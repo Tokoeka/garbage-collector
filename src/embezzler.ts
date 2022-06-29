@@ -182,14 +182,7 @@ export class witchessPieceFight {
   }
 
   location(location?: Location): Location {
-    const taffyIsWorthIt = () =>
-      mallPrice($item`pulled green taffy`) < 3 * get("valueOfAdventure") &&
-      retrieveItem($item`pulled green taffy`);
-
-    const suggestion =
-      this.draggable && !location && checkUnderwater() && taffyIsWorthIt()
-        ? $location`The Briny Deeps`
-        : location;
+    const suggestion = location;
 
     if (
       (this.draggable && !suggestion) ||
