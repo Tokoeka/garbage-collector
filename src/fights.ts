@@ -1337,6 +1337,36 @@ const freeFightSources = [
       requirements: () => [new Requirement([], { forceEquip: $items`The Jokester's gun` })],
     }
   ),
+  new FreeFight(
+    () =>
+      have($item`mayfly bait necklace`) &&
+      canAdv($location`Cobb's Knob Menagerie, Level 1`, false) &&
+      get("_mayflySummons") < 30 &&
+      acquire(1, $item`Louder Than Bomb`) &&
+      acquire(1, $item`tennis ball`),
+    () => {
+      adventureMacro(
+        $location`Cobb's Knob Menagerie, Level 1`,
+        Macro.if_(
+          $monster`QuickBASIC elemental`,
+          Macro.trySkill($skill`Emit Matter Duplicating Drones`).basicCombat()
+        )
+          .if_($monster`BASIC Elemental`, Macro.trySkill($skill`Summon Mayfly Swarm`))
+          .if_($monster`Fruit Golem`, Macro.tryItem($item`Louder Than Bomb`))
+          .if_($monster`Knob Goblin Mutant`, Macro.tryItem($item`tennis ball`))
+      );
+    },
+    true,
+    {
+      familiar: () => (have($familiar`Grey Goose`) ? $familiar`Grey Goose` : null),
+      requirements: () => [
+        new Requirement([], {
+          forceEquip: $items`mayfly bait necklace`,
+          bonusEquip: new Map($items`carnivorous potted plant`.map((item) => [item, 100])),
+        }),
+      ],
+    }
+  ),
 ];
 
 const freeRunFightSources = [
@@ -1551,17 +1581,28 @@ const freeRunFightSources = [
         1209: 2, // enter the gallery at Upscale Midnight
         1214: 1, // get High-End ginger wine
       });
-      const best = bestConsumable("booze", $item`high-end ginger wine`);
+      const best = bestConsumable("booze", $items`high-end ginger wine, astral pilsner`);
       const gingerWineValue =
         (0.5 * 30 * (baseMeat + 750) +
           getAverageAdventures($item`high-end ginger wine`) * get("valueOfAdventure")) /
         2;
       const valueDif = gingerWineValue - best.value;
+      const cigValue = garboValue($item`gingerbread cigarette`);
+      const getGingerwine: boolean = valueDif * 2 > cigValue * 5;
+      print(
+        `Compared High-End Ginger Wine @ ${gingerWineValue} to ${best.edible} @ ${best.value}. Difference of ${valueDif} per liver`
+      );
+      print(
+        `As ${valueDif * 2} is ${
+          getGingerwine ? "greater" : "less"
+        } than ${cigValue}, going to get ${
+          getGingerwine ? "High-End Ginger Wine" : "gingerbread cigarettes"
+        }`
+      );
       if (
         haveOutfit("gingerbread best") &&
         (availableAmount($item`sprinkles`) < 5 ||
-          (valueDif * 2 > garboValue($item`gingerbread cigarette`) * 5 &&
-            itemAmount($item`high-end ginger wine`) < 11))
+          (getGingerwine && itemAmount($item`high-end ginger wine`) < 11))
       ) {
         outfit("gingerbread best");
         adventureMacro($location`Gingerbread Upscale Retail District`, Macro.abort());
@@ -1693,12 +1734,16 @@ const freeRunFightSources = [
     (runSource: ActionSource) => {
       adventureMacro(
         $location`Cobb's Knob Menagerie, Level 1`,
-        Macro.if_($monster`QuickBASIC elemental`, Macro.basicCombat())
+        Macro.if_(
+          $monster`QuickBASIC elemental`,
+          Macro.trySkill($skill`Emit Matter Duplicating Drones`).basicCombat()
+        )
           .if_($monster`BASIC Elemental`, Macro.trySkill($skill`Summon Mayfly Swarm`))
           .step(runSource.macro)
       );
     },
     {
+      familiar: () => (have($familiar`Grey Goose`) ? $familiar`Grey Goose` : null),
       requirements: () => [
         new Requirement([], {
           forceEquip: $items`mayfly bait necklace`,
