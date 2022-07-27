@@ -1342,8 +1342,8 @@ const freeFightSources = [
       have($item`mayfly bait necklace`) &&
       canAdv($location`Cobb's Knob Menagerie, Level 1`, false) &&
       get("_mayflySummons") < 30 &&
-      acquire(1, $item`Louder Than Bomb`) &&
-      acquire(1, $item`tennis ball`),
+      retrieveItem(1, $item`Louder Than Bomb`) &&
+      retrieveItem(1, $item`tennis ball`),
     () => {
       adventureMacro(
         $location`Cobb's Knob Menagerie, Level 1`,
@@ -1351,7 +1351,7 @@ const freeFightSources = [
           $monster`QuickBASIC elemental`,
           Macro.trySkill($skill`Emit Matter Duplicating Drones`).basicCombat()
         )
-          .if_($monster`BASIC Elemental`, Macro.trySkill($skill`Summon Mayfly Swarm`))
+          .if_($monster`BASIC Elemental`, Macro.trySkill($skill`extract`).trySkill($skill`pocket crumbs`).trySkill($skill`Summon Mayfly Swarm`))
           .if_($monster`Fruit Golem`, Macro.tryItem($item`Louder Than Bomb`))
           .if_($monster`Knob Goblin Mutant`, Macro.tryItem($item`tennis ball`))
       );
