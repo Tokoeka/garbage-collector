@@ -1,7 +1,7 @@
-import { canAdv } from "canadv.ash";
 import {
   bjornifyFamiliar,
   buy,
+  canAdventure,
   canEquip,
   cliExecute,
   enthroneFamiliar,
@@ -74,6 +74,8 @@ export function freeFightOutfit(requirement?: Requirement): void {
   preventEquip.push(
     bjornAlike === $item`Buddy Bjorn` ? $item`Crown of Thrones` : $item`Buddy Bjorn`
   );
+
+  if (myFamiliar() !== $familiar`Grey Goose`) bonusEquip.set($item`tiny stillsuit`, 69);
 
   const finalRequirement = new Requirement(parameters, {
     forceEquip,
@@ -333,7 +335,7 @@ export function usingPurse(): boolean {
     cachedUsingPurse =
       !have($item`latte lovers member's mug`) ||
       !have($familiar`Robortender`) ||
-      !canAdv($location`The Black Forest`, false);
+      !canAdventure($location`The Black Forest`);
   }
   return cachedUsingPurse;
 }
