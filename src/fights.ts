@@ -779,7 +779,7 @@ const freeFightSources = [
           .externalIf(
             get("glitchItemImplementationCount") * itemAmount($item`[glitch season reward name]`) >=
               2000,
-            Macro.item([$item`gas can`, $item`gas can`])
+            Macro.item([$item`jam band bootleg`, $item`jam band bootleg`]).item([$item`gas can`, $item`gas can`])
           )
           .externalIf(
             get("lovebugsUnlocked"),
@@ -804,6 +804,7 @@ const freeFightSources = [
             2000
           ) {
             retrieveItem($item`gas can`, 2);
+						retrieveItem($item`jam band bootleg`, 2);
           }
           visitUrl("inv_eat.php?pwd&whichitem=10207");
           runCombat();
@@ -811,7 +812,7 @@ const freeFightSources = [
       ),
     true,
     {
-      requirements: () => [new Requirement(["1000 mainstat"], {})],
+      requirements: () => [new Requirement(["1000 mainstat"], {forceEquip: $items`june cleaver`})],
     }
   ),
 
