@@ -34,6 +34,7 @@ import {
   $location,
   $locations,
   $monster,
+  $monsters,
   $skill,
   adventureMacro,
   adventureMacroAuto,
@@ -266,7 +267,9 @@ export const embezzlerMacro = (): Macro =>
       .tryCopier($item`unfinished ice sculpture`)
       .externalIf(get("_enamorangs") === 0, Macro.tryCopier($item`LOV Enamorang`))
       .meatKill()
-  ).abort();
+  )
+    .if_($monsters`giant rubber spider, time-spinner prank`, Macro.kill())
+    .abort();
 
 const wandererFailsafeMacro = () =>
   Macro.externalIf(
@@ -919,7 +922,16 @@ export function estimatedTurns(): number {
   let turns;
   if (globalOptions.stopTurncount) turns = globalOptions.stopTurncount - myTurncount();
   else if (globalOptions.noBarf) turns = embezzlerCount();
-  else {
+  else if (globalOptions.saveTurns > 0 || !globalOptions.ascending) {
+    turns =
+      (myAdventures() +
+        sausageAdventures +
+        pantsgivingAdventures +
+        thesisAdventures +
+        adventuresAfterChaining -
+        globalOptions.saveTurns) *
+      thumbRingMultiplier;
+  } else {
     turns =
       (myAdventures() +
         sausageAdventures +
