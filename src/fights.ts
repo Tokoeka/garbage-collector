@@ -1351,7 +1351,7 @@ const freeFightSources = [
     () => {
       adventureMacro(
         $location`Cobb's Knob Menagerie, Level 1`,
-        Macro.if_(
+        Macro.step("pickpocket").if_(
           $monster`QuickBASIC elemental`,
           Macro.trySkill($skill`Emit Matter Duplicating Drones`).basicCombat()
         )
@@ -1364,9 +1364,9 @@ const freeFightSources = [
     {
       familiar: () => (have($familiar`Grey Goose`) ? $familiar`Grey Goose` : null),
       requirements: () => [
-        new Requirement([], {
-          forceEquip: $items`mayfly bait necklace`,
-          bonusEquip: new Map($items`carnivorous potted plant`.map((item) => [item, 100])),
+        new Requirement(["100 init"], {
+          forceEquip: $items`mayfly bait necklace, tiny black hole`,
+          //bonusEquip: new Map($items`carnivorous potted plant`.map((item) => [item, 100])),
         }),
       ],
     }
