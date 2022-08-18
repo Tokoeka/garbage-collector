@@ -1343,7 +1343,7 @@ const freeFightSources = [
   new FreeFight(
     () =>
       have($item`mayfly bait necklace`) &&
-      canAdv($location`Cobb's Knob Menagerie, Level 1`, false) &&
+      canAdventure($location`Cobb's Knob Menagerie, Level 1`) &&
       get("_mayflySummons") < 30 &&
       retrieveItem(1, $item`Louder Than Bomb`) &&
       retrieveItem(1, $item`tennis ball`),
