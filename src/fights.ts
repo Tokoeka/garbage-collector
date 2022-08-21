@@ -778,8 +778,11 @@ const freeFightSources = [
           .trySkill($skill`Shadow Noodles`)
           .externalIf(
             get("glitchItemImplementationCount") * itemAmount($item`[glitch season reward name]`) >=
-              2000,
-            Macro.item([$item`jam band bootleg`, $item`jam band bootleg`]).item([$item`gas can`, $item`gas can`])
+              1000,
+            Macro.item([$item`jam band bootleg`, $item`jam band bootleg`]).item([
+              $item`gas can`,
+              $item`gas can`,
+            ])
           )
           .externalIf(
             get("lovebugsUnlocked"),
@@ -801,10 +804,10 @@ const freeFightSources = [
           retrieveItem($item`[glitch season reward name]`);
           if (
             get("glitchItemImplementationCount") * itemAmount($item`[glitch season reward name]`) >=
-            2000
+            1000
           ) {
             retrieveItem($item`gas can`, 2);
-						retrieveItem($item`jam band bootleg`, 2);
+            retrieveItem($item`jam band bootleg`, 2);
           }
           visitUrl("inv_eat.php?pwd&whichitem=10207");
           runCombat();
@@ -812,7 +815,9 @@ const freeFightSources = [
       ),
     true,
     {
-      requirements: () => [new Requirement(["1000 mainstat"], {forceEquip: $items`june cleaver`})],
+      requirements: () => [
+        new Requirement(["1000 mainstat"], { forceEquip: $items`June cleaver` }),
+      ],
     }
   ),
 
@@ -1351,11 +1356,17 @@ const freeFightSources = [
     () => {
       adventureMacro(
         $location`Cobb's Knob Menagerie, Level 1`,
-        Macro.step("pickpocket").if_(
-          $monster`QuickBASIC elemental`,
-          Macro.trySkill($skill`Emit Matter Duplicating Drones`).basicCombat()
-        )
-          .if_($monster`BASIC Elemental`, Macro.trySkill($skill`extract`).trySkill($skill`pocket crumbs`).trySkill($skill`Summon Mayfly Swarm`))
+        Macro.step("pickpocket")
+          .if_(
+            $monster`QuickBASIC elemental`,
+            Macro.trySkill($skill`Emit Matter Duplicating Drones`).basicCombat()
+          )
+          .if_(
+            $monster`BASIC Elemental`,
+            Macro.trySkill($skill`Extract`)
+              .trySkill($skill`Pocket Crumbs`)
+              .trySkill($skill`Summon Mayfly Swarm`)
+          )
           .if_($monster`Fruit Golem`, Macro.tryItem($item`Louder Than Bomb`))
           .if_($monster`Knob Goblin Mutant`, Macro.tryItem($item`tennis ball`))
       );
@@ -1364,9 +1375,9 @@ const freeFightSources = [
     {
       familiar: () => (have($familiar`Grey Goose`) ? $familiar`Grey Goose` : null),
       requirements: () => [
-        new Requirement(["100 init"], {
+        new Requirement(["100 init", "pickpocket chance"], {
           forceEquip: $items`mayfly bait necklace, tiny black hole`,
-          //bonusEquip: new Map($items`carnivorous potted plant`.map((item) => [item, 100])),
+          // bonusEquip: new Map($items`carnivorous potted plant`.map((item) => [item, 100])),
         }),
       ],
     }
