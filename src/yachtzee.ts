@@ -70,7 +70,7 @@ import { acquire } from "./acquire";
 import { withStash } from "./clan";
 import { prepFamiliars } from "./dailies";
 import { runDiet } from "./diet";
-import { embezzlerCount, EmbezzlerFight, embezzlerSources } from "./embezzler";
+import { embezzlerCount, EmbezzlerFight, embezzlerSources, estimatedTurns } from "./embezzler";
 import { hasMonsterReplacers } from "./extrovermectin";
 import { meatFamiliar } from "./familiar";
 import { doSausage } from "./fights";
@@ -461,6 +461,22 @@ function yachtzeeBuffValue(obj: Item | Effect): number {
   return (2000 * (getModifier("Meat Drop", obj) + getModifier("Familiar Weight", obj) * 2.5)) / 100;
 }
 
+function fishyCloverAdventureOpportunityCost(pipe: boolean) {
+  const willBeFishy = pipe || have($effect`Fishy`);
+  const fishyCloverAdventureCost = willBeFishy ? 1 : 2;
+  const adventureExtensionBonus = pyecAvailable() ? 5 : 0;
+  return sum(getActiveEffects(), (currentBuff) => {
+    const buffValue = yachtzeeBuffValue(currentBuff);
+    if (buffValue <= 0) return 0;
+
+    const currentBuffTurns = haveEffect(currentBuff);
+    if (currentBuffTurns <= fishyCloverAdventureCost) {
+      return (currentBuffTurns + adventureExtensionBonus) * buffValue;
+    }
+    return fishyCloverAdventureCost * buffValue;
+  });
+}
+
 function getBestWaterBreathingEquipment(yachtzeeTurns: number): { item: Item; cost: number } {
   const waterBreathingEquipmentCosts = waterBreathingEquipment.map((it) => ({
     item: it,
@@ -502,35 +518,20 @@ function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number {
   }
   safeRestore();
 
-  // Compute the cost of losing buffs if we spend turns getting fishy using clovers
-  const havePYECCharge = get("_PYECAvailable", false);
-  const haveFishyPipe = have($item`fishy pipe`) && !get("_fishyPipeUsed", false);
-  let costOfLosingBuffs = 0;
-  getActiveEffects().forEach(
-    (eff: Effect) =>
-      (costOfLosingBuffs +=
-        yachtzeeBuffValue(eff) > 0 // We only consider buffs that affect our meat% and fam wt
-          ? haveEffect(eff) <= 1 + toInt(haveFishyPipe) && havePYECCharge // If we lose all the turns of our buff
-            ? (6 + toInt(haveFishyPipe)) * yachtzeeBuffValue(eff) // we also lose the potential of extending it with PYEC (e.g. $effect`smart drunk`)
-            : haveEffect(eff) + 5 * toInt(havePYECCharge) < yachtzeeTurns // Else if we don't have enough turns of the buff to cover yachtzeeTurns
-            ? (1 + toInt(haveFishyPipe)) * yachtzeeBuffValue(eff) // we lose that many turns worth of value of the buff (e.g. $effect`Puzzle Champ`)
-            : 0 // Else, we could potentially lose value from not having enough buffs for embezzlers, but that's out of scope for now
-          : 0) // Buffs that don't affect our meat% and fam wt are not considered
-  );
+  const haveFishyPipe = have($item`fishy pipe`) && !get("_fishyPipeUsed");
+  const adventureExtensionBonus = pyecAvailable() ? 5 : 0;
   const fishySources = [
     {
       name: "fish juice box",
       cost:
-        mallPrice($item`fish juice box`) +
-        (!haveFishyPipe &&
-        haveEffect($effect`Fishy`) + 20 + 5 * toInt(havePYECCharge) < yachtzeeTurns
+        !haveFishyPipe && haveEffect($effect`Fishy`) + 20 + adventureExtensionBonus < yachtzeeTurns
           ? Infinity
-          : 0),
+          : mallPrice($item`fish juice box`),
       action: () => {
         acquire(1, $item`fish juice box`, 1.2 * mallPrice($item`fish juice box`));
         if (!have($item`fish juice box`)) throw new Error("Unable to obtain fish juice box");
         use(1, $item`fish juice box`);
-        use(1, $item`fishy pipe`);
+        if (haveFishyPipe) use(1, $item`fishy pipe`);
       },
     },
     {
@@ -595,7 +596,7 @@ function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number {
         ? (have($effect`Lucky!`) ? 0 : mallPrice($item`11-leaf clover`)) +
           get("valueOfAdventure") +
           bestWaterBreathingEquipment.cost +
-          costOfLosingBuffs
+          fishyCloverAdventureOpportunityCost(haveFishyPipe)
         : Infinity,
       action: () => {
         if (!have($effect`Lucky!`)) {
@@ -618,6 +619,17 @@ function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number {
         }
       },
     },
+    {
+      name: "Just Fishy Pipe",
+      cost:
+        (haveFishyPipe ? 10 : haveEffect($effect`Fishy`)) + (pyecAvailable() ? 5 : 0) <
+        yachtzeeTurns
+          ? Infinity
+          : 0,
+      action: () => {
+        if (haveFishyPipe && haveEffect($effect`Fishy`) < yachtzeeTurns) use(1, $item`fishy pipe`);
+      },
+    },
   ];
 
   const bestFishySource = fishySources.reduce((left, right) => {
@@ -638,12 +650,40 @@ function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number {
 export function yachtzeeChainDiet(simOnly?: boolean): boolean {
   if (get("_garboYachtzeeChainDietPlanned", false)) return true;
 
-  const havePYECCharge = get("_PYECAvailable", false);
-  const maxYachtzeeTurns = havePYECCharge ? 35 : 30;
+  const havePYECCharge = pyecAvailable();
   const haveDistentionPill = !get("_distentionPillUsed") && have($item`distention pill`);
+  const haveDogHairPill = !get("_syntheticDogHairPillUsed") && have($item`synthetic dog hair pill`);
+
+  const currentSpleenLeft = spleenLimit() - mySpleenUse();
+  const filters = 3 - get("currentMojoFilters");
+  // save some spleen the first two extro, which are worth a lot
+  // due to macrometeor and cheat code: replace enemy
+  const extroSpleenSpace = hasMonsterReplacers()
+    ? 4 - Math.min(4, 2 * get("beGregariousCharges"))
+    : 0;
+  const synthCastsToCoverRun =
+    globalOptions.noBarf || !have($skill`Sweet Synthesis`)
+      ? 0
+      : Math.max(0, Math.round((estimatedTurns() - haveEffect($effect`Synthesis: Greed`)) / 30));
+  const fullnessAvailable = fullnessLimit() - myFullness() + toInt(haveDistentionPill);
+  const inebrietyAvailable =
+    inebrietyLimit() -
+    myInebriety() +
+    toInt(haveDogHairPill) +
+    (3 - get("_sweatOutSomeBoozeUsed", 0));
+  const spleenAvailable = currentSpleenLeft + filters;
+  const organsAvailable = fullnessAvailable + inebrietyAvailable + spleenAvailable;
+  const sufficientOrgans =
+    organsAvailable - synthCastsToCoverRun - extroSpleenSpace >= 30 + 5 * toInt(havePYECCharge);
+  const baseYachtzeeTurns = sufficientOrgans ? 30 : 10;
+
+  const maxYachtzeeTurns = havePYECCharge ? baseYachtzeeTurns + 5 : baseYachtzeeTurns;
+  print(`Synth Casts Wanted: ${synthCastsToCoverRun}`, "blue");
+  print(`Organs Available: ${organsAvailable}`, "blue");
+  print(`Max Yachtzee Turns: ${maxYachtzeeTurns}`, "blue");
 
   // Plan our diet
-  const currentSpleenLeft = spleenLimit() - mySpleenUse();
+
   const sliders = Math.floor((fullnessLimit() + toInt(haveDistentionPill) - myFullness()) / 5);
   const pickleJuice = Math.floor((inebrietyLimit() - myInebriety()) / 5);
 
@@ -652,14 +692,6 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
   const synthCastsWanted = Math.ceil(synthTurnsWanted / 30);
   const synthCasts = have($skill`Sweet Synthesis`) ? Math.max(synthCastsWanted, 0) : 0;
 
-  const filters = 3 - get("currentMojoFilters");
-
-  // save some spleen the first two extro, which are worth a lot
-  // due to macrometeor and cheat code: replace enemy
-  const extroSpleenSpace = hasMonsterReplacers()
-    ? 4 - Math.min(4, 2 * get("beGregariousCharges"))
-    : 0;
-
   let cologne = 0;
 
   const potentialSpleen = currentSpleenLeft + 5 * sliders + 5 * pickleJuice + filters;
@@ -667,12 +699,12 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 
   set("_stenchJellyChargeTarget", 0);
 
-  if (availableSpleen < 30) {
+  if (availableSpleen < baseYachtzeeTurns) {
     print("We were unable to generate enough organ space for optimal yachtzee chaining", "red");
     return false;
   }
 
-  const yachtzeeTurns = availableSpleen >= maxYachtzeeTurns ? maxYachtzeeTurns : 30;
+  const yachtzeeTurns = availableSpleen >= maxYachtzeeTurns ? maxYachtzeeTurns : baseYachtzeeTurns;
   if (availableSpleen > yachtzeeTurns) cologne = 1; // If we have excess spleen, chew a cologne (representing -1 to availableSpleen, but we no longer need that variable)
 
   if (simOnly) print(`We can potentially run ${yachtzeeTurns} for yachtzee`, "purple");
@@ -751,7 +783,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
   }
 
   const horseradishes =
-    haveEffect($effect`Kicked in the Sinuses`) < 30 &&
+    haveEffect($effect`Kicked in the Sinuses`) < baseYachtzeeTurns &&
     myFullness() + 1 + slidersToEat * 5 + toastsToEat <= fullnessLimit() + toInt(haveDistentionPill)
       ? 1
       : 0;
@@ -905,7 +937,7 @@ function yachtzeePotionProfits(potion: Potion, yachtzeeTurns: number): number {
   // 1) If we don't have an effect, +5 to gained effect duration
   // 2) If we already have an effect, +5 to existing effect duration
   // This means that the first use of a potion that we don't already have an effect of is more valuable than the next use
-  const PYECOffset = 5 * toInt(get("_PYECAvailable", false));
+  const PYECOffset = pyecAvailable() ? 5 : 0;
   const existingOffset = haveEffect(potion.effect()) ? PYECOffset : 0;
   const extraOffset = PYECOffset - existingOffset;
   const effectiveYachtzeeTurns = Math.max(
@@ -933,7 +965,7 @@ function yachtzeePotionProfits(potion: Potion, yachtzeeTurns: number): number {
 
 function yachtzeePotionSetup(yachtzeeTurns: number, simOnly?: boolean): number {
   let totalProfits = 0;
-  const PYECOffset = 5 * toInt(get("_PYECAvailable", false));
+  const PYECOffset = pyecAvailable() ? 5 : 0;
   const excludedEffects = new Set<Effect>();
 
   shrugIrrelevantSongs();
@@ -943,7 +975,7 @@ function yachtzeePotionSetup(yachtzeeTurns: number, simOnly?: boolean): number {
       .filter(
         (potion) =>
           potion.canDouble &&
-          haveEffect(potion.effect()) + PYECOffset * toInt(haveEffect(potion.effect()) > 0) <
+          haveEffect(potion.effect()) + PYECOffset * (have(potion.effect()) ? 1 : 0) <
             yachtzeeTurns &&
           yachtzeePotionProfits(potion.doubleDuration(), yachtzeeTurns) > 0 &&
           potion.price(true) < myMeat()
@@ -1051,7 +1083,7 @@ function yachtzeePotionSetup(yachtzeeTurns: number, simOnly?: boolean): number {
   if (!simOnly) {
     variableMeatPotionsSetup(yachtzeeTurns, expectedEmbezzlers);
     executeNextDietStep(true);
-    if (get("_PYECAvailable", false)) {
+    if (pyecAvailable()) {
       maximize("MP", false);
       if (have($item`Platinum Yendorian Express Card`)) {
         burnLibrams(200);
@@ -1206,21 +1238,26 @@ function stickerSetup(expectedYachts: number) {
   }
 }
 
+function pyecAvailable(): boolean {
+  if (get("_PYECAvailable") === "") {
+    set(
+      "_PYECAvailable",
+      get("expressCardUsed")
+        ? false
+        : have($item`Platinum Yendorian Express Card`)
+        ? true
+        : withStash($items`Platinum Yendorian Express Card`, () => {
+            return have($item`Platinum Yendorian Express Card`);
+          })
+    );
+  }
+  return get("_PYECAvailable", false);
+}
+
 function _yachtzeeChain(): void {
   if (myLevel() <= 13 || !canInteract()) return;
   // We definitely need to be able to eat sliders and drink pickle juice
   if (!realmAvailable("sleaze")) return;
-
-  set(
-    "_PYECAvailable",
-    get("expressCardUsed")
-      ? false
-      : have($item`Platinum Yendorian Express Card`)
-      ? true
-      : withStash($items`Platinum Yendorian Express Card`, () => {
-          return have($item`Platinum Yendorian Express Card`);
-        })
-  );
 
   maximize("MP", false);
   meatMood(false, 750 + baseMeat).execute(embezzlerCount());
@@ -1249,7 +1286,7 @@ function _yachtzeeChain(): void {
     return;
   }
   let jellyTurns = get("_stenchJellyChargeTarget", 0);
-  let fishyTurns = haveEffect($effect`Fishy`) + 5 * toInt(get("_PYECAvailable", false));
+  let fishyTurns = haveEffect($effect`Fishy`) + (pyecAvailable() ? 5 : 0);
   let turncount = myTurncount();
   yachtzeePotionSetup(Math.min(jellyTurns, fishyTurns));
   stickerSetup(Math.min(jellyTurns, fishyTurns));
