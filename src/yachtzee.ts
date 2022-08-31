@@ -486,7 +486,7 @@ function getBestWaterBreathingEquipment(yachtzeeTurns: number): { item: Item; co
         : Infinity,
   }));
   const bestWaterBreathingEquipment = waterBreathingEquipment.some((item) => haveEquipped(item))
-    ? { item: $item`none`, cost: 0 }
+    ? { item: $item.none, cost: 0 }
     : waterBreathingEquipmentCosts.reduce((left, right) => (left.cost < right.cost ? left : right));
   return bestWaterBreathingEquipment;
 }
@@ -499,7 +499,7 @@ function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number {
   if (
     setup &&
     !have($effect`Really Deep Breath`) &&
-    bestWaterBreathingEquipment.item !== $item`none`
+    bestWaterBreathingEquipment.item !== $item.none
   ) {
     equip(bestWaterBreathingEquipment.item);
   }
@@ -531,7 +531,9 @@ function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number {
         acquire(1, $item`fish juice box`, 1.2 * mallPrice($item`fish juice box`));
         if (!have($item`fish juice box`)) throw new Error("Unable to obtain fish juice box");
         use(1, $item`fish juice box`);
-        if (haveFishyPipe) use(1, $item`fishy pipe`);
+        if (haveFishyPipe && haveEffect($effect`Fishy`) + adventureExtensionBonus < yachtzeeTurns) {
+          use(1, $item`fishy pipe`);
+        }
       },
     },
     {
@@ -673,9 +675,18 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
     (3 - get("_sweatOutSomeBoozeUsed", 0));
   const spleenAvailable = currentSpleenLeft + filters;
   const organsAvailable = fullnessAvailable + inebrietyAvailable + spleenAvailable;
-  const sufficientOrgans =
-    organsAvailable - synthCastsToCoverRun - extroSpleenSpace >= 30 + 5 * toInt(havePYECCharge);
-  const baseYachtzeeTurns = sufficientOrgans ? 30 : 10;
+
+  const cleanableSpleen = organsAvailable - synthCastsToCoverRun - extroSpleenSpace;
+  const sufficientOrgansFor = (yachtzees: number) =>
+    cleanableSpleen >= yachtzees + (havePYECCharge ? 5 : 0);
+
+  const possibleBaseYachtzeeTurns = [30, 20, 10];
+  const baseYachtzeeTurns = possibleBaseYachtzeeTurns.find(sufficientOrgansFor) ?? 0;
+
+  if (baseYachtzeeTurns === 0) {
+    print("Determined that there are no suitable number of turns to chain yachtzees", "red");
+    return false;
+  }
 
   const maxYachtzeeTurns = havePYECCharge ? baseYachtzeeTurns + 5 : baseYachtzeeTurns;
   print(`Synth Casts Wanted: ${synthCastsToCoverRun}`, "blue");
@@ -1181,7 +1192,7 @@ export function bestYachtzeeFamiliar(): Familiar {
     );
   });
 
-  if (sortedUnderwaterFamiliars.length === 0) return $familiar`none`;
+  if (sortedUnderwaterFamiliars.length === 0) return $familiar.none;
   print(`Best Familiar: ${sortedUnderwaterFamiliars[0]}`, "blue");
   return sortedUnderwaterFamiliars[0];
 }
@@ -1309,7 +1320,7 @@ function _yachtzeeChain(): void {
       const bestWaterBreathingEquipment = getBestWaterBreathingEquipment(
         Math.min(jellyTurns, fishyTurns)
       );
-      if (bestWaterBreathingEquipment.item !== $item`none`) equip(bestWaterBreathingEquipment.item);
+      if (bestWaterBreathingEquipment.item !== $item.none) equip(bestWaterBreathingEquipment.item);
       if (
         haveEquipped($item`The Crown of Ed the Undying`) &&
         !booleanModifier("Adventure Underwater")
