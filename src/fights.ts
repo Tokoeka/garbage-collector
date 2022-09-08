@@ -193,7 +193,7 @@ const secondChainMacro = () =>
   ).abort();
 
 function embezzlerSetup() {
-  setLocation($location.none);
+  setLocation($location`none`);
   potionSetup(false);
   maximize("MP", false);
   meatMood(true, 750 + baseMeat).execute(embezzlerCount());
@@ -318,7 +318,7 @@ function startWandererCounter() {
       } else {
         print("You do not have gregs active, so this is a regular free run.");
         run = tryFindFreeRun() ?? ltbRun();
-        useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar());
+        useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false }));
         run.constraints.preparation?.();
         freeFightOutfit(run.constraints.equipmentRequirements?.());
       }
@@ -530,7 +530,7 @@ class FreeFight {
   pickFamiliar(): Familiar {
     const mandatory = this.options.familiar?.();
     if (mandatory) return mandatory;
-    return freeFightFamiliar(this.options.canOverrideMacro);
+    return freeFightFamiliar({ canChooseMacro: this.options.canOverrideMacro });
   }
 
   isAvailable(): boolean {
@@ -624,7 +624,7 @@ function getStenchLocation() {
   return (
     $locations`Uncle Gator's Country Fun-Time Liquid Waste Sluice, The Hippy Camp (Bombed Back to the Stone Age), The Dark and Spooky Swamp`.find(
       (l) => canAdventure(l)
-    ) || $location.none
+    ) ?? $location`none`
   );
 }
 
@@ -1409,7 +1409,7 @@ const freeRunFightSources = [
     () =>
       have($familiar`Space Jellyfish`) &&
       get("_spaceJellyfishDrops") < 5 &&
-      getStenchLocation() !== $location.none,
+      getStenchLocation() !== $location`none`,
     (runSource: ActionSource) => {
       adventureMacro(
         getStenchLocation(),
@@ -1426,7 +1426,7 @@ const freeRunFightSources = [
       have($familiar`Space Jellyfish`) &&
       have($skill`Meteor Lore`) &&
       get("_macrometeoriteUses") < 10 &&
-      getStenchLocation() !== $location.none,
+      getStenchLocation() !== $location`none`,
     (runSource: ActionSource) => {
       adventureMacro(
         getStenchLocation(),
@@ -1448,7 +1448,7 @@ const freeRunFightSources = [
       have($familiar`Space Jellyfish`) &&
       have($item`Powerful Glove`) &&
       get("_powerfulGloveBatteryPowerUsed") < 91 &&
-      getStenchLocation() !== $location.none,
+      getStenchLocation() !== $location`none`,
     (runSource: ActionSource) => {
       adventureMacro(
         getStenchLocation(),
@@ -2049,7 +2049,7 @@ export function doSausage(): void {
   if (!kramcoGuaranteed()) {
     return;
   }
-  useFamiliar(freeFightFamiliar(true));
+  useFamiliar(freeFightFamiliar());
   freeFightOutfit(new Requirement([], { forceEquip: $items`Kramco Sausage-o-Matic™` }));
   do {
     adventureMacroAuto(
@@ -2067,7 +2067,7 @@ function doGhost() {
   if (!have($item`protonic accelerator pack`) || get("questPAGhost") === "unstarted") return;
   const ghostLocation = get("ghostLocation");
   if (!ghostLocation) return;
-  useFamiliar(freeFightFamiliar(true));
+  useFamiliar(freeFightFamiliar());
   freeFightOutfit(new Requirement([], { forceEquip: $items`protonic accelerator pack` }));
   adventureMacro(ghostLocation, Macro.ghostBustin());
   postCombatActions();
@@ -2220,7 +2220,7 @@ function voidMonster(): void {
     return;
   }
 
-  useFamiliar(freeFightFamiliar(true));
+  useFamiliar(freeFightFamiliar());
   freeFightOutfit(new Requirement([], { forceEquip: $items`cursed magnifying glass` }));
   adventureMacro(determineDraggableZoneAndEnsureAccess(), Macro.basicCombat());
   postCombatActions();
@@ -2315,7 +2315,7 @@ function killRobortCreaturesForFree() {
     if (!roboTarget) break;
     const regularTarget = CombatLoversLocket.findMonster(() => true, valueDrops);
     if (regularTarget === roboTarget) {
-      useFamiliar(freeFightFamiliar());
+      useFamiliar(freeFightFamiliar({ canChooseMacro: roboTarget.attributes.includes("FREE") }));
     } else {
       useFamiliar($familiar`Robortender`);
     }
