@@ -52,6 +52,7 @@ import {
   StrictMacro,
 } from "libram";
 import { canOpenRedPresent, meatFamiliar, timeToMeatify } from "./familiar";
+import { garboValue } from "./session";
 import { digitizedMonstersRemaining } from "./wanderer";
 
 let monsterManuelCached: boolean | undefined = undefined;
@@ -148,6 +149,11 @@ export function shouldRedigitize(): boolean {
     SourceTerminal.canDigitize() &&
     myAdventures() * 1.04 < digitizesLeft * digitizeAdventuresUsed
   );
+}
+
+function preferredOil(): Item {
+  const oils = $items`unusual oil, skin oil, eldritch oil`.sort((a,b) => garboValue(b) - garboValue(a));
+  return oils[0];
 }
 
 export class Macro extends StrictMacro {
@@ -427,6 +433,10 @@ export class Macro extends StrictMacro {
           have($item`porquoise-handled sixgun`),
           Macro.if_(`${hpCheckSixgun}`, Macro.tryItem($item`porquoise-handled sixgun`))
         )
+        .externalIf(
+          have($skill`extract oil`) && (get("_oilExtracted") < 15),
+          Macro.if_(`${hpCheck}`, Macro.tryHaveSkill($skill`extract oil`))
+        )
         .while_(`${hpCheck} && !pastround ${stasisRounds}`, Macro.item(stasisItem))
     );
   }
@@ -457,6 +467,7 @@ export class Macro extends StrictMacro {
       .tryHaveItem($item`Time-Spinner`)
       .tryHaveItem($item`Rain-Doh indigo cup`)
       .tryHaveItem($item`Rain-Doh blue balls`)
+      .externalIf(have($skill`extract oil`), Macro.tryHaveSkill($skill`extract oil`))
       .externalIf(
         haveEquipped($item`Buddy Bjorn`) || haveEquipped($item`Crown of Thrones`),
         Macro.while_("!pastround 3 && !hppercentbelow 25", Macro.item($item`seal tooth`))
