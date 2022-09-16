@@ -1,3 +1,4 @@
+import "core-js/features/array/flat";
 import {
   choiceFollowsFight,
   equippedAmount,
@@ -5,6 +6,7 @@ import {
   Familiar,
   familiarWeight,
   getAutoAttack,
+  getMonsters,
   haveEquipped,
   haveSkill,
   hippyStoneBroken,
@@ -38,8 +40,8 @@ import {
   $item,
   $items,
   $location,
+  $locations,
   $monster,
-  $monsters,
   $skill,
   $slot,
   $thralls,
@@ -178,10 +180,24 @@ export class Macro extends StrictMacro {
     return this.externalIf(
       myFamiliar() === $familiar`Grey Goose` && timeToMeatify(),
       Macro.trySkill($skill`Meatify Matter`)
-    ).externalIf(
-      canOpenRedPresent() && myFamiliar() === $familiar`Crimbo Shrub`,
-      Macro.trySkill($skill`Open a Big Red Present`)
-    );
+    )
+      .externalIf(
+        canOpenRedPresent() && myFamiliar() === $familiar`Crimbo Shrub`,
+        Macro.trySkill($skill`Open a Big Red Present`)
+      )
+      .externalIf(
+        myFamiliar() === $familiar`Space Jellyfish`,
+        Macro.externalIf(
+          get("_spaceJellyfishDrops") < 5,
+          Macro.if_(
+            $locations`Barf Mountain, Pirates of the Garbage Barges, Uncle Gator's Country Fun-Time Liquid Waste Sluice`
+              .map((l) => getMonsters(l))
+              .flat(),
+            Macro.trySkill($skill`Extract Jelly`)
+          ),
+          Macro.trySkill($skill`Extract Jelly`)
+        )
+      );
   }
 
   static familiarActions(): Macro {
@@ -303,17 +319,6 @@ export class Macro extends StrictMacro {
         Macro.if_(
           `!monsterid ${$monster`garbage tourist`.id}`,
           Macro.trySkill($skill`Feel Nostalgic`)
-        )
-      )
-      .externalIf(
-        myFamiliar() === $familiar`Space Jellyfish`,
-        Macro.externalIf(
-          get("_spaceJellyfishDrops") < 5,
-          Macro.if_(
-            $monsters`angry tourist, garbage tourist, horrible tourist family`,
-            Macro.trySkill($skill`Extract Jelly`)
-          ),
-          Macro.trySkill($skill`Extract Jelly`)
         )
       )
       .externalIf(opsSetup, Macro.trySkill($skill`Throw Shield`))
