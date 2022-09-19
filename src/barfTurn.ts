@@ -173,7 +173,7 @@ const turns: AdventureAction[] = [
             true
           );
         }
-        return fightingSteve;
+        return totalTurnsPlayed() === get("lastLightsOutTurn");
       }
       return false;
     },
@@ -369,6 +369,8 @@ export default function barfTurn(): void {
     if (turn.available() && validSobrieties.includes(turn.sobriety)) {
       const expectToSpendATurn =
         typeof turn.spendsTurn === "function" ? turn.spendsTurn() : turn.spendsTurn;
+
+      print(`Now running barf-turn: ${turn.name}.`);
 
       const startTurns = totalTurnsPlayed();
       const success = turn.execute();
