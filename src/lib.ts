@@ -10,6 +10,7 @@ import {
   gitAtHead,
   gitInfo,
   handlingChoice,
+  haveEffect,
   haveSkill,
   inebrietyLimit,
   isDarkMode,
@@ -356,7 +357,11 @@ export function safeRestoreMpTarget(): number {
 
 export function safeRestore(): void {
   if (have($effect`Beaten Up`)) {
-    if (get("lastEncounter") === "Sssshhsssblllrrggghsssssggggrrgglsssshhssslblgl") {
+    if (
+      get("lastEncounter") === "Sssshhsssblllrrggghsssssggggrrgglsssshhssslblgl" ||
+      get("lastEncounter") === "Poetic Justice" ||
+      haveEffect($effect`Beaten Up`) === 5
+    ) {
       uneffect($effect`Beaten Up`);
     } else {
       throw new Error(
