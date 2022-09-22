@@ -138,7 +138,7 @@ export function main(argString = ""): void {
       "valueOfAdventure"
     )}, which is too low for barf farming to be worthwhile. If you forgot to set it, use "set valueOfAdventure = XXXX" to set it to your marginal turn meat value.`;
   }
-  if (get("valueOfAdventure") >= 10000) {
+  if (get("valueOfAdventure") >= 15000) {
     throw `Your valueOfAdventure is set to ${get(
       "valueOfAdventure"
     )}, which is definitely incorrect. Please set it to your reliable marginal turn value.`;
