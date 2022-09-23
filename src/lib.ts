@@ -313,7 +313,7 @@ export function pillkeeperOpportunityCost(): number {
   const canTreasury = canAdventure($location`Cobb's Knob Treasury`);
 
   const alternateUse = [
-    { can: canTreasury, value: 3 * get("valueOfAdventure") },
+    { can: canTreasury, value: get("garbo_valueOfEmbezzler", 10500) },
     {
       can: realmAvailable("sleaze"),
       value: 40000,

@@ -186,7 +186,7 @@ export class EmbezzlerFight {
 
   location(location?: Location): Location {
     const taffyIsWorthIt = () =>
-      mallPrice($item`pulled green taffy`) < 3 * get("valueOfAdventure") &&
+      mallPrice($item`pulled green taffy`) < 3 * get("garbo_valueOfEmbezzler", 10500) &&
       retrieveItem($item`pulled green taffy`);
 
     const suggestion =
