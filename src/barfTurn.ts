@@ -111,7 +111,7 @@ function shouldGoUnderwater(): boolean {
 
   if (have($item`envyfish egg`)) return false;
   if (!canAdventure($location`The Briny Deeps`)) return false;
-  if (mallPrice($item`pulled green taffy`) < 3 * get("valueOfAdventure")) return false;
+  if (mallPrice($item`pulled green taffy`) < get("garbo_valueOfEmbezzler", 10500)) return false;
   return have($effect`Fishy`) || (have($item`fishy pipe`) && use($item`fishy pipe`));
 }
 
