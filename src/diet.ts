@@ -394,8 +394,9 @@ export function bestConsumable(
     }
   }
   if (maxSize) {
-    organMenu = organMenu.filter((MenuItem) => MenuItem.size <= maxSize);
+    organMenu = organMenu.filter((menuItem) => menuItem.size <= maxSize);
   }
+  organMenu = organMenu.filter((menuItem) => menuItem.item.levelreq <= myLevel());
   const organList = organMenu.map((consumable) => {
     const edible = consumable.item;
     const buff = getModifier("Effect", edible);
