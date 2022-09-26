@@ -56,9 +56,9 @@ export function freeFightOutfit(requirement?: Requirement): void {
   const preventEquip = requirement?.maximizeOptions.preventEquip ?? [];
   const preventSlot = requirement?.maximizeOptions.preventSlot ?? [];
 
-  if (myInebriety() > inebrietyLimit()) {
+  /* if (myInebriety() > inebrietyLimit()) {
     forceEquip.push($item`Drunkula's wineglass`);
-  }
+  } */
   parameters.push(
     $familiars`Pocket Professor, Grey Goose`.includes(myFamiliar())
       ? "Familiar Experience"
