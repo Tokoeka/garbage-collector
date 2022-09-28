@@ -145,7 +145,6 @@ import {
   embezzlerSources,
   getNextEmbezzlerFight,
 } from "./embezzler";
-import { determineDraggableZoneAndEnsureAccess } from "./wanderer";
 import postCombatActions from "./post";
 import {
   crateStrategy,
@@ -156,6 +155,7 @@ import {
 import { magnifyingGlass } from "./dropsgear";
 import { garboValue } from "./session";
 import { bestConsumable } from "./diet";
+import { wanderWhere } from "./wanderer";
 
 const firstChainMacro = () =>
   Macro.if_(
@@ -1047,7 +1047,7 @@ const freeFightSources = [
 
   new FreeFight(
     () => get("_sausageFights") === 0 && have($item`Kramco Sausage-o-Matic™`),
-    () => adv1(determineDraggableZoneAndEnsureAccess(), -1, ""),
+    () => adv1(wanderWhere("wanderer"), -1, ""),
     true,
     {
       requirements: () => [
@@ -1673,7 +1673,7 @@ const freeRunFightSources = [
       get("_hipsterAdv") < 7 &&
       (have($familiar`Mini-Hipster`) || have($familiar`Artistic Goth Kid`)),
     (runSource: ActionSource) => {
-      const targetLocation = determineDraggableZoneAndEnsureAccess("backup");
+      const targetLocation = wanderWhere("backup");
       adventureMacro(
         targetLocation,
         Macro.if_(
@@ -2065,7 +2065,7 @@ export function doSausage(): void {
   freeFightOutfit(new Requirement([], { forceEquip: $items`Kramco Sausage-o-Matic™` }));
   do {
     adventureMacroAuto(
-      determineDraggableZoneAndEnsureAccess(),
+      wanderWhere("wanderer"),
       Macro.if_($monster`sausage goblin`, Macro.basicCombat())
         .ifHolidayWanderer(Macro.basicCombat())
         .abort()
@@ -2252,7 +2252,7 @@ function voidMonster(): void {
 
   useFamiliar(freeFightFamiliar());
   freeFightOutfit(new Requirement([], { forceEquip: $items`cursed magnifying glass` }));
-  adventureMacro(determineDraggableZoneAndEnsureAccess(), Macro.basicCombat());
+  adventureMacro(wanderWhere("wanderer"), Macro.basicCombat());
   postCombatActions();
 }
 
