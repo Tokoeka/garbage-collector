@@ -4,8 +4,8 @@ import App from "./App";
 import ".//css/App.scss";
 
 getData((data: Data) => {
-  ReactDOM.render(
-    <App updatedSettings={data.updatedSettings} settings={data.settings} />,
-    document.getElementById("root")
-  );
+	ReactDOM.render(
+		<App updatedSettings={data.updatedSettings} settings={data.settings} />,
+		document.getElementById("root")
+	);
 });
