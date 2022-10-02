@@ -2237,12 +2237,12 @@ function bestDigitizeTarget(): Monster | null {
 
   if (
     have($item`Kramco Sausage-o-Matic™`) &&
-    sum($items`magical sausage, magical sausage casing`, (item) => availableAmount(item)) < 69
+    sum($items`magical sausage, magical sausage casing`, (item) => availableAmount(item)) < 230
   ) {
     return $monster`sausage goblin`;
   }
 
-  for (const piece of $monsters`Witchess Knight, Witchess Bishop, Witchess Pawn`.sort(
+  for (const piece of $monsters`Witchess Knight, Witchess Bishop, Witchess Pawn, Witchess Rook`.sort(
     (a, b) => valueDrops(b) - valueDrops(a)
   )) {
     if (
