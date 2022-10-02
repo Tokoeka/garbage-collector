@@ -165,8 +165,8 @@ function useIfUnused(item: Item, prop: string | boolean, maxPrice: number) {
 	}
 }
 
-function nonOrganAdventures(): void {
-	useIfUnused($item`fancy chocolate car`, get("_chocolatesUsed") !== 0, 2 * MPA);
+export function nonOrganAdventures(): void {
+  useIfUnused($item`fancy chocolate car`, get("_chocolatesUsed") !== 0, 2 * MPA);
 
 	while (get("_loveChocolatesUsed") < 3) {
 		const price = have($item`LOV Extraterrestrial Chocolate`) ? 15000 : 20000;
@@ -389,40 +389,42 @@ function menu(): MenuItem<Note>[] {
 }
 
 export function bestConsumable(
-	organType: "booze" | "food" | "spleen",
-	restrictList?: Item | Item[],
-	maxSize?: number
+  organType: "booze" | "food" | "spleen",
+  levelRestrict = true,
+  restrictList?: Item | Item[],
+  maxSize?: number
 ): { edible: Item; value: number } {
-	const fullMenu = potionMenu(menu(), 0, 0);
-	let organMenu = fullMenu.filter((menuItem) => itemType(menuItem.item) === organType);
-	if (restrictList) {
-		if (restrictList instanceof Item) {
-			organMenu = organMenu.filter((menuItem) => restrictList !== menuItem.item);
-		} else {
-			organMenu = organMenu.filter((menuItem) => !restrictList.includes(menuItem.item));
-		}
-	}
-	if (maxSize) {
-		organMenu = organMenu.filter((menuItem) => menuItem.size <= maxSize);
-	}
-	organMenu = organMenu.filter((menuItem) => menuItem.item.levelreq <= myLevel());
-	const organList = organMenu.map((consumable) => {
-		const edible = consumable.item;
-		const buff = getModifier("Effect", edible);
-		const turnsPerUse = getModifier("Effect Duration", edible);
-		const meatDrop = getModifier("Meat Drop", buff);
-		const famWeight = getModifier("Familiar Weight", buff);
-		const buffValue =
-			((meatDrop + (famWeight * 25) / 10) * turnsPerUse * (baseMeat + 750)) / 100;
-		const advValue = getAverageAdventures(edible) * get("valueOfAdventure");
-		const organSpace = consumable.size;
-		return {
-			edible: edible,
-			value: (buffValue + advValue - mallPrice(edible)) / organSpace,
-		};
-	});
-	const best = organList.sort((a, b) => b.value - a.value)[0];
-	return best;
+  const fullMenu = potionMenu(menu(), 0, 0);
+  let organMenu = fullMenu.filter((menuItem) => itemType(menuItem.item) === organType);
+  if (restrictList) {
+    if (restrictList instanceof Item) {
+      organMenu = organMenu.filter((menuItem) => restrictList !== menuItem.item);
+    } else {
+      organMenu = organMenu.filter((menuItem) => !restrictList.includes(menuItem.item));
+    }
+  }
+  if (maxSize) {
+    organMenu = organMenu.filter((menuItem) => menuItem.size <= maxSize);
+  }
+  if (levelRestrict) {
+    organMenu = organMenu.filter((menuItem) => menuItem.item.levelreq <= myLevel());
+  }
+  const organList = organMenu.map((consumable) => {
+    const edible = consumable.item;
+    const buff = getModifier("Effect", edible);
+    const turnsPerUse = getModifier("Effect Duration", edible);
+    const meatDrop = getModifier("Meat Drop", buff);
+    const famWeight = getModifier("Familiar Weight", buff);
+    const buffValue = ((meatDrop + (famWeight * 25) / 10) * turnsPerUse * (baseMeat + 750)) / 100;
+    const advValue = getAverageAdventures(edible) * get("valueOfAdventure");
+    const organSpace = consumable.size;
+    return {
+      edible: edible,
+      value: (buffValue + advValue - mallPrice(edible)) / organSpace,
+    };
+  });
+  const best = organList.sort((a, b) => b.value - a.value)[0];
+  return best;
 }
 
 function gregariousCount(): {
@@ -818,20 +820,27 @@ export function consumeDiet(diet: Diet<Note>, name: DietName): void {
 	);
 	acquire(seasoningCount, $item`Special Seasoning`, MPA);
 
-	// Fill organs in rounds, making sure we're making progress in each round.
-	const organs = () => [myFullness(), myInebriety(), mySpleenUse()];
-	let lastOrgans = [-1, -1, -1];
-	const capacities = () => [fullnessLimit(), inebrietyLimit(), spleenLimit()];
-	let lastCapacities = [-1, -1, -1];
-	while (sum(diet.entries, ({ quantity }) => quantity) > 0) {
-		if (arrayEquals(lastOrgans, organs()) && arrayEquals(lastCapacities, capacities())) {
-			print();
-			printDiet(diet, "REMAINING");
-			print();
-			throw "Failed to consume some diet item.";
-		}
-		lastOrgans = organs();
-		lastCapacities = capacities();
+  // Fill organs in rounds, making sure we're making progress in each round.
+  const organs = () => [myFullness(), myInebriety(), mySpleenUse()];
+  let lastOrgans = [-1, -1, -1];
+  const capacities = () => [fullnessLimit(), inebrietyLimit(), spleenLimit()];
+  let lastCapacities = [-1, -1, -1];
+  let currentQuantity = sum(diet.entries, ({ quantity }) => quantity);
+  let lastQuantity = -1;
+  while (currentQuantity > 0) {
+    if (
+      arrayEquals(lastOrgans, organs()) &&
+      arrayEquals(lastCapacities, capacities()) &&
+      lastQuantity === currentQuantity
+    ) {
+      print();
+      printDiet(diet, "REMAINING");
+      print();
+      throw "Failed to consume some diet item.";
+    }
+    lastOrgans = organs();
+    lastCapacities = capacities();
+    lastQuantity = currentQuantity;
 
 		for (const dietEntry of diet.entries) {
 			const { menuItems, quantity } = dietEntry;
@@ -987,19 +996,20 @@ export function consumeDiet(diet: Diet<Note>, name: DietName): void {
 				],
 			]);
 
-			for (const menuItem of menuItems) {
-				const itemAction = itemActions.get(menuItem.item);
-				if (itemAction === "skip") {
-					continue;
-				} else if (itemAction) {
-					itemAction(countToConsume, menuItem);
-				} else {
-					consumeSafe(countToConsume, menuItem.item, menuItem.additionalValue);
-				}
-			}
-			dietEntry.quantity -= countToConsume;
-		}
-	}
+      for (const menuItem of menuItems) {
+        const itemAction = itemActions.get(menuItem.item);
+        if (itemAction === "skip") {
+          continue;
+        } else if (itemAction) {
+          itemAction(countToConsume, menuItem);
+        } else {
+          consumeSafe(countToConsume, menuItem.item, menuItem.additionalValue);
+        }
+      }
+      dietEntry.quantity -= countToConsume;
+    }
+    currentQuantity = sum(diet.entries, ({ quantity }) => quantity);
+  }
 }
 
 export function runDiet(): void {

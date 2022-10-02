@@ -29,7 +29,7 @@ import {
 import { prepFamiliars } from "../dailies";
 import { runDiet } from "../diet";
 import { embezzlerCount } from "../embezzler";
-import { doSausage } from "../fights";
+import { doSausage, freeRunFights } from "../fights";
 import { baseMeat, globalOptions, realmAvailable, safeRestore } from "../lib";
 import { meatMood } from "../mood";
 import postCombatActions from "../post";
@@ -141,14 +141,15 @@ function _yachtzeeChain(): void {
 }
 
 export function yachtzeeChain(): void {
-	if (!globalOptions.yachtzeeChain) return;
-	if (get("_garboYachtzeeChainCompleted", false)) return;
-	print("Running Yachtzee Chain", "purple");
-	_yachtzeeChain();
-	set("_garboYachtzeeChainCompleted", true);
-	globalOptions.yachtzeeChain = false;
-	if (!globalOptions.noDiet) {
-		runDiet();
-		prepFamiliars(); // Recompute robo drinks' worth after diet is finally consumed
-	}
+  if (!globalOptions.yachtzeeChain) return;
+  if (get("_garboYachtzeeChainCompleted", false)) return;
+  print("Running Yachtzee Chain", "purple");
+  _yachtzeeChain();
+  set("_garboYachtzeeChainCompleted", true);
+  globalOptions.yachtzeeChain = false;
+  if (!globalOptions.noDiet) {
+    runDiet();
+    prepFamiliars(); // Recompute robo drinks' worth after diet is finally consumed
+  }
+  freeRunFights();
 }

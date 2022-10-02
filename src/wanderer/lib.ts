@@ -60,18 +60,12 @@ const canAdventureOrUnlockSkipList = [
 	...Location.all().filter((l) => l.parent === "Clan Basement"),
 ];
 export function canAdventureOrUnlock(loc: Location): boolean {
-	const skiplist = [...canAdventureOrUnlockSkipList];
-	if (!have($item`repaid diaper`) && have($item`Great Wolf's beastly trousers`)) {
-		skiplist.push($location`The Icy Peak`);
-	}
-	const canUnlock = UnlockableZones.some(
-		(z) => loc.zone === z.zone && (z.available() || !z.noInv)
-	);
-	return (
-		!underwater(loc) &&
-		!canAdventureOrUnlockSkipList.includes(loc) &&
-		(canAdventure(loc) || canUnlock)
-	);
+  const skiplist = [...canAdventureOrUnlockSkipList];
+  if (!have($item`repaid diaper`) && have($item`Great Wolf's beastly trousers`)) {
+    skiplist.push($location`The Icy Peak`);
+  }
+  const canUnlock = UnlockableZones.some((z) => loc.zone === z.zone && (z.available() || !z.noInv));
+  return !underwater(loc) && !skiplist.includes(loc) && (canAdventure(loc) || canUnlock);
 }
 
 export function unlock(loc: Location, value: number): boolean {

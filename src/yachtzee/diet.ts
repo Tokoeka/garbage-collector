@@ -227,61 +227,69 @@ export function executeNextDietStep(stopBeforeJellies?: boolean): void {
 	dietUtil.resetDietPref();
 	const VOA = get("valueOfAdventure");
 
-	const dietString = get("_garboYachtzeeChainDiet").split(",");
-	let stenchJellyConsumed = false;
-	for (const name of dietString) {
-		if (name.length === 0) continue;
-		else if (
-			!stenchJellyConsumed &&
-			(name.includes("stench jelly") || ["clara's bell", "jurassic parka"].includes(name))
-		) {
-			if (stopBeforeJellies) dietUtil.addToPref(1, name);
-			else {
-				const entry = dietUtil.dietArray.find((entry) => entry.name === name);
-				if (entry) {
-					if (entry.fullness > 0) {
-						if (!get("_milkOfMagnesiumUsed")) {
-							acquire(1, $item`milk of magnesium`, 5 * VOA);
-							use(1, $item`milk of magnesium`);
-						}
-						if (!get("_distentionPillUsed") && have($item`distention pill`)) {
-							use(1, $item`distention pill`);
-						}
-					}
-					entry.action(1);
-				} else {
-					throw new Error(`Could not find ${name} in dietArray`);
-				}
-				set("_stenchJellyUsed", true);
-			}
-			stenchJellyConsumed = true;
-		} else if (!stenchJellyConsumed) {
-			dietUtil.dietArray.forEach((entry) => {
-				if (entry.name === name) {
-					if (myFullness() + entry.fullness > fullnessLimit()) {
-						throw new Error(`consuming ${entry.name} will exceed our fullness limit`);
-					} else if (myInebriety() + entry.drunkenness > inebrietyLimit()) {
-						throw new Error(`consuming ${entry.name} will exceed our inebriety limit`);
-					} else if (mySpleenUse() + entry.spleen > spleenLimit()) {
-						throw new Error(`consuming ${entry.name} will exceed our spleen limit`);
-					}
-					if (entry.fullness > 0) {
-						if (!get("_milkOfMagnesiumUsed")) {
-							acquire(1, $item`milk of magnesium`, 5 * VOA);
-							use(1, $item`milk of magnesium`);
-						}
-						if (!get("_distentionPillUsed") && have($item`distention pill`)) {
-							use(1, $item`distention pill`);
-						}
-					}
-					entry.action(1);
-				}
-			});
-		} else {
-			dietUtil.addToPref(1, name);
-		}
-	}
-	dietUtil.setDietPref();
+  const dietString = get("_garboYachtzeeChainDiet").split(",");
+  let stenchJellyConsumed = false;
+  for (const name of dietString) {
+    if (name.length === 0) continue;
+    else if (
+      !stenchJellyConsumed &&
+      (name.includes("stench jelly") || ["clara's bell", "jurassic parka"].includes(name))
+    ) {
+      if (stopBeforeJellies) dietUtil.addToPref(1, name);
+      else {
+        const entry = dietUtil.dietArray.find((entry) => entry.name === name);
+        if (entry) {
+          if (entry.fullness > 0) {
+            if (!get("_milkOfMagnesiumUsed")) {
+              acquire(1, $item`milk of magnesium`, 5 * VOA);
+              use(1, $item`milk of magnesium`);
+            }
+            if (!get("_distentionPillUsed") && have($item`distention pill`)) {
+              use(1, $item`distention pill`);
+            }
+          }
+          entry.action(1);
+        } else {
+          throw new Error(`Could not find ${name} in dietArray`);
+        }
+        set("_stenchJellyUsed", true);
+      }
+      stenchJellyConsumed = true;
+    } else if (!stenchJellyConsumed) {
+      dietUtil.dietArray.forEach((entry) => {
+        if (entry.name === name) {
+          if (entry.drunkenness > 0) {
+            while (get("sweat") >= 25 && get("_sweatOutSomeBoozeUsed") < 3 && myInebriety() > 0) {
+              useSkill($skill`Sweat Out Some Booze`);
+            }
+            if (!get("_syntheticDogHairPillUsed") && have($item`synthetic dog hair pill`)) {
+              use(1, $item`synthetic dog hair pill`);
+            }
+          }
+          if (myFullness() + entry.fullness > fullnessLimit()) {
+            throw new Error(`consuming ${entry.name} will exceed our fullness limit`);
+          } else if (myInebriety() + entry.drunkenness > inebrietyLimit()) {
+            throw new Error(`consuming ${entry.name} will exceed our inebriety limit`);
+          } else if (mySpleenUse() + entry.spleen > spleenLimit()) {
+            throw new Error(`consuming ${entry.name} will exceed our spleen limit`);
+          }
+          if (entry.fullness > 0) {
+            if (!get("_milkOfMagnesiumUsed")) {
+              acquire(1, $item`milk of magnesium`, 5 * VOA);
+              use(1, $item`milk of magnesium`);
+            }
+            if (!get("_distentionPillUsed") && have($item`distention pill`)) {
+              use(1, $item`distention pill`);
+            }
+          }
+          entry.action(1);
+        }
+      });
+    } else {
+      dietUtil.addToPref(1, name);
+    }
+  }
+  dietUtil.setDietPref();
 
 	if (!stenchJellyConsumed) {
 		throw new Error("We completed our entire diet but failed to get a stench jelly charge");
@@ -298,25 +306,29 @@ function yachtzeeDietScheduler(
 	const toasts = new Array<YachtzeeDietEntry<void>>();
 	const freeNCs = new Array<YachtzeeDietEntry<void>>();
 
-	// We assume the menu was constructed such that we will not overshoot our fullness and inebriety limits
-	// Assume all fullness/drunkenness > 0 non-spleen cleansers are inserted for buffs
-	// This makes it trivial to plan the diet
-	// First, lay out all the spleen cleansers (and the buff consumables at the front)
-	for (const entry of menu) {
-		if (entry.spleen < 0) {
-			for (const splitEntry of splitDietEntry(entry)) dietSchedule.push(splitEntry);
-		} else if (entry.name === "stench jelly") {
-			for (const splitEntry of splitDietEntry(entry)) jellies.push(splitEntry);
-		} else if (entry.name === "toast with stench jelly") {
-			for (const splitEntry of splitDietEntry(entry)) toasts.push(splitEntry);
-		} else if (["clara's bell", "jurassic parka"].includes(entry.name)) {
-			for (const splitEntry of splitDietEntry(entry)) freeNCs.push(splitEntry);
-		} else if (entry.fullness > 0 || entry.drunkenness > 0) {
-			for (const splitEntry of splitDietEntry(entry)) dietSchedule.splice(0, 0, splitEntry);
-		} else {
-			for (const splitEntry of splitDietEntry(entry)) remainingMenu.push(splitEntry);
-		}
-	}
+  // We assume the menu was constructed such that we will not overshoot our fullness and inebriety limits
+  // Assume all fullness/drunkenness > 0 non-spleen cleansers are inserted for buffs
+  // This makes it trivial to plan the diet
+  // First, lay out all the spleen cleansers (and the buff consumables at the front)
+  for (const entry of menu) {
+    if (entry.spleen < 0) {
+      for (const splitEntry of splitDietEntry(entry)) dietSchedule.push(splitEntry);
+    } else if (entry.name === "stench jelly") {
+      for (const splitEntry of splitDietEntry(entry)) jellies.push(splitEntry);
+    } else if (entry.name === "toast with stench jelly") {
+      for (const splitEntry of splitDietEntry(entry)) toasts.push(splitEntry);
+    } else if (entry.name === "jurassic parka") {
+      // Parka before Clara's, since we want to use free runs asap
+      // Note that since we push a flipped freeNCs onto the dietSchedule, so we put Clara's in front in freeNCs
+      for (const splitEntry of splitDietEntry(entry)) freeNCs.push(splitEntry);
+    } else if (entry.name === "clara's bell") {
+      for (const splitEntry of splitDietEntry(entry)) freeNCs.splice(0, 0, splitEntry);
+    } else if (entry.fullness > 0 || entry.drunkenness > 0) {
+      for (const splitEntry of splitDietEntry(entry)) dietSchedule.splice(0, 0, splitEntry);
+    } else {
+      for (const splitEntry of splitDietEntry(entry)) remainingMenu.push(splitEntry);
+    }
+  }
 
 	// Place toasts at the back of our schedule
 	for (const toast of toasts) {
@@ -350,8 +362,15 @@ function yachtzeeDietScheduler(
 		}
 	}
 
-	// Next, put our free NC sources at the end of the diet
-	for (const freeNCSource of freeNCs) dietSchedule.push(freeNCSource);
+  // Place our free NC sources immediately before any jellies
+  for (let idx = 0; idx <= dietSchedule.length; idx++) {
+    if (idx === dietSchedule.length) {
+      for (const freeNCSource of freeNCs) dietSchedule.push(freeNCSource);
+    } else if (dietSchedule[idx].name.includes("jelly")) {
+      for (const freeNCSource of freeNCs) dietSchedule.splice(idx, 0, freeNCSource);
+      break;
+    }
+  }
 
 	// Next, combine clustered entries where possible (this is purely for aesthetic reasons)
 	let idx = 0;
@@ -372,34 +391,49 @@ function yachtzeeDietScheduler(
 	print("Diet schedule:", "blue");
 	for (const entry of dietSchedule) print(`Use ${entry.quantity} ${entry.name}`, "blue");
 
-	// Finally, run a check to ensure everything is fine
-	let fullness = myFullness();
-	let drunkenness = myInebriety();
-	let spleenUse = mySpleenUse();
-	for (const entry of dietSchedule) {
-		fullness += entry.quantity * entry.fullness;
-		drunkenness += entry.quantity * entry.drunkenness;
-		spleenUse += entry.quantity * entry.spleen;
-		if (fullness > fullnessLimit() + toInt(haveDistentionPill)) {
-			throw new Error(
-				`Error in diet schedule: Overeating ${entry.quantity} ${
-					entry.name
-				} to ${fullness}/${fullnessLimit() + toInt(haveDistentionPill)}`
-			);
-		} else if (drunkenness > inebrietyLimit()) {
-			throw new Error(
-				`Error in diet schedule: Overdrinking ${entry.quantity} ${
-					entry.name
-				} to ${drunkenness}/${inebrietyLimit()}`
-			);
-		} else if (spleenUse > spleenLimit()) {
-			throw new Error(
-				`Error in diet schedule: Overspleening ${entry.quantity} ${
-					entry.name
-				} to ${spleenUse}/${spleenLimit()}`
-			);
-		}
-	}
+  // Finally, run a check to ensure everything is fine
+  let fullness = myFullness();
+  let drunkenness = myInebriety();
+  let spleenUse = mySpleenUse();
+  let sweatOutsAvailable = clamp(
+    Math.floor(get("sweat") / 25),
+    0,
+    3 - get("_sweatOutSomeBoozeUsed")
+  );
+  let syntheticPillsAvailable =
+    !get("_syntheticDogHairPillUsed") && have($item`synthetic dog hair pill`) ? 1 : 0;
+  for (const entry of dietSchedule) {
+    fullness += entry.quantity * entry.fullness;
+    drunkenness += entry.quantity * entry.drunkenness;
+    spleenUse += entry.quantity * entry.spleen;
+    if (fullness > fullnessLimit() + toInt(haveDistentionPill)) {
+      throw new Error(
+        `Error in diet schedule: Overeating ${entry.quantity} ${entry.name} to ${fullness}/${
+          fullnessLimit() + toInt(haveDistentionPill)
+        }`
+      );
+    } else if (drunkenness > inebrietyLimit()) {
+      throw new Error(
+        `Error in diet schedule: Overdrinking ${entry.quantity} ${
+          entry.name
+        } to ${drunkenness}/${inebrietyLimit()}`
+      );
+    } else if (spleenUse > spleenLimit()) {
+      throw new Error(
+        `Error in diet schedule: Overspleening ${entry.quantity} ${
+          entry.name
+        } to ${spleenUse}/${spleenLimit()}`
+      );
+    }
+    while (drunkenness > 0 && sweatOutsAvailable > 0) {
+      drunkenness -= 1;
+      sweatOutsAvailable -= 1;
+    }
+    if (drunkenness > 0 && syntheticPillsAvailable > 0) {
+      drunkenness -= 1;
+      syntheticPillsAvailable -= 1;
+    }
+  }
 
 	return dietSchedule;
 }
@@ -408,33 +442,32 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 	if (get("_garboYachtzeeChainDietPlanned", false)) return true;
 	set("_garboYachtzeeChainDiet", "");
 
-	const havePYECCharge = pyecAvailable();
-	const haveDistentionPill = !get("_distentionPillUsed") && have($item`distention pill`);
-	const haveDogHairPill =
-		!get("_syntheticDogHairPillUsed") && have($item`synthetic dog hair pill`);
+  const havePYECCharge = pyecAvailable();
+  const haveDistentionPill = !get("_distentionPillUsed") && have($item`distention pill`);
+  const sweatOutsAvailable = clamp(
+    Math.floor(get("sweat") / 25),
+    0,
+    3 - get("_sweatOutSomeBoozeUsed")
+  );
+  const syntheticPillsAvailable =
+    !get("_syntheticDogHairPillUsed") && have($item`synthetic dog hair pill`) ? 1 : 0;
 
-	const currentSpleenLeft = spleenLimit() - mySpleenUse();
-	const filters = 3 - get("currentMojoFilters");
-	// save some spleen the first two extro, which are worth a lot
-	// due to macrometeor and cheat code: replace enemy
-	const extroSpleenSpace = hasMonsterReplacers()
-		? 4 - Math.min(4, 2 * get("beGregariousCharges"))
-		: 0;
-	const synthCastsToCoverRun =
-		globalOptions.noBarf || !have($skill`Sweet Synthesis`)
-			? 0
-			: Math.max(
-					0,
-					Math.round((estimatedTurns() - haveEffect($effect`Synthesis: Greed`)) / 30)
-			  );
-	const fullnessAvailable = fullnessLimit() - myFullness() + toInt(haveDistentionPill);
-	const inebrietyAvailable =
-		inebrietyLimit() -
-		myInebriety() +
-		toInt(haveDogHairPill) +
-		(3 - get("_sweatOutSomeBoozeUsed", 0));
-	const spleenAvailable = currentSpleenLeft + filters;
-	const organsAvailable = fullnessAvailable + inebrietyAvailable + spleenAvailable;
+  const currentSpleenLeft = spleenLimit() - mySpleenUse();
+  const filters = 3 - get("currentMojoFilters");
+  // save some spleen the first two extro, which are worth a lot
+  // due to macrometeor and cheat code: replace enemy
+  const extroSpleenSpace = hasMonsterReplacers()
+    ? 4 - Math.min(4, 2 * get("beGregariousCharges"))
+    : 0;
+  const synthCastsToCoverRun =
+    globalOptions.noBarf || !have($skill`Sweet Synthesis`)
+      ? 0
+      : Math.max(0, Math.round((estimatedTurns() - haveEffect($effect`Synthesis: Greed`)) / 30));
+  const fullnessAvailable = fullnessLimit() - myFullness() + toInt(haveDistentionPill);
+  const inebrietyAvailable =
+    inebrietyLimit() - myInebriety() + syntheticPillsAvailable + sweatOutsAvailable;
+  const spleenAvailable = currentSpleenLeft + filters;
+  const organsAvailable = fullnessAvailable + inebrietyAvailable + spleenAvailable;
 
 	const cleanableSpleen = organsAvailable - synthCastsToCoverRun - extroSpleenSpace;
 	const sufficientOrgansFor = (yachtzees: number) =>
@@ -454,8 +487,10 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 
 	// Plan our diet
 
-	const sliders = Math.floor((fullnessLimit() + toInt(haveDistentionPill) - myFullness()) / 5);
-	const pickleJuice = Math.floor((inebrietyLimit() - myInebriety()) / 5);
+  const sliders = Math.floor((fullnessLimit() + toInt(haveDistentionPill) - myFullness()) / 5);
+  const pickleJuice = Math.floor(
+    (inebrietyLimit() - myInebriety() + sweatOutsAvailable + syntheticPillsAvailable) / 5
+  );
 
 	const reqSynthTurns = 30; // We will be left with max(0, 30 - yachtzeeTurns) after chaining
 	const synthTurnsWanted = reqSynthTurns - haveEffect($effect`Synthesis: Greed`);

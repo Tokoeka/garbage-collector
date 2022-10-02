@@ -146,102 +146,105 @@ type AdventureAction = {
 
 // This is roughly ordered by the encounter ontology, followed by general priority
 const turns: AdventureAction[] = [
-	{
-		name: "Lights Out",
-		available: () =>
-			totalTurnsPlayed() % 37 === 0 &&
-			totalTurnsPlayed() !== get("lastLightsOutTurn") &&
-			canAdventure(get("nextSpookyravenStephenRoom") ?? $location`none`),
-		execute: () => {
-			const steveRoom = get("nextSpookyravenStephenRoom");
-			const ghostLocation = get("ghostLocation");
-			if (steveRoom && canAdventure(steveRoom) && steveRoom !== ghostLocation) {
-				const fightingSteve = steveRoom === $location`The Haunted Laboratory`;
-				// Technically drops 500 meat, but that's close enough for me.
-				const drunkRequirement = sober()
-					? undefined
-					: new Requirement([], { forceEquip: $items`Drunkula's wineglass` });
-				if (fightingSteve) embezzlerPrep({ requirements: drunkRequirement });
-				const plan = steveAdventures.get(steveRoom);
-				if (plan) {
-					withMacro(
-						Macro.if_($monster`Stephen Spookyraven`, Macro.basicCombat()).abort(),
-						() => {
-							visitUrl(toUrl(steveRoom));
-							for (const choiceValue of plan) {
-								runChoice(choiceValue);
-							}
-							if (fightingSteve || currentRound()) runCombat();
-						},
-						true
-					);
-				}
-				return totalTurnsPlayed() === get("lastLightsOutTurn");
-			}
-			return false;
-		},
-		spendsTurn: () => get("nextSpookyravenStephenRoom") === $location`The Haunted Laboratory`,
-		sobriety: Sobriety.EITHER,
-	},
-	{
-		name: "Proton Ghost",
-		available: () =>
-			have($item`protonic accelerator pack`) &&
-			get("questPAGhost") !== "unstarted" &&
-			!!get("ghostLocation"),
-		execute: () => {
-			const ghostLocation = get("ghostLocation");
-			if (!ghostLocation) return false;
-			freeFightPrep(
-				new Requirement(
-					ghostLocation === $location`The Icy Peak` ? ["Cold Resistance 5 min"] : [],
-					{
-						forceEquip: $items`protonic accelerator pack`,
-					}
-				)
-			);
-			adventureMacro(ghostLocation, Macro.ghostBustin());
-			return get("questPAGhost") === "unstarted";
-		},
-		spendsTurn: false,
-		// Ghost fights are currently hard
-		// and they resist physical attacks!
-		sobriety: Sobriety.SOBER,
-	},
-	{
-		name: "Vote Wanderer",
-		available: () =>
-			have($item`"I Voted!" sticker`) &&
-			totalTurnsPlayed() % 11 === 1 &&
-			get("lastVoteMonsterTurn") < totalTurnsPlayed() &&
-			get("_voteFreeFights") < 3,
-		execute: () => {
-			const isGhost = get("_voteMonster") === $monster`angry ghost`;
-
-			freeFightPrep(
-				new Requirement([], {
-					forceEquip: [
-						$item`"I Voted!" sticker`,
-						...(!sober() && !isGhost ? $items`Drunkula's wineglass` : []),
-					],
-				})
-			);
-			adventureMacroAuto(
-				isGhost ? drunkSafeWander("wanderer") : wanderWhere("wanderer"),
-				Macro.basicCombat()
-			);
-			return get("lastVoteMonsterTurn") === totalTurnsPlayed();
-		},
-		spendsTurn: false,
-		sobriety: Sobriety.EITHER,
-	},
-	{
-		name: "Digitize Wanderer",
-		available: () => Counter.get("Digitize Monster") <= 0,
-		execute: () => {
-			// This check exists primarily for the ease of modded garbos
-			const isEmbezzler = SourceTerminal.getDigitizeMonster() === embezzler;
-			const start = get("_sourceTerminalDigitizeMonsterCount");
+  {
+    name: "Lights Out",
+    available: () =>
+      totalTurnsPlayed() % 37 === 0 &&
+      totalTurnsPlayed() !== get("lastLightsOutTurn") &&
+      canAdventure(get("nextSpookyravenStephenRoom") ?? $location`none`),
+    execute: () => {
+      const steveRoom = get("nextSpookyravenStephenRoom");
+      const ghostLocation = get("ghostLocation");
+      if (steveRoom && canAdventure(steveRoom) && steveRoom !== ghostLocation) {
+        const fightingSteve = steveRoom === $location`The Haunted Laboratory`;
+        // Technically drops 500 meat, but that's close enough for me.
+        const drunkRequirement = sober()
+          ? undefined
+          : new Requirement([], { forceEquip: $items`Drunkula's wineglass` });
+        if (fightingSteve) embezzlerPrep({ requirements: drunkRequirement });
+        const plan = steveAdventures.get(steveRoom);
+        if (plan) {
+          withMacro(
+            Macro.if_($monster`Stephen Spookyraven`, Macro.basicCombat()).abort(),
+            () => {
+              visitUrl(toUrl(steveRoom));
+              for (const choiceValue of plan) {
+                runChoice(choiceValue);
+              }
+              if (fightingSteve || currentRound()) runCombat();
+            },
+            true
+          );
+        }
+        return totalTurnsPlayed() === get("lastLightsOutTurn");
+      }
+      return false;
+    },
+    spendsTurn: () => get("nextSpookyravenStephenRoom") === $location`The Haunted Laboratory`,
+    sobriety: Sobriety.EITHER,
+  },
+  {
+    name: "Proton Ghost",
+    available: () =>
+      have($item`protonic accelerator pack`) &&
+      get("questPAGhost") !== "unstarted" &&
+      !!get("ghostLocation"),
+    execute: () => {
+      const ghostLocation = get("ghostLocation");
+      if (!ghostLocation) return false;
+      freeFightPrep(
+        new Requirement(
+          ghostLocation === $location`The Icy Peak` ? ["Cold Resistance 5 min"] : [],
+          {
+            forceEquip: $items`protonic accelerator pack`,
+          }
+        )
+      );
+      adventureMacro(ghostLocation, Macro.ghostBustin());
+      return get("questPAGhost") === "unstarted";
+    },
+    spendsTurn: false,
+    // Ghost fights are currently hard
+    // and they resist physical attacks!
+    sobriety: Sobriety.SOBER,
+  },
+  {
+    name: "Vote Wanderer",
+    available: () =>
+      have($item`"I Voted!" sticker`) &&
+      totalTurnsPlayed() % 11 === 1 &&
+      get("lastVoteMonsterTurn") < totalTurnsPlayed() &&
+      get("_voteFreeFights") < 3,
+    execute: () => {
+      const isGhost = get("_voteMonster") === $monster`angry ghost`;
+      const isMutant = get("_voteMonster") === $monster`terrible mutant`;
+      freeFightPrep(
+        new Requirement([], {
+          forceEquip: [
+            $item`"I Voted!" sticker`,
+            ...(!sober() && !isGhost ? $items`Drunkula's wineglass` : []),
+            ...(!have($item`mutant crown`) && isMutant
+              ? $items`mutant arm, mutant legs`.filter((i) => have(i))
+              : []),
+          ],
+        })
+      );
+      adventureMacroAuto(
+        isGhost ? drunkSafeWander("wanderer") : wanderWhere("wanderer"),
+        Macro.basicCombat()
+      );
+      return get("lastVoteMonsterTurn") === totalTurnsPlayed();
+    },
+    spendsTurn: false,
+    sobriety: Sobriety.EITHER,
+  },
+  {
+    name: "Digitize Wanderer",
+    available: () => Counter.get("Digitize Monster") <= 0,
+    execute: () => {
+      // This check exists primarily for the ease of modded garbos
+      const isEmbezzler = SourceTerminal.getDigitizeMonster() === embezzler;
+      const start = get("_sourceTerminalDigitizeMonsterCount");
 
 			const underwater = isEmbezzler && shouldGoUnderwater();
 
