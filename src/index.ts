@@ -407,14 +407,14 @@ export function main(argString = ""): void {
 					globalOptions.yachtzeeChain = false;
 				}
 
-        if (
-          !globalOptions.noDiet &&
-          (!globalOptions.yachtzeeChain || get("_garboYachtzeeChainCompleted", false))
-        ) {
-          runDiet();
-        } else if (!globalOptions.simulateDiet) {
-          nonOrganAdventures();
-        }
+				if (
+					!globalOptions.noDiet &&
+					(!globalOptions.yachtzeeChain || get("_garboYachtzeeChainCompleted", false))
+				) {
+					runDiet();
+				} else if (!globalOptions.simulateDiet) {
+					nonOrganAdventures();
+				}
 
 				// 1. make an outfit (amulet coin, pantogram, etc), misc other stuff (VYKEA, songboom, robortender drinks)
 				dailySetup();

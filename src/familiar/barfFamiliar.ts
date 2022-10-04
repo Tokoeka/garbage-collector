@@ -50,17 +50,17 @@ function getCachedOutfitValues(fam: Familiar) {
 	const currentValue = outfitCache.get(lepMult);
 	if (currentValue) return currentValue;
 
-  useFamiliar(fam);
-  meatOutfit(
-    false,
-    new Requirement([], {
-      // If we don't include the li'l pirate costume as a preventEquip, we could
-      // double-count the value of the pirate costume between here and constantvalue.ts,
-      // and we could apply the value of the pirate costume to every 0x leprechaun. Other items are
-      // included as strong, temporary bonuses that go away quickly in a user's BarfDay.
-      preventEquip: $items`Kramco Sausage-o-Matic™, cursed magnifying glass, protonic accelerator pack, "I Voted!" sticker, li'l pirate costume, bag of many confections`,
-    })
-  );
+	useFamiliar(fam);
+	meatOutfit(
+		false,
+		new Requirement([], {
+			// If we don't include the li'l pirate costume as a preventEquip, we could
+			// double-count the value of the pirate costume between here and constantvalue.ts,
+			// and we could apply the value of the pirate costume to every 0x leprechaun. Other items are
+			// included as strong, temporary bonuses that go away quickly in a user's BarfDay.
+			preventEquip: $items`Kramco Sausage-o-Matic™, cursed magnifying glass, protonic accelerator pack, "I Voted!" sticker, li'l pirate costume, bag of many confections`,
+		})
+	);
 
 	const outfit = outfitSlots.map((slot) => equippedItem(slot));
 	const bonuses = bonusGear("barf", false);

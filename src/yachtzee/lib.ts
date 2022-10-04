@@ -99,16 +99,16 @@ export function useSpikolodonSpikes(): void {
 	freeFightOutfit(mergedRequirements);
 	cliExecute("parka spikolodon");
 
-  const targetZone = canJelly
-    ? $location`Pirates of the Garbage Barges`
-    : $location`Sloppy Seconds Diner`;
-  const macro = Macro.familiarActions()
-    .skill($skill`Launch spikolodon spikes`)
-    .step(run.macro);
-  const startingSpikes = get("_spikolodonSpikeUses");
-  do {
-    adventureMacroAuto(targetZone, macro);
-  } while (get("_spikolodonSpikeUses") === startingSpikes);
+	const targetZone = canJelly
+		? $location`Pirates of the Garbage Barges`
+		: $location`Sloppy Seconds Diner`;
+	const macro = Macro.familiarActions()
+		.skill($skill`Launch spikolodon spikes`)
+		.step(run.macro);
+	const startingSpikes = get("_spikolodonSpikeUses");
+	do {
+		adventureMacroAuto(targetZone, macro);
+	} while (get("_spikolodonSpikeUses") === startingSpikes);
 
 	postCombatActions();
 }

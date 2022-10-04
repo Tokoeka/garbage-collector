@@ -99,8 +99,9 @@ function _yachtzeeChain(): void {
 			const bestWaterBreathingEquipment = getBestWaterBreathingEquipment(
 				Math.min(jellyTurns, fishyTurns)
 			);
-			if (bestWaterBreathingEquipment.item !== $item.none)
+			if (bestWaterBreathingEquipment.item !== $item.none) {
 				equip(bestWaterBreathingEquipment.item);
+			}
 			if (
 				haveEquipped($item`The Crown of Ed the Undying`) &&
 				!booleanModifier("Adventure Underwater")
@@ -141,15 +142,15 @@ function _yachtzeeChain(): void {
 }
 
 export function yachtzeeChain(): void {
-  if (!globalOptions.yachtzeeChain) return;
-  if (get("_garboYachtzeeChainCompleted", false)) return;
-  print("Running Yachtzee Chain", "purple");
-  _yachtzeeChain();
-  set("_garboYachtzeeChainCompleted", true);
-  globalOptions.yachtzeeChain = false;
-  if (!globalOptions.noDiet) {
-    runDiet();
-    prepFamiliars(); // Recompute robo drinks' worth after diet is finally consumed
-  }
-  freeRunFights();
+	if (!globalOptions.yachtzeeChain) return;
+	if (get("_garboYachtzeeChainCompleted", false)) return;
+	print("Running Yachtzee Chain", "purple");
+	_yachtzeeChain();
+	set("_garboYachtzeeChainCompleted", true);
+	globalOptions.yachtzeeChain = false;
+	if (!globalOptions.noDiet) {
+		runDiet();
+		prepFamiliars(); // Recompute robo drinks' worth after diet is finally consumed
+	}
+	freeRunFights();
 }
