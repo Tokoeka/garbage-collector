@@ -26,7 +26,6 @@ import {
 	set,
 	uneffect,
 } from "libram";
-import { prepFamiliars } from "../dailies";
 import { runDiet } from "../diet";
 import { embezzlerCount } from "../embezzler";
 import { doSausage, freeRunFights } from "../fights";
@@ -34,6 +33,7 @@ import { baseMeat, globalOptions, realmAvailable, safeRestore } from "../lib";
 import { meatMood } from "../mood";
 import postCombatActions from "../post";
 import { potionSetup } from "../potions";
+import { prepRobortender } from "../tasks/dailyFamiliars";
 import { yachtzeePotionSetup } from "./buffs";
 import { executeNextDietStep, yachtzeeChainDiet } from "./diet";
 import { pyecAvailable } from "./lib";
@@ -142,15 +142,15 @@ function _yachtzeeChain(): void {
 }
 
 export function yachtzeeChain(): void {
-	if (!globalOptions.yachtzeeChain) return;
-	if (get("_garboYachtzeeChainCompleted", false)) return;
-	print("Running Yachtzee Chain", "purple");
-	_yachtzeeChain();
-	set("_garboYachtzeeChainCompleted", true);
-	globalOptions.yachtzeeChain = false;
-	if (!globalOptions.noDiet) {
-		runDiet();
-		prepFamiliars(); // Recompute robo drinks' worth after diet is finally consumed
-	}
-	freeRunFights();
+  if (!globalOptions.yachtzeeChain) return;
+  if (get("_garboYachtzeeChainCompleted", false)) return;
+  print("Running Yachtzee Chain", "purple");
+  _yachtzeeChain();
+  set("_garboYachtzeeChainCompleted", true);
+  globalOptions.yachtzeeChain = false;
+  if (!globalOptions.noDiet) {
+    runDiet();
+    prepRobortender(); // Recompute robo drinks' worth after diet is finally consumed
+  }
+  freeRunFights();
 }
