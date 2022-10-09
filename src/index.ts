@@ -50,6 +50,7 @@ import {
 	checkGithubVersion,
 	globalOptions,
 	HIGHLIGHT,
+	maxBy,
 	printHelpMenu,
 	printLog,
 	propertyManager,
@@ -140,7 +141,9 @@ export function main(argString = ""): void {
 	}
 	if (get("valueOfAdventure") >= 8000) {
 		const proceedRegardless = userConfirmDialog(
-			`Your valueOfAdventure is set to ${get("valueOfAdventure")}, which is possibly wrong. Are you sure you want to garbologize with that VOA?`,
+			`Your valueOfAdventure is set to ${get(
+				"valueOfAdventure"
+			)}, which is possibly wrong. Are you sure you want to garbologize with that VOA?`,
 			false
 		);
 		if (!proceedRegardless) {
@@ -354,7 +357,7 @@ export function main(argString = ""): void {
 					choiceId: choiceId,
 				};
 			});
-			bestHalloweiner = halloweinerOptions.sort((a, b) => b.price - a.price)[0].choiceId;
+			bestHalloweiner = maxBy(halloweinerOptions, "price").choiceId;
 		}
 		propertyManager.setChoices({
 			1106: 3, // Ghost Dog Chow

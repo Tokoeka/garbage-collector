@@ -4,16 +4,18 @@ import { DailyItemTasks } from "./tasks/dailyItems";
 import { DailyVolcanoTasks } from "./tasks/dailyVolcano";
 import { DailyFamiliarTasks } from "./tasks/dailyFamiliars";
 import { runSafeGarboTasks } from "./tasks/engine";
+import { AscendingTasks } from "./tasks/ascending";
 
 export function dailySetup(): void {
-  runSafeGarboTasks([
-    ...DailyFamiliarTasks,
-    ...DailyItemTasks,
-    ...DailyVolcanoTasks,
-    ...DailyTasks,
-  ]);
+	runSafeGarboTasks([
+		...DailyFamiliarTasks,
+		...DailyItemTasks,
+		...DailyVolcanoTasks,
+		...DailyTasks,
+		...AscendingTasks,
+	]);
 }
 
 export function postFreeFightDailySetup(): void {
-  runSafeGarboTasks(PostFreeFightTasks);
+	runSafeGarboTasks(PostFreeFightTasks);
 }

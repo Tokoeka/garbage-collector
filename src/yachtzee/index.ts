@@ -6,7 +6,6 @@ import {
 	haveEffect,
 	haveEquipped,
 	maximize,
-	myLevel,
 	myMeat,
 	myTurncount,
 	print,
@@ -45,7 +44,7 @@ import {
 } from "./outfit";
 
 function _yachtzeeChain(): void {
-	if (myLevel() < 13 || !canInteract()) return;
+	if (!canInteract()) return;
 	// We definitely need to be able to eat sliders and drink pickle juice
 	if (!realmAvailable("sleaze")) return;
 
@@ -142,15 +141,15 @@ function _yachtzeeChain(): void {
 }
 
 export function yachtzeeChain(): void {
-  if (!globalOptions.yachtzeeChain) return;
-  if (get("_garboYachtzeeChainCompleted", false)) return;
-  print("Running Yachtzee Chain", "purple");
-  _yachtzeeChain();
-  set("_garboYachtzeeChainCompleted", true);
-  globalOptions.yachtzeeChain = false;
-  if (!globalOptions.noDiet) {
-    runDiet();
-    prepRobortender(); // Recompute robo drinks' worth after diet is finally consumed
-  }
-  freeRunFights();
+	if (!globalOptions.yachtzeeChain) return;
+	if (get("_garboYachtzeeChainCompleted", false)) return;
+	print("Running Yachtzee Chain", "purple");
+	_yachtzeeChain();
+	set("_garboYachtzeeChainCompleted", true);
+	globalOptions.yachtzeeChain = false;
+	if (!globalOptions.noDiet) {
+		runDiet();
+		prepRobortender(); // Recompute robo drinks' worth after diet is finally consumed
+	}
+	freeRunFights();
 }
