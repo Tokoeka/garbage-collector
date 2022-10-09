@@ -454,7 +454,7 @@ function gregariousCount(): {
 
 function copiers(): MenuItem<Note>[] {
 	// assuming embezzler is worth 4 * MPA and a marginal turn is 1 * MPA, the differential is 3 * MPA
-	const embezzlerDifferential = 3 * MPA;
+	const embezzlerDifferential = get("garbo_valueOfEmbezzler", 10500) - MPA;
 	const { expectedGregariousFights, marginalGregariousFights } = gregariousCount();
 	const extros =
 		myInebriety() > inebrietyLimit()
