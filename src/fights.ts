@@ -1448,12 +1448,28 @@ const freeFightSources = [
 		true,
 		{
 			familiar: () => (have($familiar`Grey Goose`) ? $familiar`Grey Goose` : null),
-			requirements: () => [
-				new Requirement(["100 init", "pickpocket chance"], {
-					forceEquip: $items`mayfly bait necklace, tiny black hole`,
-					// bonusEquip: new Map($items`carnivorous potted plant`.map((item) => [item, 100])),
-				}),
-			],
+			requirements: () => {
+				const canPickPocket = myPrimestat() === $stat`Moxie`;
+				const bestPickpocketItem =
+					$items`tiny black hole, mime army infiltration glove`.find(
+						(item) => have(item) && canEquip(item)
+					);
+
+				const reqs = [
+					new Requirement(["100 init", "Pickpocket Chance"], {
+						forceEquip: $items`mayfly bait necklace`,
+						bonusEquip: new Map($items`carnivorous potted plant`.map((item) => [item, 100])),
+					}),
+				];
+				if (!canPickPocket && bestPickpocketItem) {
+					reqs.push(
+						new Requirement([], {
+							forceEquip: [bestPickpocketItem],
+						})
+					);
+				}
+				return reqs;
+			},
 		}
 	),
 ];
