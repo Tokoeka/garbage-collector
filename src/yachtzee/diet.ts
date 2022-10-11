@@ -650,7 +650,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 
 	// We assume that the embezzlers after yachtzee chaining would still benefit from our start-of-day buffs
 	// so the assumption is that all the gregged embezzlies can be approximated as marginal KGEs with profits of 3 * VOA
-	const extroValuePerSpleen = 3 * VPE - 3 * VOA - extroPrice / 2;
+	const extroValuePerSpleen = (4 * VPE - 4 * VOA - extroPrice) / 2;
 	const jellyValuePerSpleen =
 		(earlyMeatDropsEstimate * 2000) / 100 -
 		(jelliesBulkPrice +
