@@ -15,24 +15,24 @@ import {
 	visitUrl,
 } from "kolmafia";
 import {
-  $effect,
-  $familiar,
-  $item,
-  $items,
-  $location,
-  $locations,
-  $skill,
-  $slot,
-  adventureMacro,
-  AutumnAton,
-  get,
-  getRemainingStomach,
-  have,
-  JuneCleaver,
-  Macro,
-  property,
-  uneffect,
-  withProperty,
+	$effect,
+	$familiar,
+	$item,
+	$items,
+	$location,
+	$locations,
+	$skill,
+	$slot,
+	adventureMacro,
+	AutumnAton,
+	get,
+	getRemainingStomach,
+	have,
+	JuneCleaver,
+	Macro,
+	property,
+	uneffect,
+	withProperty,
 } from "libram";
 import { acquire } from "./acquire";
 import { computeDiet, consumeDiet } from "./diet";
@@ -188,17 +188,17 @@ function funguySpores() {
 const autumnAtonZones = $locations`The Toxic Teacups, The Oasis, The Deep Dark Jungle, The Bubblin' Caldera, The Sleazy Back Alley`;
 
 export default function postCombatActions(skipDiet = false): void {
-  juneCleave();
-  numberology();
-  if (!skipDiet && !globalOptions.noDiet) {
-    fillPantsgivingFullness();
-    fillSweatyLiver();
-  }
-  coldMedicineCabinet();
-  safeInterrupt();
-  safeRestore();
-  updateMallPrices();
-  stillsuit();
-  funguySpores();
-  AutumnAton.sendTo(autumnAtonZones);
+	juneCleave();
+	numberology();
+	if (!skipDiet && !globalOptions.noDiet) {
+		fillPantsgivingFullness();
+		fillSweatyLiver();
+	}
+	coldMedicineCabinet();
+	safeInterrupt();
+	safeRestore();
+	updateMallPrices();
+	stillsuit();
+	funguySpores();
+	AutumnAton.sendTo(autumnAtonZones);
 }

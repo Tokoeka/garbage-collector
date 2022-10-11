@@ -816,7 +816,7 @@ const freeFightSources = [
 					.externalIf(
 						get("glitchItemImplementationCount") *
 							itemAmount($item`[glitch season reward name]`) >=
-							1000,
+							2000,
 						Macro.item([$item`jam band bootleg`, $item`jam band bootleg`]).item([
 							$item`gas can`,
 							$item`gas can`,
@@ -838,18 +838,16 @@ const freeFightSources = [
 					.kill(),
 				() => {
 					restoreHp(myMaxhp());
-					if (have($skill`Ruthless Efficiency`)) {
+					if (have($skill`Ruthless Efficiency`))
 						ensureEffect($effect`Ruthlessly Efficient`);
-					}
-					if (have($skill`Mathematical Precision`)) {
+					if (have($skill`Mathematical Precision`))
 						ensureEffect($effect`Mathematically Precise`);
-					}
 					if (have($skill`Blood Bubble`)) ensureEffect($effect`Blood Bubble`);
 					retrieveItem($item`[glitch season reward name]`);
 					if (
 						get("glitchItemImplementationCount") *
 							itemAmount($item`[glitch season reward name]`) >=
-						1000
+						2000
 					) {
 						retrieveItem($item`gas can`, 2);
 						retrieveItem($item`jam band bootleg`, 2);
@@ -861,7 +859,10 @@ const freeFightSources = [
 		true,
 		{
 			requirements: () => [
-				new Requirement(["1000 mainstat"], { forceEquip: $items`June cleaver` }),
+				new Requirement(["1000 mainstat"], {
+					preventEquip: $items`mutant crown, mutant arm, mutant legs, shield of the Skeleton Lord`,
+					forceEquip: $items`June cleaver`,
+				}),
 			],
 			macroAllowsFamiliarActions: false,
 		}
@@ -1458,7 +1459,9 @@ const freeFightSources = [
 				const reqs = [
 					new Requirement(["100 init", "Pickpocket Chance"], {
 						forceEquip: $items`mayfly bait necklace`,
-						bonusEquip: new Map($items`carnivorous potted plant`.map((item) => [item, 100])),
+						bonusEquip: new Map(
+							$items`carnivorous potted plant`.map((item) => [item, 100])
+						),
 					}),
 				];
 				if (!canPickPocket && bestPickpocketItem) {
