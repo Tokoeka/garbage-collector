@@ -218,12 +218,12 @@ export function nonOrganAdventures(): void {
 		} else break;
 	}
 
-	useIfUnused(
-		$item`fancy chocolate sculpture`,
-		get("_chocolateSculpturesUsed") < 1,
-		5 * MPA + 5000
-	);
-	useIfUnused($item`essential tofu`, "_essentialTofuUsed", 5 * MPA);
+  useIfUnused(
+    $item`fancy chocolate sculpture`,
+    get("_chocolateSculpturesUsed") > 0,
+    5 * MPA + 5000
+  );
+  useIfUnused($item`essential tofu`, "_essentialTofuUsed", 5 * MPA);
 
 	if (!get("_etchedHourglassUsed") && have($item`etched hourglass`)) {
 		use(1, $item`etched hourglass`);

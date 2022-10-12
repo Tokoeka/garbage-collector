@@ -146,6 +146,9 @@ function juneCleave(): void {
 		equip($slot`weapon`, $item`June cleaver`);
 		skipJuneCleaverChoices();
 		withProperty("recoveryScript", "", () => {
+			if (have($effect`feeling lost`)) {
+				uneffect($effect`feeling lost`);
+			}
 			adventureMacro($location`Noob Cave`, Macro.abort());
 			if (["Poetic Justice", "Lost and Found"].includes(get("lastEncounter"))) {
 				uneffect($effect`Beaten Up`);
