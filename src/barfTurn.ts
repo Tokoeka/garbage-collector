@@ -273,7 +273,7 @@ const turns: AdventureAction[] = [
 	},
 	{
 		name: "Guaranteed Kramco",
-		available: () => kramcoGuaranteed(),
+		available: () => kramcoGuaranteed() && romanticMonsterImpossible(),
 		execute: () => {
 			freeFightPrep(new Requirement([], { forceEquip: $items`Kramco Sausage-o-Matic™` }));
 			adventureMacroAuto(drunkSafeWander("wanderer"), Macro.basicCombat());
