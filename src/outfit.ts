@@ -1,5 +1,4 @@
 import {
-	availableAmount,
 	bjornifyFamiliar,
 	canAdventure,
 	canEquip,
@@ -14,7 +13,6 @@ import {
 	myFamiliar,
 	myInebriety,
 	numericModifier,
-	print,
 	retrieveItem,
 	toInt,
 	toSlot,

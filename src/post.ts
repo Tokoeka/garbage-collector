@@ -146,8 +146,8 @@ function juneCleave(): void {
 		equip($slot`weapon`, $item`June cleaver`);
 		skipJuneCleaverChoices();
 		withProperty("recoveryScript", "", () => {
-			if (have($effect`feeling lost`)) {
-				uneffect($effect`feeling lost`);
+			if (have($effect`Feeling Lost`)) {
+				uneffect($effect`Feeling Lost`);
 			}
 			adventureMacro($location`Noob Cave`, Macro.abort());
 			if (["Poetic Justice", "Lost and Found"].includes(get("lastEncounter"))) {
@@ -203,7 +203,7 @@ export default function postCombatActions(skipDiet = false): void {
 	updateMallPrices();
 	stillsuit();
 	funguySpores();
-  if (globalOptions.ascending || AutumnAton.turnsForQuest() < myAdventures() + 10) {
-    AutumnAton.sendTo(autumnAtonZones);
-  }
+	if (globalOptions.ascending || AutumnAton.turnsForQuest() < myAdventures() + 10) {
+		AutumnAton.sendTo(autumnAtonZones);
+	}
 }

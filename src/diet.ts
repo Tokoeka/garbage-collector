@@ -91,7 +91,7 @@ type Note = PotionTier | null;
 
 function eatSafe(qty: number, item: Item) {
 	if (
-		have($item`Universal Seasoning`) && 
+		have($item`Universal Seasoning`) &&
 		$item`Universal Seasoning`.dailyusesleft > 0 &&
 		!get("universalSeasoningActive")
 	) {
@@ -222,12 +222,12 @@ export function nonOrganAdventures(): void {
 		} else break;
 	}
 
-  useIfUnused(
-    $item`fancy chocolate sculpture`,
-    get("_chocolateSculpturesUsed") > 0,
-    5 * MPA + 5000
-  );
-  useIfUnused($item`essential tofu`, "_essentialTofuUsed", 5 * MPA);
+	useIfUnused(
+		$item`fancy chocolate sculpture`,
+		get("_chocolateSculpturesUsed") > 0,
+		5 * MPA + 5000
+	);
+	useIfUnused($item`essential tofu`, "_essentialTofuUsed", 5 * MPA);
 
 	if (!get("_etchedHourglassUsed") && have($item`etched hourglass`)) {
 		use(1, $item`etched hourglass`);

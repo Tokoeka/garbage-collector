@@ -164,10 +164,10 @@ function initializeCrates(): void {
 		// if we have olfaction, that's our primary method for ensuring crates
 		if (
 			(crateStrategy() === "Sniff" &&
-        (property.getString("olfactedMonster") !== "crate" ||
-          !have($effect`On the Trail`) ||
-          property.getString("longConMonster") !== "crate" ||
-          get("_longConUsed") <= 0)) ||
+				(property.getString("olfactedMonster") !== "crate" ||
+					!have($effect`On the Trail`) ||
+					property.getString("longConMonster") !== "crate" ||
+					get("_longConUsed") <= 0)) ||
 			(crateStrategy() === "Orb" &&
 				((get("_gallapagosMonster") !== $monster`crate` &&
 					have($skill`Gallapagosian Mating Call`)) ||

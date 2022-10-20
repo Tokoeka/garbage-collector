@@ -4,7 +4,7 @@ import { HIGHLIGHT, maxBy, propertyManager, sober } from "../lib";
 import { guzzlrFactory } from "./guzzlr";
 import {
 	canAdventureOrUnlock,
-  canWander,
+	canWander,
 	defaultFactory,
 	DraggableFight,
 	unlock,
@@ -37,7 +37,7 @@ export function bestWander(
 			if (
 				!nameSkiplist.includes(wanderTarget.name) &&
 				!locationSkiplist.includes(wanderTarget.location) &&
-        canWander(wanderTarget.location, type)
+				canWander(wanderTarget.location, type)
 			) {
 				const wandererLocation: WandererLocation = possibleLocations.get(
 					wanderTarget.location
@@ -77,8 +77,8 @@ export function wanderWhere(
 
 	const badLocation =
 		!canAdventureOrUnlock(candidate.location) ||
-    !unlock(candidate.location, candidate.value) ||
-    !canWander(candidate.location, type)
+		!unlock(candidate.location, candidate.value) ||
+		!canWander(candidate.location, type)
 			? [candidate.location]
 			: [];
 
