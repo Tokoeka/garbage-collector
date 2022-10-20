@@ -50,7 +50,6 @@ import {
 	stashAmount,
 	takeCloset,
 	toInt,
-	toItem,
 	totalTurnsPlayed,
 	use,
 	useFamiliar,
@@ -124,7 +123,6 @@ import {
 	HIGHLIGHT,
 	kramcoGuaranteed,
 	latteActionSourceFinderConstraints,
-	logMessage,
 	ltbRun,
 	mapMonster,
 	maxBy,
@@ -838,10 +836,12 @@ const freeFightSources = [
 					.kill(),
 				() => {
 					restoreHp(myMaxhp());
-					if (have($skill`Ruthless Efficiency`))
+					if (have($skill`Ruthless Efficiency`)) {
 						ensureEffect($effect`Ruthlessly Efficient`);
-					if (have($skill`Mathematical Precision`))
+					}
+					if (have($skill`Mathematical Precision`)) {
 						ensureEffect($effect`Mathematically Precise`);
+					}
 					if (have($skill`Blood Bubble`)) ensureEffect($effect`Blood Bubble`);
 					retrieveItem($item`[glitch season reward name]`);
 					if (
@@ -2176,11 +2176,11 @@ export function freeFights(): void {
 }
 
 function setNepQuestChoicesAndPrepItems() {
-	const quest = get("_questPartyFairQuest");
+	//const quest = get("_questPartyFairQuest");
 
-	if (quest === "food") {
+	/* if (quest === "food") {
 		if (!questStep("_questPartyFair")) {
-			setChoice(1324, 2); // Check out the kitchen
+			setChoice(1324, 5); // Do not actually get the quest
 			setChoice(1326, 3); // Talk to the woman
 		} else if (get("choiceAdventure1324") !== 5) {
 			setChoice(1324, 5);
@@ -2205,7 +2205,8 @@ function setNepQuestChoicesAndPrepItems() {
 		}
 	} else {
 		setChoice(1324, 5); // Pick a fight
-	}
+	} */
+	setChoice(1324, 5); // Pick a fight - do not actually find out what food is wanted
 }
 
 function thesisReady(): boolean {
