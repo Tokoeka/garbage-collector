@@ -355,6 +355,7 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem(mallMin(complexMushroomWines)),
 		new MenuItem(mallMin(perfectDrinks)),
 		new MenuItem($item`green eggnog`),
+		new MenuItem($item`Doc Clock's thyme cocktail`, {priceOverride: 100000}),
 
 		// SPLEEN
 		new MenuItem($item`octolus oculus`),
