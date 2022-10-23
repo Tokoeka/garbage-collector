@@ -288,8 +288,8 @@ const stomachLiverCleaners = new Map([
 	[$item`synthetic dog hair pill`, [0, -1]],
 	[$item`cuppa Sobrie tea`, [0, -1]],
 	[$item`designer sweatpants`, [0, -1]],
-	[$item`Doc Clock's thyme cocktail`, [-2, 0]],
-	[$item`Mr. Burnsger`, [0, -2]],
+	//[$item`Doc Clock's thyme cocktail`, [-2, 0]],
+	//[$item`Mr. Burnsger`, [0, -2]],
 ]);
 
 export const mallMin: (items: Item[]) => Item = (items: Item[]) => maxBy(items, mallPrice, true);
@@ -358,7 +358,7 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem(mallMin(complexMushroomWines)),
 		new MenuItem(mallMin(perfectDrinks)),
 		new MenuItem($item`green eggnog`),
-		new MenuItem($item`Doc Clock's thyme cocktail`, {priceOverride: 150000}),
+		new MenuItem($item`Doc Clock's thyme cocktail`, {priceOverride: 100000}),
 
 		// SPLEEN
 		new MenuItem($item`octolus oculus`),
