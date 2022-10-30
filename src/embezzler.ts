@@ -74,15 +74,15 @@ class WitchessFightRunOptions {
   #location?: Location;
   #useAuto: boolean;
 
-  constructor(macro: Macro, location?: Location, useAuto = true) {
-    this.#macro = macro;
-    this.#location = location;
-    this.#useAuto = useAuto;
-  }
+	constructor(macro: Macro, location?: Location, useAuto = true) {
+		this.#macro = macro;
+		this.#location = location;
+		this.#useAuto = useAuto;
+	}
 
-  get macro(): Macro {
-    return this.#macro;
-  }
+	get macro(): Macro {
+		return this.#macro;
+	}
 
   get location(): Location {
     if (!this.#location) {
@@ -92,9 +92,9 @@ class WitchessFightRunOptions {
     }
   }
 
-  get useAuto(): boolean {
-    return this.#useAuto;
-  }
+	get useAuto(): boolean {
+		return this.#useAuto;
+	}
 }
 
 export class WitchessFight {
@@ -172,14 +172,14 @@ export class WitchessFight {
   location(location?: Location): Location {
     const suggestion = location;
 
-    if (
-      (this.draggable && !suggestion) ||
-      (this.draggable === "backup" && suggestion && suggestion.combatPercent < 100)
-    ) {
-      return wanderWhere(this.draggable);
-    }
-    return suggestion ?? $location`Noob Cave`;
-  }
+		if (
+			(this.draggable && !suggestion) ||
+			(this.draggable === "backup" && suggestion && suggestion.combatPercent < 100)
+		) {
+			return wanderWhere(this.draggable);
+		}
+		return suggestion ?? $location`Noob Cave`;
+	}
 }
 
 function checkFax(): boolean {
@@ -433,15 +433,6 @@ export const copySources = [
 
 export const wanderSources = [
   new WitchessFight(
-    "Lucky!",
-    () => canAdventure($location`Cobb's Knob Treasury`) && have($effect`Lucky!`),
-    () => (canAdventure($location`Cobb's Knob Treasury`) && have($effect`Lucky!`) ? 1 : 0),
-    (options: WitchessFightRunOptions) => {
-      const adventureFunction = options.useAuto ? adventureMacroAuto : adventureMacro;
-      adventureFunction($location`Cobb's Knob Treasury`, options.macro, options.macro);
-    }
-  ),
-  new WitchessFight(
     "Digitize",
     () =>
       get("_sourceTerminalDigitizeMonster") === copyTarget && Counter.get("Digitize Monster") <= 0,
@@ -545,10 +536,10 @@ export const conditionalSources = [
     (options: WitchessFightRunOptions) => {
       equipOrbIfDesired();
 
-      const crateIsSabered = get("_saberForceMonster") === $monster`crate`;
-      const notEnoughCratesSabered = get("_saberForceMonsterCount") < 2;
-      const weWantToSaberCrates = !crateIsSabered || notEnoughCratesSabered;
-      setChoice(1387, 2);
+			const crateIsSabered = get("_saberForceMonster") === $monster`crate`;
+			const notEnoughCratesSabered = get("_saberForceMonsterCount") < 2;
+			const weWantToSaberCrates = !crateIsSabered || notEnoughCratesSabered;
+			setChoice(1387, 2);
 
       const macro = Macro.if_(
         $monster`crate`,
@@ -589,10 +580,10 @@ export const conditionalSources = [
     (options: WitchessFightRunOptions) => {
       equipOrbIfDesired();
 
-      const crateIsSabered = get("_saberForceMonster") === $monster`crate`;
-      const notEnoughCratesSabered = get("_saberForceMonsterCount") < 2;
-      const weWantToSaberCrates = !crateIsSabered || notEnoughCratesSabered;
-      setChoice(1387, 2);
+			const crateIsSabered = get("_saberForceMonster") === $monster`crate`;
+			const notEnoughCratesSabered = get("_saberForceMonsterCount") < 2;
+			const weWantToSaberCrates = !crateIsSabered || notEnoughCratesSabered;
+			setChoice(1387, 2);
 
       const macro = Macro.if_(
         $monster`crate`,
@@ -807,24 +798,24 @@ function proceedWithOrb(): boolean {
     return false;
   }
 
-  return true;
+	return true;
 }
 
 function toasterGaze(): void {
-  const shore = $location`The Shore, Inc. Travel Agency`;
-  const pass = $item`Desert Bus pass`;
-  if (!canAdventure(shore) && !have(pass)) {
-    retrieveItem(pass);
-  }
-  try {
-    const store = visitUrl(toUrl(shore));
-    if (!store.includes("Check out the gift shop")) {
-      print("Unable to stare longingly at toast");
-    }
-    runChoice(4);
-  } catch (e) {
-    print(`We ran into an issue when gazing at toast: ${e}.`, "red");
-  } finally {
-    visitUrl("main.php");
-  }
+	const shore = $location`The Shore, Inc. Travel Agency`;
+	const pass = $item`Desert Bus pass`;
+	if (!canAdventure(shore) && !have(pass)) {
+		retrieveItem(pass);
+	}
+	try {
+		const store = visitUrl(toUrl(shore));
+		if (!store.includes("Check out the gift shop")) {
+			print("Unable to stare longingly at toast");
+		}
+		runChoice(4);
+	} catch (e) {
+		print(`We ran into an issue when gazing at toast: ${e}.`, "red");
+	} finally {
+		visitUrl("main.php");
+	}
 }

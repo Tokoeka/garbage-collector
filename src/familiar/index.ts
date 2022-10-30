@@ -5,12 +5,12 @@ import { freeFightFamiliar } from "./freeFightFamiliar";
 import { bestFairy } from "./itemFamiliar";
 
 export {
-  canOpenRedPresent,
-  timeToMeatify,
-  pocketProfessorLectures,
-  meatFamiliar,
-  setBestLeprechaunAsMeatFamiliar,
-  barfFamiliar,
-  freeFightFamiliar,
-  bestFairy,
+	canOpenRedPresent,
+	timeToMeatify,
+	pocketProfessorLectures,
+	meatFamiliar,
+	setBestLeprechaunAsMeatFamiliar,
+	barfFamiliar,
+	freeFightFamiliar,
+	bestFairy,
 };

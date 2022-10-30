@@ -6,11 +6,11 @@ import { HIGHLIGHT, safeInterrupt } from "../lib";
  * Runs extra logic before executing all tasks.
  */
 export class BaseGarboEngine extends Engine {
-  // Check for interrupt before executing a task
-  execute(task: Task): void {
-    safeInterrupt();
-    super.execute(task);
-  }
+	// Check for interrupt before executing a task
+	execute(task: Task): void {
+		safeInterrupt();
+		super.execute(task);
+	}
 }
 
 /**
@@ -18,35 +18,38 @@ export class BaseGarboEngine extends Engine {
  * Treats soft limits as tasks that should be skipped, with a default max of one attempt for any task.
  */
 export class SafeGarboEngine extends BaseGarboEngine {
-  // Garbo treats soft limits as completed, and continues on.
-  markAttempt(task: Task<never>): void {
-    super.markAttempt(task);
+	// Garbo treats soft limits as completed, and continues on.
+	markAttempt(task: Task<never>): void {
+		super.markAttempt(task);
 
-    if (task.completed()) return;
-    const limit = task.limit?.soft || 1;
-    if (this.attempts[task.name] >= limit) {
-      task.completed = () => true;
-      print(`Task ${task.name} did not complete within ${limit} attempts. Skipping.`, HIGHLIGHT);
-    }
-  }
+		if (task.completed()) return;
+		const limit = task.limit?.soft || 1;
+		if (this.attempts[task.name] >= limit) {
+			task.completed = () => true;
+			print(
+				`Task ${task.name} did not complete within ${limit} attempts. Skipping.`,
+				HIGHLIGHT
+			);
+		}
+	}
 }
 
 export function runSafeGarboTasks(tasks: Task[]): void {
-  const engine = new SafeGarboEngine(tasks);
+	const engine = new SafeGarboEngine(tasks);
 
-  try {
-    engine.run();
-  } finally {
-    engine.destruct();
-  }
+	try {
+		engine.run();
+	} finally {
+		engine.destruct();
+	}
 }
 
 export function runGarboTasks(tasks: Task[]): void {
-  const engine = new BaseGarboEngine(tasks);
+	const engine = new BaseGarboEngine(tasks);
 
-  try {
-    engine.run();
-  } finally {
-    engine.destruct();
-  }
+	try {
+		engine.run();
+	} finally {
+		engine.destruct();
+	}
 }

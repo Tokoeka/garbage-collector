@@ -7,15 +7,15 @@ import { runSafeGarboTasks } from "./tasks/engine";
 import { AscendingTasks } from "./tasks/ascending";
 
 export function dailySetup(): void {
-  runSafeGarboTasks([
-    ...DailyFamiliarTasks,
-    ...DailyItemTasks,
-    ...DailyVolcanoTasks,
-    ...DailyTasks,
-    ...AscendingTasks,
-  ]);
+	runSafeGarboTasks([
+		...DailyFamiliarTasks,
+		...DailyItemTasks,
+		...DailyVolcanoTasks,
+		...DailyTasks,
+		...AscendingTasks,
+	]);
 }
 
 export function postFreeFightDailySetup(): void {
-  runSafeGarboTasks(PostFreeFightTasks);
+	runSafeGarboTasks(PostFreeFightTasks);
 }
