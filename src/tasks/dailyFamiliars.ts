@@ -4,6 +4,7 @@ import {
 	equip,
 	familiarEquippedEquipment,
 	hippyStoneBroken,
+	itemAmount,
 	myPrimestat,
 	use,
 	useFamiliar,

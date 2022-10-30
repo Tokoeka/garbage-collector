@@ -234,7 +234,7 @@ export function meatOutfit(embezzlerUp: boolean, requirement?: Requirement, sea?
 	if (embezzlerUp) {
 		const currentWeapon = 25 * findLeprechaunMultiplier(meatFamiliar());
 		const embezzlers = globalOptions.ascending
-			? Math.min(20, embezzlerCount() || digitizedMonstersRemaining())
+			? Math.min(20, digitizedMonstersRemaining())
 			: 20;
 
 		const addedValueOfFullSword =
