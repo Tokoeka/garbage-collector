@@ -1,4 +1,16 @@
-import { equip, mallPrice, useFamiliar, visitUrl } from "kolmafia";
+import {
+  canEquip,
+  equip,
+  Item,
+  itemType,
+  mallPrice,
+  myFury,
+  retrieveItem,
+  useFamiliar,
+  useSkill,
+  visitUrl,
+  weaponHands,
+} from "kolmafia";
 import {
   $effect,
   $item,
@@ -19,9 +31,9 @@ import {
   tryFindFreeRun,
 } from "libram";
 import { freeFightFamiliar } from "./familiar";
-import { globalOptions, latteActionSourceFinderConstraints, ltbRun, setChoice } from "./lib";
+import { globalOptions, latteActionSourceFinderConstraints, ltbRun, maxBy, setChoice } from "./lib";
 import { Macro } from "./combat";
-import { witchessPieceMacro } from "./embezzler";
+import { copyTargetMacro } from "./embezzler";
 import { acquire } from "./acquire";
 
 export function expectedGregs(): number[] {
@@ -69,8 +81,10 @@ export function doingExtrovermectin(): boolean {
 export function crateStrategy(): "Sniff" | "Saber" | "Orb" | null {
   if (!doingExtrovermectin()) return null;
   if (
-    have($skill`Transcendent Olfaction`) &&
-    (property.getString("olfactedMonster") === "crate" || get("_olfactionsUsed") < 2)
+    (have($skill`Transcendent Olfaction`) &&
+      (property.getString("olfactedMonster") === "crate" || get("_olfactionsUsed") < 2)) ||
+    (have($skill`Long Con`) &&
+      (get("longConMonster") === $monster`crate` || get("_longConUsed") < 4))
   ) {
     return "Sniff";
   }
@@ -97,7 +111,7 @@ export function saberCrateIfSafe(): void {
   do {
     const run = tryFindFreeRun() ?? ltbRun();
 
-    useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar());
+    useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false }));
     run.constraints.preparation?.();
     new Requirement([], {
       forceEquip: $items`Fourth of May Cosplay Saber`,
@@ -160,6 +174,7 @@ function initializeCrates(): void {
 
       // Sniff the crate in as many ways as humanly possible
       const macro = Macro.trySkill($skill`Transcendent Olfaction`)
+        .trySkill($skill`Long Con`)
         .trySkill($skill`Offer Latte to Opponent`)
         .externalIf(
           get("_gallapagosMonster") !== $monster`crate` && have($skill`Gallapagosian Mating Call`),
@@ -170,7 +185,7 @@ function initializeCrates(): void {
 
       // equip latte and saber for lattesniff and saberfriends, if we want to
       // Crank up ML to make sure the crate survives several rounds; we may have some passive damage
-      useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar());
+      useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false }));
       run.constraints.preparation?.();
       new Requirement(["100 Monster Level"], {
         forceEquip: $items`latte lovers member's mug, Fourth of May Cosplay Saber`.filter((item) =>
@@ -208,19 +223,49 @@ function initializeDireWarren(): void {
   if (options.some((option) => banishedMonsters.get(option) === $monster`fluffy bunny`)) {
     return;
   }
-  if (banishedMonsters.get($skill`Furious Wallop`) === $monster`fluffy bunny`) return;
+  if (banishedMonsters.get($skill`Batter Up!`) === $monster`fluffy bunny`) return;
 
   if (!have($item`miniature crystal ball`)) {
     options.push(...$items`Louder Than Bomb, tennis ball`);
   }
-  const banish = options.sort((a, b) => mallPrice(a) - mallPrice(b))[0];
-  acquire(1, banish, 50000, true);
-  do {
-    adventureMacro(
-      $location`The Dire Warren`,
-      Macro.if_($monster`fluffy bunny`, Macro.item(banish)).step(witchessPieceMacro())
+  const canBat = myFury() >= 5 && have($skill`Batter Up!`);
+  if (canBat) {
+    if (have($skill`Iron Palm Technique`) && !have($effect`Iron Palms`)) {
+      useSkill($skill`Iron Palm Technique`);
+    }
+    const availableClub =
+      Item.all().find(
+        (i) =>
+          have(i) &&
+          canEquip(i) &&
+          weaponHands(i) === 2 &&
+          (itemType(i) === "club" || (have($effect`Iron Palms`) && itemType(i) === "sword"))
+      ) ?? $item`amok putter`;
+    retrieveItem(availableClub);
+    new Requirement(["100 Monster Level"], {
+      preventEquip: $items`carnivorous potted plant`,
+      forceEquip: [availableClub],
+    }).maximize();
+
+    do {
+      adventureMacro(
+        $location`The Dire Warren`,
+        Macro.if_($monster`fluffy bunny`, Macro.skill($skill`Batter Up!`)).step(copyTargetMacro())
+      );
+    } while (
+      "fluffy bunny" !== get("lastEncounter") &&
+      banishedMonsters.get($skill`Batter Up!`) !== $monster`fluffy bunny`
     );
-  } while ("fluffy bunny" !== get("lastEncounter"));
+  } else {
+    const banish = maxBy(options, mallPrice, true);
+    acquire(1, banish, 50000, true);
+    do {
+      adventureMacro(
+        $location`The Dire Warren`,
+        Macro.if_($monster`fluffy bunny`, Macro.item(banish)).step(copyTargetMacro())
+      );
+    } while ("fluffy bunny" !== get("lastEncounter"));
+  }
 }
 
 export function initializeExtrovermectinZones(): void {

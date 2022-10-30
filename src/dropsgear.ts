@@ -1,4 +1,5 @@
 import {
+  equippedItem,
   fullnessLimit,
   getWorkshed,
   haveEffect,
@@ -20,16 +21,19 @@ import {
   $location,
   $skill,
   $slot,
+  $slots,
   clamp,
   DaylightShavings,
   findFairyMultiplier,
   findLeprechaunMultiplier,
   get,
+  getAverageAdventures,
   getFoldGroup,
   getModifier,
   have,
   JuneCleaver,
   Modifiers,
+  sum,
   sumNumbers,
 } from "libram";
 import {
@@ -37,7 +41,7 @@ import {
   FamiliarRider,
   pickRider,
 } from "libram/dist/resources/2010/CrownOfThrones";
-import { estimatedTurns } from "./embezzler";
+import { mallMin } from "./diet";
 import { meatFamiliar } from "./familiar";
 import {
   baseMeat,
@@ -49,6 +53,7 @@ import {
   valueJuneCleaverOption,
 } from "./lib";
 import { garboAverageValue, garboValue } from "./session";
+import { estimatedTurns } from "./turns";
 
 /**
  * Determine the meat value of the modifier bonuses a particular bjorned familiar grants
@@ -135,14 +140,34 @@ function pantsgiving() {
   return new Map<Item, number>([[$item`Pantsgiving`, pantsgivingBonus]]);
 }
 
-const bestAdventuresFromPants =
-  Item.all()
-    .filter(
-      (item) =>
-        toSlot(item) === $slot`pants` && have(item) && numericModifier(item, "Adventures") > 0
-    )
-    .map((pants) => numericModifier(pants, "Adventures"))
-    .sort((a, b) => b - a)[0] || 0;
+function sweatpants(equipMode: BonusEquipMode) {
+  if (!have($item`designer sweatpants`) || equipMode === "embezzler") return new Map();
+
+  const needSweat =
+    (!globalOptions.ascending && get("sweat", 0) < 75) ||
+    get("sweat", 0) < 25 * (3 - get("_sweatOutSomeBoozeUsed", 0));
+
+  if (!needSweat) return new Map();
+
+  const VOA = get("valueOfAdventure");
+
+  const bestPerfectDrink = mallMin(
+    $items`perfect cosmopolitan, perfect negroni, perfect dark and stormy, perfect mimosa, perfect old-fashioned, perfect paloma`
+  );
+  const perfectDrinkValuePerDrunk =
+    ((getAverageAdventures(bestPerfectDrink) + 3) * VOA - mallPrice(bestPerfectDrink)) / 3;
+  const splendidMartiniValuePerDrunk = (getAverageAdventures($item`splendid martini`) + 2) * VOA;
+
+  const bonus = (Math.max(perfectDrinkValuePerDrunk, splendidMartiniValuePerDrunk) * 2) / 25;
+  return new Map([[$item`designer sweatpants`, bonus]]);
+}
+
+const alternativePants = Item.all()
+  .filter(
+    (item) => toSlot(item) === $slot`pants` && have(item) && numericModifier(item, "Adventures") > 0
+  )
+  .map((pants) => numericModifier(pants, "Adventures"));
+const bestAdventuresFromPants = Math.max(0, ...alternativePants);
 const haveSomeCheese = getFoldGroup($item`stinky cheese diaper`).some((item) => have(item));
 function cheeses(embezzlerUp: boolean) {
   return haveSomeCheese &&
@@ -207,7 +232,7 @@ function mrCheengsSpectacles() {
 
   // Items drop every 4 turns
   // TODO: Possible drops are speculated to be any pvpable potion that will never be banned by standard
-  return new Map<Item, number>([[$item`Mr. Cheeng's spectacles`, 400]]);
+  return new Map<Item, number>([[$item`Mr. Cheeng's spectacles`, 220]]);
 }
 
 function mrScreegesSpectacles() {
@@ -309,18 +334,27 @@ export function magnifyingGlass(): Map<Item, number> {
   ]);
 }
 
-export function bonusGear(equipMode: BonusEquipMode): Map<Item, number> {
+export function bonusGear(
+  equipMode: BonusEquipMode,
+  valueCircumstantialBonus = true
+): Map<Item, number> {
   return new Map<Item, number>([
     ...cheeses(equipMode === "embezzler"),
-    ...(!["embezzler", "dmt"].includes(equipMode) ? pantsgiving() : []),
-    ...shavingBonus(),
     ...bonusAccessories(equipMode),
     ...pantogramPants(),
     ...bagOfManyConfections(),
-    ...snowSuit(equipMode),
-    ...mayflowerBouquet(equipMode),
-    ...(equipMode === "barf" ? magnifyingGlass() : []),
-    ...juneCleaver(equipMode),
+    ...stickers(equipMode),
+    ...(valueCircumstantialBonus
+      ? new Map<Item, number>([
+          ...(!["embezzler", "dmt"].includes(equipMode) ? pantsgiving() : []),
+          ...sweatpants(equipMode),
+          ...shavingBonus(),
+          ...snowSuit(equipMode),
+          ...mayflowerBouquet(equipMode),
+          ...(equipMode === "barf" ? magnifyingGlass() : []),
+          ...juneCleaver(equipMode),
+        ])
+      : []),
   ]);
 }
 
@@ -419,14 +453,23 @@ function juneCleaver(equipMode: BonusEquipMode): Map<Item, number> {
   }
   if (!juneCleaverEV) {
     juneCleaverEV =
-      JuneCleaver.choices.reduce(
-        (total, choice) =>
-          total +
-          valueJuneCleaverOption(juneCleaverChoiceValues[choice][bestJuneCleaverOption(choice)]),
-        0
+      sum([...JuneCleaver.choices], (choice) =>
+        valueJuneCleaverOption(juneCleaverChoiceValues[choice][bestJuneCleaverOption(choice)])
       ) / JuneCleaver.choices.length;
   }
 
   const interval = equipMode === "embezzler" ? 30 : JuneCleaver.getInterval();
   return new Map<Item, number>([[$item`June cleaver`, juneCleaverEV / interval]]);
+}
+
+function stickers(equipMode: BonusEquipMode): Map<Item, number> {
+  if (equipMode === "embezzler") return new Map();
+
+  const cost = sumNumbers(
+    $slots`sticker1, sticker2, sticker3`.map((s) => mallPrice(equippedItem(s)) / 20)
+  );
+  return new Map([
+    [$item`scratch 'n' sniff sword`, -1 * cost],
+    [$item`scratch 'n' sniff crossbow`, -1 * cost],
+  ]);
 }
