@@ -3,7 +3,6 @@ import {
   chatPrivate,
   cliExecute,
   getClanLounge,
-  getCounters,
   haveEquipped,
   itemAmount,
   Location,
@@ -17,7 +16,6 @@ import {
   toMonster,
   toUrl,
   use,
-  userConfirm,
   visitUrl,
   wait,
 } from "kolmafia";
@@ -42,6 +40,7 @@ import {
   property,
   Requirement,
   set,
+  SourceTerminal,
   sum,
 } from "libram";
 import { Macro, shouldRedigitize, withMacro } from "./combat";
@@ -189,7 +188,7 @@ function checkFax(): boolean {
   return false;
 }
 
-function faxwitchessPiece(): void {
+function faxCopyTarget(): void {
   if (!get("_photocopyUsed")) {
     if (checkFax()) return;
     chatPrivate("cheesefax", copyTarget.name);
@@ -197,7 +196,7 @@ function faxwitchessPiece(): void {
       wait(10);
       if (checkFax()) return;
     }
-    throw new Error(`Failed to acquire photocopied ${witchessPiece.name}.`);
+    throw new Error(`Failed to acquire photocopied ${copyTarget.name}.`);
   }
 }
 
@@ -278,7 +277,7 @@ export const chainStarters = [
         ? 1
         : 0,
     (options: WitchessFightRunOptions) => {
-      faxEmbezzler();
+      faxCopyTarget();
       withMacro(options.macro, () => use($item`photocopied monster`), options.useAuto);
     }
   ),
@@ -701,11 +700,11 @@ export const fakeSources = [
     () => false,
     () =>
       have($item`envyfish egg`) &&
-      get("envyfishMonster") === witchessPiece &&
+      get("envyfishMonster") === copyTarget &&
       !get("_envyfishEggUsed")
         ? 1
         : 0,
-    (options: witchessPieceFightRunOptions) => {
+    (options: WitchessFightRunOptions) => {
       withMacro(options.macro, () => use($item`envyfish egg`));
     }
   ),
@@ -713,13 +712,10 @@ export const fakeSources = [
     "Professor WeightChain",
     () => false,
     () =>
-      have($item`screencapped monster`) &&
-      property.getString("screencappedMonster") === "Knob Goblin witchessPiece",
-    () =>
       property.getString("screencappedMonster") === "Knob Goblin witchessPiece"
         ? itemAmount($item`screencapped monster`)
         : 0,
-    (options: witchessPieceFightRunOptions) => {
+    (options: WitchessFightRunOptions) => {
       withMacro(options.macro, () => use($item`screencapped monster`));
     }
   ),
@@ -782,7 +778,7 @@ function proceedWithOrb(): boolean {
     $location`Noob Cave`.combatQueue
       .split(";")
       .map((monster) => toMonster(monster))
-      .includes(witchessPiece)
+      .includes(copyTarget)
   ) {
     return true;
   }

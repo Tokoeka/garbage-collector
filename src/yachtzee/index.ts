@@ -26,7 +26,6 @@ import {
 	uneffect,
 } from "libram";
 import { runDiet } from "../diet";
-import { copyTargetCount } from "../embezzler";
 import { doSausage, freeRunFights } from "../fights";
 import { baseMeat, globalOptions, realmAvailable, safeRestore } from "../lib";
 import { meatMood } from "../mood";

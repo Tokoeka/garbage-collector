@@ -77,7 +77,6 @@ import synthesize from "./synthesis";
 import { estimatedTurns } from "./turns";
 
 const MPA = get("valueOfAdventure");
-const VPE = get("garbo_valueOfEmbezzler", 10500);
 print(`Using adventure value ${MPA}.`, HIGHLIGHT);
 
 const Mayo = MayoClinic.Mayo;
@@ -271,8 +270,8 @@ const stomachLiverCleaners = new Map([
 	[$item`synthetic dog hair pill`, [0, -1]],
 	[$item`cuppa Sobrie tea`, [0, -1]],
 	[$item`designer sweatpants`, [0, -1]],
-	//[$item`Doc Clock's thyme cocktail`, [-2, 0]],
-	//[$item`Mr. Burnsger`, [0, -2]],
+	// [$item`Doc Clock's thyme cocktail`, [-2, 0]],
+	// [$item`Mr. Burnsger`, [0, -2]],
 ]);
 
 export const mallMin: (items: Item[]) => Item = (items: Item[]) => maxBy(items, mallPrice, true);

@@ -44,7 +44,7 @@ import {
 	sinceKolmafiaRevision,
 } from "libram";
 import { nonOrganAdventures, runDiet } from "./diet";
-import { dailyFights, freeFights, printEmbezzlerLog } from "./fights";
+import { dailyFights, freeFights } from "./fights";
 import {
 	bestJuneCleaverOption,
 	checkGithubVersion,
@@ -150,7 +150,7 @@ export function main(argString = ""): void {
 			throw new Error("User interrupt requested. Stopping Garbage Collector.");
 		}
 	}
-	
+
 	globalOptions.noBarf = true;
 
   const args = argString.split(" ");

@@ -110,19 +110,15 @@ import {
   burnLibrams,
   dogOrHolidayWanderer,
   embezzlerLog,
-  expectedEmbezzlerProfit,
   globalOptions,
-  HIGHLIGHT,
   kramcoGuaranteed,
   latteActionSourceFinderConstraints,
-  logMessage,
   ltbRun,
   mapMonster,
   maxBy,
   propertyManager,
   questStep,
   realmAvailable,
-  resetDailyPreference,
   romanticMonsterImpossible,
   safeRestore,
   setChoice,
@@ -2123,7 +2119,7 @@ export function freeFights(): void {
 }
 
 function setNepQuestChoicesAndPrepItems() {
-	//const quest = get("_questPartyFairQuest");
+	// const quest = get("_questPartyFairQuest");
 
 	/* if (quest === "food") {
 		if (!questStep("_questPartyFair")) {
