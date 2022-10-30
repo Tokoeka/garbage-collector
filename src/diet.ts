@@ -1,63 +1,63 @@
 import {
-  autosellPrice,
-  availableAmount,
-  buy,
-  chew,
-  cliExecute,
-  drink,
-  eat,
-  Element,
-  elementalResistance,
-  fullnessLimit,
-  getClanLounge,
-  getProperty,
-  haveEffect,
-  inebrietyLimit,
-  Item,
-  itemAmount,
-  itemType,
-  logprint,
-  mallPrice,
-  myClass,
-  myFamiliar,
-  myFullness,
-  myInebriety,
-  myLevel,
-  myMaxhp,
-  mySpleenUse,
-  print,
-  retrievePrice,
-  sellsItem,
-  setProperty,
-  spleenLimit,
-  toItem,
-  turnsPerCast,
-  use,
-  useFamiliar,
-  useSkill,
+	autosellPrice,
+	availableAmount,
+	buy,
+	chew,
+	cliExecute,
+	drink,
+	eat,
+	Element,
+	elementalResistance,
+	fullnessLimit,
+	getClanLounge,
+	getProperty,
+	haveEffect,
+	inebrietyLimit,
+	Item,
+	itemAmount,
+	itemType,
+	logprint,
+	mallPrice,
+	myClass,
+	myFamiliar,
+	myFullness,
+	myInebriety,
+	myLevel,
+	myMaxhp,
+	mySpleenUse,
+	print,
+	retrievePrice,
+	sellsItem,
+	setProperty,
+	spleenLimit,
+	toItem,
+	turnsPerCast,
+	use,
+	useFamiliar,
+	useSkill,
 } from "kolmafia";
 import {
-  $class,
-  $classes,
-  $coinmaster,
-  $effect,
-  $element,
-  $familiar,
-  $item,
-  $items,
-  $skill,
-  clamp,
-  Diet,
-  get,
-  getAverageAdventures,
-  getModifier,
-  getRemainingLiver,
-  have,
-  maximizeCached,
-  MayoClinic,
-  MenuItem,
-  set,
-  sum,
+	$class,
+	$classes,
+	$coinmaster,
+	$effect,
+	$element,
+	$familiar,
+	$item,
+	$items,
+	$skill,
+	clamp,
+	Diet,
+	get,
+	getAverageAdventures,
+	getModifier,
+	getRemainingLiver,
+	have,
+	maximizeCached,
+	MayoClinic,
+	MenuItem,
+	set,
+	sum,
 } from "libram";
 import { acquire, priceCaps } from "./acquire";
 import { withVIPClan } from "./clan";
@@ -166,15 +166,15 @@ function useIfUnused(item: Item, prop: string | boolean, maxPrice: number) {
 export function nonOrganAdventures(): void {
 	useIfUnused($item`fancy chocolate car`, get("_chocolatesUsed") !== 0, 2 * MPA);
 
-  while (get("_loveChocolatesUsed") < 3) {
-    const price = have($item`LOV Extraterrestrial Chocolate`) ? 15000 : 20000;
-    const value = clamp(3 - get("_loveChocolatesUsed"), 0, 3) * get("valueOfAdventure");
-    if (value < price) break;
-    if (!have($item`LOV Extraterrestrial Chocolate`)) {
-      break;
-    }
-    use($item`LOV Extraterrestrial Chocolate`);
-  }
+	while (get("_loveChocolatesUsed") < 3) {
+		const price = have($item`LOV Extraterrestrial Chocolate`) ? 15000 : 20000;
+		const value = clamp(3 - get("_loveChocolatesUsed"), 0, 3) * get("valueOfAdventure");
+		if (value < price) break;
+		if (!have($item`LOV Extraterrestrial Chocolate`)) {
+			break;
+		}
+		use($item`LOV Extraterrestrial Chocolate`);
+	}
 
 	const chocos = new Map([
 		[$class`Seal Clubber`, $item`chocolate seal-clubbing club`],
@@ -340,7 +340,7 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem(mallMin(complexMushroomWines)),
 		new MenuItem(mallMin(perfectDrinks)),
 		new MenuItem($item`green eggnog`),
-		new MenuItem($item`Doc Clock's thyme cocktail`, {priceOverride: 100000}),
+		new MenuItem($item`Doc Clock's thyme cocktail`, { priceOverride: 100000 }),
 
 		// SPLEEN
 		new MenuItem($item`octolus oculus`),
@@ -501,8 +501,8 @@ export function potionMenu(
 			  )
 			: [];
 
-  return [
-    ...baseMenu,
+	return [
+		...baseMenu,
 
 		// FOOD POTIONS
 		...potion($item`jumping horseradish`),
@@ -580,23 +580,27 @@ interface DietPlanner {
 	(menu: MenuItem<Note>[]): Diet<Note>;
 }
 function balanceMenu(baseMenu: MenuItem<Note>[], dietPlanner: DietPlanner): MenuItem<Note>[] {
-  const baseEmbezzlers = 0;
-  function rebalance(
-    menu: MenuItem<Note>[],
-    iterations: number,
-    embezzlers: number,
-    adventures: number
-  ): MenuItem<Note>[] {
-    const fullMenu = potionMenu(menu, baseEmbezzlers + embezzlers, estimatedTurns() + adventures);
-    if (iterations <= 0) {
-      return fullMenu;
-    } else {
-      const balancingDiet = dietPlanner(fullMenu);
-      return rebalance(menu, iterations - 1, 0, balancingDiet.expectedAdventures());
-    }
-  }
-  const baseDiet = dietPlanner(baseMenu);
-  return rebalance(baseMenu, 5, 0, baseDiet.expectedAdventures());
+	const baseEmbezzlers = 0;
+	function rebalance(
+		menu: MenuItem<Note>[],
+		iterations: number,
+		embezzlers: number,
+		adventures: number
+	): MenuItem<Note>[] {
+		const fullMenu = potionMenu(
+			menu,
+			baseEmbezzlers + embezzlers,
+			estimatedTurns() + adventures
+		);
+		if (iterations <= 0) {
+			return fullMenu;
+		} else {
+			const balancingDiet = dietPlanner(fullMenu);
+			return rebalance(menu, iterations - 1, 0, balancingDiet.expectedAdventures());
+		}
+	}
+	const baseDiet = dietPlanner(baseMenu);
+	return rebalance(baseMenu, 5, 0, baseDiet.expectedAdventures());
 }
 
 export function computeDiet(): {

@@ -143,9 +143,9 @@ export class StashManager {
 		if (visitUrl("fight.php").includes("You're fighting")) {
 			print("In fight, trying to get away to return items to stash...", HIGHLIGHT);
 			Macro.if_(
-        $monsters`Knob Goblin Embezzler, menacing thug, Mob Penguin hitman, hunting seal, turtle trapper, evil spaghetti cult assassin, béarnaise zombie, flock of seagulls, mariachi bandolero, Argarggagarg the Dire Hellseal, Safari Jack\, Small-Game Hunter, Yakisoba the Executioner, Heimandatz\, Nacho Golem, Jocko Homo, The Mariachi With No Name`,
-        Macro.attack().repeat()
-      )
+				$monsters`Knob Goblin Embezzler, menacing thug, Mob Penguin hitman, hunting seal, turtle trapper, evil spaghetti cult assassin, béarnaise zombie, flock of seagulls, mariachi bandolero, Argarggagarg the Dire Hellseal, Safari Jack\, Small-Game Hunter, Yakisoba the Executioner, Heimandatz\, Nacho Golem, Jocko Homo, The Mariachi With No Name`,
+				Macro.attack().repeat()
+			)
 				.tryItem(...$items`Louder Than Bomb, divine champagne popper`)
 				.step("runaway")
 				.submit();

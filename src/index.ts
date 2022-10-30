@@ -134,11 +134,11 @@ export function main(argString = ""): void {
 		);
 	}
 
-  if (get("valueOfAdventure") <= 8000) {
-    throw `Your valueOfAdventure is set to ${get(
-      "valueOfAdventure"
-    )}, which is too low for garboweening to be worthwhile. If you forgot to set it, use "set valueOfAdventure = XXXX" to set it to your marginal turn meat value.`;
-  }
+	if (get("valueOfAdventure") <= 8000) {
+		throw `Your valueOfAdventure is set to ${get(
+			"valueOfAdventure"
+		)}, which is too low for garboweening to be worthwhile. If you forgot to set it, use "set valueOfAdventure = XXXX" to set it to your marginal turn meat value.`;
+	}
 	if (get("valueOfAdventure") >= 20000) {
 		const proceedRegardless = userConfirmDialog(
 			`Your valueOfAdventure is set to ${get(
@@ -153,35 +153,35 @@ export function main(argString = ""): void {
 
 	globalOptions.noBarf = true;
 
-  const args = argString.split(" ");
-  for (const arg of args) {
-    if (arg.match(/\d+/)) {
-      const adventureCount = parseInt(arg, 10);
-      if (adventureCount >= 0) {
-        globalOptions.stopTurncount = myTurncount() + adventureCount;
-      } else {
-        globalOptions.saveTurns = -adventureCount;
-      }
-    } else if (arg.match(/ascend/)) {
-      globalOptions.ascending = true;
-    } else if (arg.match(/help/i)) {
-      printHelpMenu();
-      return;
-    } else if (arg.match(/simdiet/)) {
-      globalOptions.simulateDiet = true;
-    } else if (arg.match(/nodiet/)) {
-      globalOptions.noDiet = true;
-    } else if (arg.match(/yachtzeechain/)) {
-      globalOptions.yachtzeeChain = true;
-    } else if (arg.match(/quick/)) {
-      globalOptions.quickMode = true;
-    } else if (arg.match(/version/i)) {
-      return;
-    } else if (arg) {
-      print(`Invalid argument ${arg} passed. Run garbo help to see valid arguments.`, "red");
-      return;
-    }
-  }
+	const args = argString.split(" ");
+	for (const arg of args) {
+		if (arg.match(/\d+/)) {
+			const adventureCount = parseInt(arg, 10);
+			if (adventureCount >= 0) {
+				globalOptions.stopTurncount = myTurncount() + adventureCount;
+			} else {
+				globalOptions.saveTurns = -adventureCount;
+			}
+		} else if (arg.match(/ascend/)) {
+			globalOptions.ascending = true;
+		} else if (arg.match(/help/i)) {
+			printHelpMenu();
+			return;
+		} else if (arg.match(/simdiet/)) {
+			globalOptions.simulateDiet = true;
+		} else if (arg.match(/nodiet/)) {
+			globalOptions.noDiet = true;
+		} else if (arg.match(/yachtzeechain/)) {
+			globalOptions.yachtzeeChain = true;
+		} else if (arg.match(/quick/)) {
+			globalOptions.quickMode = true;
+		} else if (arg.match(/version/i)) {
+			return;
+		} else if (arg) {
+			print(`Invalid argument ${arg} passed. Run garbo help to see valid arguments.`, "red");
+			return;
+		}
+	}
 
 	if (stashItems.length > 0) {
 		if (
@@ -457,31 +457,34 @@ export function main(argString = ""): void {
 							postCombatActions();
 						}
 
-            // buy one-day tickets with FunFunds if user desires
-            if (
-              get("garbo_buyPass", false) &&
-              availableAmount($item`FunFunds™`) >= 20 &&
-              !have($item`one-day ticket to Dinseylandfill`)
-            ) {
-              print("Buying a one-day ticket", HIGHLIGHT);
-              buy(
-                $coinmaster`The Dinsey Company Store`,
-                1,
-                $item`one-day ticket to Dinseylandfill`
-              );
-            }
-          } finally {
-            setAutoAttack(0);
-          }
-        } else setAutoAttack(0);
-      });
-    });
-  } finally {
-    propertyManager.resetAll();
-    set("garboStashItems", stashItems.map((item) => toInt(item).toFixed(0)).join(","));
-    visitUrl(`account.php?actions[]=flag_aabosses&flag_aabosses=${aaBossFlag}&action=Update`, true);
-    if (startingGarden && have(startingGarden)) use(startingGarden);
-    printGarboSession();
-    printLog(HIGHLIGHT);
-  }
+						// buy one-day tickets with FunFunds if user desires
+						if (
+							get("garbo_buyPass", false) &&
+							availableAmount($item`FunFunds™`) >= 20 &&
+							!have($item`one-day ticket to Dinseylandfill`)
+						) {
+							print("Buying a one-day ticket", HIGHLIGHT);
+							buy(
+								$coinmaster`The Dinsey Company Store`,
+								1,
+								$item`one-day ticket to Dinseylandfill`
+							);
+						}
+					} finally {
+						setAutoAttack(0);
+					}
+				} else setAutoAttack(0);
+			});
+		});
+	} finally {
+		propertyManager.resetAll();
+		set("garboStashItems", stashItems.map((item) => toInt(item).toFixed(0)).join(","));
+		visitUrl(
+			`account.php?actions[]=flag_aabosses&flag_aabosses=${aaBossFlag}&action=Update`,
+			true
+		);
+		if (startingGarden && have(startingGarden)) use(startingGarden);
+		printGarboSession();
+		printLog(HIGHLIGHT);
+	}
 }

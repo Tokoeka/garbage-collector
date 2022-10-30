@@ -256,25 +256,27 @@ function initializeDireWarren(): void {
 			forceEquip: [availableClub],
 		}).maximize();
 
-    do {
-      adventureMacro(
-        $location`The Dire Warren`,
-        Macro.if_($monster`fluffy bunny`, Macro.skill($skill`Batter Up!`)).step(copyTargetMacro())
-      );
-    } while (
-      "fluffy bunny" !== get("lastEncounter") &&
-      banishedMonsters.get($skill`Batter Up!`) !== $monster`fluffy bunny`
-    );
-  } else {
-    const banish = maxBy(options, mallPrice, true);
-    acquire(1, banish, 50000, true);
-    do {
-      adventureMacro(
-        $location`The Dire Warren`,
-        Macro.if_($monster`fluffy bunny`, Macro.item(banish)).step(copyTargetMacro())
-      );
-    } while ("fluffy bunny" !== get("lastEncounter"));
-  }
+		do {
+			adventureMacro(
+				$location`The Dire Warren`,
+				Macro.if_($monster`fluffy bunny`, Macro.skill($skill`Batter Up!`)).step(
+					copyTargetMacro()
+				)
+			);
+		} while (
+			"fluffy bunny" !== get("lastEncounter") &&
+			banishedMonsters.get($skill`Batter Up!`) !== $monster`fluffy bunny`
+		);
+	} else {
+		const banish = maxBy(options, mallPrice, true);
+		acquire(1, banish, 50000, true);
+		do {
+			adventureMacro(
+				$location`The Dire Warren`,
+				Macro.if_($monster`fluffy bunny`, Macro.item(banish)).step(copyTargetMacro())
+			);
+		} while ("fluffy bunny" !== get("lastEncounter"));
+	}
 }
 
 export function initializeExtrovermectinZones(): void {

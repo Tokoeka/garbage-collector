@@ -1,12 +1,12 @@
 import { Task } from "grimoire-kolmafia";
 import {
-  cliExecute,
-  equip,
-  familiarEquippedEquipment,
-  hippyStoneBroken,
-  myPrimestat,
-  use,
-  useFamiliar,
+	cliExecute,
+	equip,
+	familiarEquippedEquipment,
+	hippyStoneBroken,
+	myPrimestat,
+	use,
+	useFamiliar,
 } from "kolmafia";
 import { $familiar, $familiars, $item, $items, CrimboShrub, get, have } from "libram";
 import { withStash } from "../clan";

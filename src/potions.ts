@@ -385,9 +385,9 @@ export function doublingPotions(embezzlers: number): Potion[] {
  * @param doEmbezzlers Do we account for embezzlers when deciding what potions are profitable?
  */
 export function potionSetup(embezzlersOnly: boolean): void {
-  // TODO: Count PYEC.
-  // TODO: Count free fights (25 meat each for most).
-  const embezzlers = 0;
+	// TODO: Count PYEC.
+	// TODO: Count free fights (25 meat each for most).
+	const embezzlers = 0;
 
 	if (have($item`Eight Days a Week Pill Keeper`) && !get("_freePillKeeperUsed")) {
 		const possibleDoublingPotions = doublingPotions(embezzlers);

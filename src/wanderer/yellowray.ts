@@ -32,9 +32,9 @@ function averageYrValue(location: Location) {
 			sum(monsters, (m) => {
 				const items = itemDropsArray(m).filter((drop) => ["", "n"].includes(drop.type));
 				return sum(items, (drop) => {
-          const yrRate = (drop.type === "" ? 100 : drop.rate) / 100;
-          return yrRate * garboValue(drop.drop, true);
-        });
+					const yrRate = (drop.type === "" ? 100 : drop.rate) / 100;
+					return yrRate * garboValue(drop.drop, true);
+				});
 			}) / monsters.length
 		);
 	}

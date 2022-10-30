@@ -46,11 +46,11 @@ function _yachtzeeChain(): void {
 	// We definitely need to be able to eat sliders and drink pickle juice
 	if (!realmAvailable("sleaze")) return;
 
-  maximize("MP", false);
-  meatMood(false, baseMeat - 250).execute(1);
-  potionSetup(false); // This is the default set up for embezzlers (which helps us estimate if chaining is better than extros)
-  maximizeMeat();
-  prepareOutfitAndFamiliar();
+	maximize("MP", false);
+	meatMood(false, baseMeat - 250).execute(1);
+	potionSetup(false); // This is the default set up for embezzlers (which helps us estimate if chaining is better than extros)
+	maximizeMeat();
+	prepareOutfitAndFamiliar();
 
 	const meatLimit = 5000000;
 	if (myMeat() > meatLimit) {
@@ -139,14 +139,14 @@ function _yachtzeeChain(): void {
 }
 
 export function yachtzeeChain(): void {
-  if (!globalOptions.yachtzeeChain) return;
-  if (get("_garboYachtzeeChainCompleted", false)) return;
-  print("Running Yachtzee Chain", "purple");
-  _yachtzeeChain();
-  set("_garboYachtzeeChainCompleted", true);
-  globalOptions.yachtzeeChain = false;
-  if (!globalOptions.noDiet) {
-    runDiet();
-  }
-  freeRunFights();
+	if (!globalOptions.yachtzeeChain) return;
+	if (get("_garboYachtzeeChainCompleted", false)) return;
+	print("Running Yachtzee Chain", "purple");
+	_yachtzeeChain();
+	set("_garboYachtzeeChainCompleted", true);
+	globalOptions.yachtzeeChain = false;
+	if (!globalOptions.noDiet) {
+		runDiet();
+	}
+	freeRunFights();
 }
