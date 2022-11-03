@@ -343,7 +343,7 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem(mallMin(lasagnas)),
 		new MenuItem(mallMin(smallEpics)),
 		new MenuItem($item`green hamhock`),
-		new MenuItem($item`Mr. Burnsger`),
+		new MenuItem($item`Mr. Burnsger`, {priceOverride: 100000}),
 
 		// BOOZE
 		new MenuItem($item`elemental caipiroska`),
