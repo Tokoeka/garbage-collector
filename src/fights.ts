@@ -814,7 +814,7 @@ const freeFightSources = [
 					.externalIf(
 						get("glitchItemImplementationCount") *
 							itemAmount($item`[glitch season reward name]`) >=
-							2000,
+							1000,
 						Macro.item([$item`jam band bootleg`, $item`jam band bootleg`]).item([
 							$item`gas can`,
 							$item`gas can`,
