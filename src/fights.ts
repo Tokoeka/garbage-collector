@@ -1454,13 +1454,13 @@ const freeFightSources = [
 			requirements: () => {
 				const canPickPocket = myPrimestat() === $stat`Moxie`;
 				const bestPickpocketItem =
-					$items`tiny black hole, mime army infiltration glove`.find(
+					$items`mime army infiltration glove, tiny black hole`.find(
 						(item) => have(item) && canEquip(item)
 					);
 
 				const reqs = [
 					new Requirement(["100 init", "Pickpocket Chance"], {
-						forceEquip: $items`mayfly bait necklace`,
+						forceEquip: $items`mayfly bait necklace, Pantsgiving`,
 						bonusEquip: new Map(
 							$items`carnivorous potted plant`.map((item) => [item, 100])
 						),
@@ -2178,7 +2178,7 @@ export function freeFights(): void {
 }
 
 function setNepQuestChoicesAndPrepItems() {
-	//const quest = get("_questPartyFairQuest");
+	// const quest = get("_questPartyFairQuest");
 
 	/* if (quest === "food") {
 		if (!questStep("_questPartyFair")) {
