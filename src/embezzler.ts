@@ -833,7 +833,7 @@ export const emergencyChainStarters = [
 			if (get("_genieFightsUsed") < 3 && mallPrice($item`11-leaf clover`) >= WISH_VALUE) {
 				return false;
 			}
-			if (globalOptions.askedAboutWish && !globalOptions.wishAnswer) return false;
+			if (globalOptions.askedAboutWish) return globalOptions.wishAnswer;
 			const profit =
 				(potential + 1) * averageEmbezzlerNet() - mallPrice($item`11-leaf clover`);
 			if (profit < 0) return false;
@@ -851,6 +851,7 @@ export const emergencyChainStarters = [
 		},
 		() => 0,
 		(options: EmbezzlerFightRunOptions) => {
+      globalOptions.askedAboutWish = false;
 			property.withProperty("autoSatisfyWithCloset", true, () =>
 				retrieveItem($item`11-leaf clover`)
 			);
@@ -868,7 +869,7 @@ export const emergencyChainStarters = [
 			const potential = Math.floor(embezzlerCount());
 			if (potential < 1) return false;
 			if (get("_genieFightsUsed") >= 3) return false;
-			if (globalOptions.askedAboutWish && !globalOptions.wishAnswer) return false;
+			if (globalOptions.askedAboutWish) return globalOptions.wishAnswer;
 			const profit = (potential + 1) * averageEmbezzlerNet() - WISH_VALUE;
 			if (profit < 0) return false;
 			print(`You have the following embezzler-sources untapped right now:`, HIGHLIGHT);
@@ -885,6 +886,7 @@ export const emergencyChainStarters = [
 		},
 		() => 0,
 		(options: EmbezzlerFightRunOptions) => {
+      globalOptions.askedAboutWish = false;
 			withMacro(
 				options.macro,
 				() => {
