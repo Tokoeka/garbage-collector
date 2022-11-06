@@ -851,7 +851,7 @@ export const emergencyChainStarters = [
 		},
 		() => 0,
 		(options: EmbezzlerFightRunOptions) => {
-      globalOptions.askedAboutWish = false;
+			globalOptions.askedAboutWish = false;
 			property.withProperty("autoSatisfyWithCloset", true, () =>
 				retrieveItem($item`11-leaf clover`)
 			);
@@ -886,7 +886,7 @@ export const emergencyChainStarters = [
 		},
 		() => 0,
 		(options: EmbezzlerFightRunOptions) => {
-      globalOptions.askedAboutWish = false;
+			globalOptions.askedAboutWish = false;
 			withMacro(
 				options.macro,
 				() => {

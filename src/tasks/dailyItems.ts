@@ -10,7 +10,7 @@ import {
 	pickedPockets,
 	pocketItems,
 	pocketMeat,
-  runChoice,
+	runChoice,
 	scrapPockets,
 	toItem,
 	useSkill,
@@ -145,12 +145,13 @@ export const DailyItemTasks: Task[] = [
 			do: () => cliExecute("Briefcase collect"),
 		},
 		{
-      name: "Ice Cold April Shower",
-      ready: () => have($item`Clan VIP Lounge key`) && getClanLounge()["Clan shower"] !== undefined,
-      completed: () => get("_aprilShower"),
-      do: () => cliExecute("try; shower ice"),
-    },
-    {
+			name: "Ice Cold April Shower",
+			ready: () =>
+				have($item`Clan VIP Lounge key`) && getClanLounge()["Clan shower"] !== undefined,
+			completed: () => get("_aprilShower"),
+			do: () => cliExecute("try; shower ice"),
+		},
+		{
 			name: "Swimming Pool Item",
 			ready: () =>
 				have($item`Clan VIP Lounge key`) &&
@@ -230,19 +231,19 @@ export const DailyItemTasks: Task[] = [
 				Wads.map((x) => <AcquireItem>{ item: x, num: 3 - get("prismaticSummons") }),
 		},
 		{
-      name: "Request Sandwich",
-      ready: () => have($skill`Request Sandwich`),
-      completed: () => get("_requestSandwichSucceeded"),
-      do: () => useSkill($skill`Request Sandwich`),
-      limit: { soft: 10 },
-    },
-    {
-      name: "Demand Sandwich",
-      ready: () => have($skill`Demand Sandwich`),
-      completed: () => get("_demandSandwich") > 0,
-      do: () => useSkill($skill`Demand Sandwich`),
-    },
-    {
+			name: "Request Sandwich",
+			ready: () => have($skill`Request Sandwich`),
+			completed: () => get("_requestSandwichSucceeded"),
+			do: () => useSkill($skill`Request Sandwich`),
+			limit: { soft: 10 },
+		},
+		{
+			name: "Demand Sandwich",
+			ready: () => have($skill`Demand Sandwich`),
+			completed: () => get("_demandSandwich") > 0,
+			do: () => useSkill($skill`Demand Sandwich`),
+		},
+		{
 			name: "Tea Tree",
 			ready: () => getCampground()["potted tea tree"] !== undefined,
 			completed: () => get("_pottedTeaTreeUsed"),
@@ -282,15 +283,15 @@ export const DailyItemTasks: Task[] = [
 			completed: () => get("_timeSpinnerReplicatorUsed"),
 			do: () => cliExecute("FarFuture drink"),
 		},
-    {
-      name: "FantasyRealm Hat",
-      ready: () => get("frAlways") || get("_frToday"),
-      completed: () => have($item`FantasyRealm G. E. M.`),
-      do: () => {
-        visitUrl("place.php?whichplace=realm_fantasy&action=fr_initcenter");
-        runChoice(-1);
-      },
-      choices: { 1280: 1 },
-    },
+		{
+			name: "FantasyRealm Hat",
+			ready: () => get("frAlways") || get("_frToday"),
+			completed: () => have($item`FantasyRealm G. E. M.`),
+			do: () => {
+				visitUrl("place.php?whichplace=realm_fantasy&action=fr_initcenter");
+				runChoice(-1);
+			},
+			choices: { 1280: 1 },
+		},
 	],
 ];

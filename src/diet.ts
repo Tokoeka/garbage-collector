@@ -288,8 +288,8 @@ const stomachLiverCleaners = new Map([
 	[$item`synthetic dog hair pill`, [0, -1]],
 	[$item`cuppa Sobrie tea`, [0, -1]],
 	[$item`designer sweatpants`, [0, -1]],
-	//[$item`Doc Clock's thyme cocktail`, [-2, 0]],
-	//[$item`Mr. Burnsger`, [0, -2]],
+	// [$item`Doc Clock's thyme cocktail`, [-2, 0]],
+	// [$item`Mr. Burnsger`, [0, -2]],
 ]);
 
 export const mallMin: (items: Item[]) => Item = (items: Item[]) => maxBy(items, mallPrice, true);
@@ -343,7 +343,7 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem(mallMin(lasagnas)),
 		new MenuItem(mallMin(smallEpics)),
 		new MenuItem($item`green hamhock`),
-		new MenuItem($item`Mr. Burnsger`, {priceOverride: 100000}),
+		new MenuItem($item`Mr. Burnsger`, { priceOverride: 100000 }),
 
 		// BOOZE
 		new MenuItem($item`elemental caipiroska`),
@@ -358,7 +358,7 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem(mallMin(complexMushroomWines)),
 		new MenuItem(mallMin(perfectDrinks)),
 		new MenuItem($item`green eggnog`),
-		new MenuItem($item`Doc Clock's thyme cocktail`, {priceOverride: 100000}),
+		new MenuItem($item`Doc Clock's thyme cocktail`, { priceOverride: 100000 }),
 
 		// SPLEEN
 		new MenuItem($item`octolus oculus`),
@@ -589,9 +589,9 @@ export function potionMenu(
 			  )
 			: [];
 
-  const borisBread = !get("unknownRecipe11000") // this property is true if you don't know the recipe, false if you do
-    ? potion($item`Boris's bread`, { price: 2 * ingredientCost($item`Yeast of Boris`) })
-    : [];
+	const borisBread = !get("unknownRecipe11000") // this property is true if you don't know the recipe, false if you do
+		? potion($item`Boris's bread`, { price: 2 * ingredientCost($item`Yeast of Boris`) })
+		: [];
 
 	return [
 		...baseMenu,
@@ -608,7 +608,7 @@ export function potionMenu(
 		...potion($item`haunted Hell ramen`),
 		...campfireHotdog,
 		...foodCone,
-    ...borisBread,
+		...borisBread,
 
 		// BOOZE POTIONS
 		...potion($item`dirt julep`),

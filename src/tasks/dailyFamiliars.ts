@@ -6,7 +6,7 @@ import {
 	familiarEquippedEquipment,
 	fileToBuffer,
 	hippyStoneBroken,
-  itemAmount,
+	itemAmount,
 	myPrimestat,
 	retrieveItem,
 	retrievePrice,
