@@ -1719,7 +1719,7 @@ const freeRunFightSources = [
 			print(
 				`As ${valueDif * 2} is ${
 					getGingerwine ? "greater" : "less"
-				} than ${cigValue}, going to get ${
+				} than ${cigValue * 5}, going to get ${
 					getGingerwine ? "High-End Ginger Wine" : "gingerbread cigarettes"
 				}`
 			);
