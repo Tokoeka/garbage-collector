@@ -589,7 +589,7 @@ export function potionMenu(
 			  )
 			: [];
 
-	const borisBread = !get("unknownRecipe11000") // this property is true if you don't know the recipe, false if you do
+	const borisBread = !get("unknownRecipe11000", true) // this property is true if you don't know the recipe, false if you do
 		? potion($item`Boris's bread`, { price: 2 * ingredientCost($item`Yeast of Boris`) })
 		: [];
 
@@ -748,7 +748,7 @@ export function computeDiet(): {
 					menu().filter(
 						(menuItem) =>
 							(itemType(menuItem.item) === "food" && menuItem.size === 1) ||
-							[Mayo.flex, Mayo.zapine].includes(menuItem.item)
+							[Mayo.flex, Mayo.zapine, $item`Special Seasoning`].includes(menuItem.item)
 					),
 					pantsgivingDietPlanner
 				)
