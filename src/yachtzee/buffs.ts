@@ -1,18 +1,24 @@
 import {
 	cliExecute,
 	Effect,
+	getWorkshed,
 	haveEffect,
 	itemAmount,
 	maximize,
+	myClass,
+	myLevel,
 	myMeat,
 	print,
 	toInt,
 	use,
+	useSkill,
 } from "kolmafia";
 import {
+	$class,
 	$effect,
 	$item,
 	$items,
+	$skill,
 	clamp,
 	get,
 	getActiveEffects,
@@ -67,6 +73,19 @@ export function yachtzeePotionSetup(yachtzeeTurns: number, simOnly?: boolean): n
 	const excludedEffects = new Set<Effect>();
 
 	shrugIrrelevantSongs();
+
+	const canRecord =
+		getWorkshed() === $item`warbear LP-ROM burner` ||
+		have($item`warbear LP-ROM burner` || get("questG04Nemesis") === "finished");
+
+	if (myClass() === $class`Accordion Thief` && myLevel() >= 15 && !canRecord) {
+		if (have($skill`The Ballad of Richie Thingfinder`)) {
+			useSkill($skill`The Ballad of Richie Thingfinder`, 10 - get("_thingfinderCasts"));
+		}
+		if (have($skill`Chorale of Companionship`)) {
+			useSkill($skill`Chorale of Companionship`, 10 - get("_companionshipCasts"));
+		}
+	}
 
 	if (have($item`Eight Days a Week Pill Keeper`) && !get("_freePillKeeperUsed", false)) {
 		const doublingPotions = farmingPotions
