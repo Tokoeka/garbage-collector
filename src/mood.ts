@@ -207,19 +207,19 @@ export function freeFightMood(...additionalEffects: Effect[]): Mood {
  * Use buff extenders like PYEC and Bag o Tricks
  */
 export function useBuffExtenders(): void {
-  withStash($items`Platinum Yendorian Express Card, Bag o' Tricks`, () => {
-    if (have($item`Platinum Yendorian Express Card`) && !get("expressCardUsed")) {
-      burnLibrams();
-      use($item`Platinum Yendorian Express Card`);
-    }
-    if (have($item`Bag o' Tricks`) && !get("_bagOTricksUsed")) {
-      use($item`Bag o' Tricks`);
-    }
-  });
-  if (have($item`License to Chill`) && !get("_licenseToChillUsed")) {
-    burnLibrams();
-    use($item`License to Chill`);
-  }
+	withStash($items`Platinum Yendorian Express Card, Bag o' Tricks`, () => {
+		if (have($item`Platinum Yendorian Express Card`) && !get("expressCardUsed")) {
+			burnLibrams();
+			use($item`Platinum Yendorian Express Card`);
+		}
+		if (have($item`Bag o' Tricks`) && !get("_bagOTricksUsed")) {
+			use($item`Bag o' Tricks`);
+		}
+	});
+	if (have($item`License to Chill`) && !get("_licenseToChillUsed")) {
+		burnLibrams();
+		use($item`License to Chill`);
+	}
 }
 
 const stings = [

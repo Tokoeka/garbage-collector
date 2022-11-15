@@ -42,7 +42,7 @@ import {
 	refreshStash,
 	restoreHp,
 	retrieveItem,
-  retrievePrice,
+	retrievePrice,
 	runChoice,
 	runCombat,
 	setAutoAttack,
@@ -197,32 +197,32 @@ const secondChainMacro = () =>
 	).abort();
 
 function embezzlerSetup() {
-  setLocation($location`none`);
-  potionSetup(false);
-  maximize("MP", false);
-  meatMood(true, 750 + baseMeat).execute(embezzlerCount());
-  safeRestore();
-  freeFightMood().execute(50);
-  useBuffExtenders();
-  burnLibrams(400);
-  if (
-    globalOptions.ascending &&
-    questStep("questM16Temple") > 0 &&
-    get("lastTempleAdventures") < myAscensions() &&
-    acquire(1, $item`stone wool`, 3 * get("valueOfAdventure") + 100, false) > 0
-  ) {
-    ensureEffect($effect`Stone-Faced`);
-    setChoice(582, 1);
-    setChoice(579, 3);
-    while (get("lastTempleAdventures") < myAscensions()) {
-      const run = tryFindFreeRun() ?? ltbRun();
-      if (!run) break;
-      useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar());
-      run.constraints.preparation?.();
-      freeFightOutfit(run.constraints.equipmentRequirements?.());
-      adventureMacro($location`The Hidden Temple`, run.macro);
-    }
-  }
+	setLocation($location`none`);
+	potionSetup(false);
+	maximize("MP", false);
+	meatMood(true, 750 + baseMeat).execute(embezzlerCount());
+	safeRestore();
+	freeFightMood().execute(50);
+	useBuffExtenders();
+	burnLibrams(400);
+	if (
+		globalOptions.ascending &&
+		questStep("questM16Temple") > 0 &&
+		get("lastTempleAdventures") < myAscensions() &&
+		acquire(1, $item`stone wool`, 3 * get("valueOfAdventure") + 100, false) > 0
+	) {
+		ensureEffect($effect`Stone-Faced`);
+		setChoice(582, 1);
+		setChoice(579, 3);
+		while (get("lastTempleAdventures") < myAscensions()) {
+			const run = tryFindFreeRun() ?? ltbRun();
+			if (!run) break;
+			useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar());
+			run.constraints.preparation?.();
+			freeFightOutfit(run.constraints.equipmentRequirements?.());
+			adventureMacro($location`The Hidden Temple`, run.macro);
+		}
+	}
 
 	bathroomFinance(embezzlerCount());
 
@@ -635,38 +635,38 @@ class FreeRunFight extends FreeFight {
 }
 
 const pygmyBanishHandlers = [
-  {
-    pygmy: $monster`pygmy bowler`,
-    skill: $skill`Snokebomb`,
-    check: "_snokebombUsed",
-    limit: 3,
-    item: $item`Louder Than Bomb`,
-  },
-  {
-    pygmy: $monster`pygmy orderlies`,
-    skill: $skill`Feel Hatred`,
-    check: "_feelHatredUsed",
-    limit: 3,
-    item: $item`divine champagne popper`,
-  },
-  {
-    pygmy: $monster`pygmy janitor`,
-    skill: undefined,
-    check: undefined,
-    limit: 0,
-    item: $item`tennis ball`,
-  },
+	{
+		pygmy: $monster`pygmy bowler`,
+		skill: $skill`Snokebomb`,
+		check: "_snokebombUsed",
+		limit: 3,
+		item: $item`Louder Than Bomb`,
+	},
+	{
+		pygmy: $monster`pygmy orderlies`,
+		skill: $skill`Feel Hatred`,
+		check: "_feelHatredUsed",
+		limit: 3,
+		item: $item`divine champagne popper`,
+	},
+	{
+		pygmy: $monster`pygmy janitor`,
+		skill: undefined,
+		check: undefined,
+		limit: 0,
+		item: $item`tennis ball`,
+	},
 ] as const;
 
 const pygmyMacro = Macro.step(
-  ...pygmyBanishHandlers.map(({ pygmy, skill, item }) =>
-    Macro.if_(pygmy, skill ? Macro.trySkill(skill).item(item) : Macro.item(item))
-  )
+	...pygmyBanishHandlers.map(({ pygmy, skill, item }) =>
+		Macro.if_(pygmy, skill ? Macro.trySkill(skill).item(item) : Macro.item(item))
+	)
 )
-  .if_($monsters`giant rubber spider, time-spinner prank`, Macro.basicCombat())
-  .if_($monster`drunk pygmy`, Macro.trySkill($skill`Extract`).trySkill($skill`Sing Along`))
-  .ifHolidayWanderer(Macro.basicCombat())
-  .abort();
+	.if_($monsters`giant rubber spider, time-spinner prank`, Macro.basicCombat())
+	.if_($monster`drunk pygmy`, Macro.trySkill($skill`Extract`).trySkill($skill`Sing Along`))
+	.ifHolidayWanderer(Macro.basicCombat())
+	.abort();
 
 function getStenchLocation() {
 	return (
@@ -1030,15 +1030,16 @@ const freeFightSources = [
 		},
 		true,
 		{
-      cost: () => {
-        const banishers = pygmyBanishHandlers
-          .filter(
-            ({ skill, check, limit }) => !skill || !have(skill) || (check && get(check) >= limit)
-          )
-          .map(({ item }) => item);
-        return retrievePrice($item`Bowl of Scorpions`) + sum(banishers, mallPrice) / 11;
-      },
-    }
+			cost: () => {
+				const banishers = pygmyBanishHandlers
+					.filter(
+						({ skill, check, limit }) =>
+							!skill || !have(skill) || (check && get(check) >= limit)
+					)
+					.map(({ item }) => item);
+				return retrievePrice($item`Bowl of Scorpions`) + sum(banishers, mallPrice) / 11;
+			},
+		}
 	),
 
 	// 10th Pygmy fight. If we have an orb, equip it for this fight, to save for later
@@ -1735,9 +1736,9 @@ const freeRunFightSources = [
 				`Compared High-End Ginger Wine @ ${gingerWineValue} to ${best.edible} @ ${best.value}. Difference of ${valueDif} per liver`
 			);
 			print(
-				`As ${valueDif * 2} is ${
-					getGingerwine ? "greater" : "less"
-				} than ${cigValue * 5}, going to get ${
+				`As ${valueDif * 2} is ${getGingerwine ? "greater" : "less"} than ${
+					cigValue * 5
+				}, going to get ${
 					getGingerwine ? "High-End Ginger Wine" : "gingerbread cigarettes"
 				}`
 			);

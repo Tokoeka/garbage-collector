@@ -330,7 +330,7 @@ export function main(argString = ""): void {
 			afterAdventureScript: "",
 			betweenBattleScript: "",
 			choiceAdventureScript: "",
-      counterScript: "",
+			counterScript: "",
 			familiarScript: "",
 			customCombatScript: "garbo",
 			currentMood: "apathetic",
@@ -457,7 +457,7 @@ export function main(argString = ""): void {
 					potionSetup(false);
 					maximize("MP", false);
 					meatMood().execute(estimatedTurns());
-          useBuffExtenders();
+					useBuffExtenders();
 					try {
 						while (canContinue()) {
 							barfTurn();

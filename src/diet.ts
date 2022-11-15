@@ -623,7 +623,7 @@ export function potionMenu(
 		...potion($item`Feliz Navidad`),
 		...potion($item`broberry brogurt`),
 		...potion($item`haunted martini`),
-		...potion($item`bottle of greedy dog`, { price: 15000 }),
+		...potion($item`bottle of Greedy Dog`, { price: 15000 }),
 		...potion($item`twice-haunted screwdriver`, { price: twiceHauntedPrice }),
 		...limitedPotion($item`high-end ginger wine`, availableAmount($item`high-end ginger wine`)),
 		...limitedPotion($item`Hot Socks`, hasSpeakeasy ? 3 : 0, { price: 5000 }),
@@ -749,7 +749,9 @@ export function computeDiet(): {
 					menu().filter(
 						(menuItem) =>
 							(itemType(menuItem.item) === "food" && menuItem.size === 1) ||
-							[Mayo.flex, Mayo.zapine, $item`Special Seasoning`].includes(menuItem.item)
+							[Mayo.flex, Mayo.zapine, $item`Special Seasoning`].includes(
+								menuItem.item
+							)
 					),
 					pantsgivingDietPlanner
 				)
