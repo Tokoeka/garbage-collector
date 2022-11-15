@@ -136,7 +136,7 @@ import {
 	setChoice,
 	userConfirmDialog,
 } from "./lib";
-import { freeFightMood, meatMood } from "./mood";
+import { freeFightMood, meatMood, useBuffExtenders } from "./mood";
 import { freeFightOutfit, meatOutfit, tryFillLatte, waterBreathingEquipment } from "./outfit";
 import { bathroomFinance, potionSetup } from "./potions";
 import {
@@ -197,44 +197,32 @@ const secondChainMacro = () =>
 	).abort();
 
 function embezzlerSetup() {
-	setLocation($location`none`);
-	potionSetup(false);
-	maximize("MP", false);
-	meatMood(true, 750 + baseMeat).execute(embezzlerCount());
-	safeRestore();
-	freeFightMood().execute(50);
-	withStash($items`Platinum Yendorian Express Card, Bag o' Tricks`, () => {
-		if (have($item`Platinum Yendorian Express Card`) && !get("expressCardUsed")) {
-			burnLibrams();
-			use($item`Platinum Yendorian Express Card`);
-		}
-		if (have($item`Bag o' Tricks`) && !get("_bagOTricksUsed")) {
-			use($item`Bag o' Tricks`);
-		}
-	});
-	if (have($item`License to Chill`) && !get("_licenseToChillUsed")) {
-		burnLibrams();
-		use($item`License to Chill`);
-	}
-	burnLibrams(400);
-	if (
-		globalOptions.ascending &&
-		questStep("questM16Temple") > 0 &&
-		get("lastTempleAdventures") < myAscensions() &&
-		acquire(1, $item`stone wool`, 3 * get("valueOfAdventure") + 100, false) > 0
-	) {
-		ensureEffect($effect`Stone-Faced`);
-		setChoice(582, 1);
-		setChoice(579, 3);
-		while (get("lastTempleAdventures") < myAscensions()) {
-			const run = tryFindFreeRun() ?? ltbRun();
-			if (!run) break;
-			useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar());
-			run.constraints.preparation?.();
-			freeFightOutfit(run.constraints.equipmentRequirements?.());
-			adventureMacro($location`The Hidden Temple`, run.macro);
-		}
-	}
+  setLocation($location`none`);
+  potionSetup(false);
+  maximize("MP", false);
+  meatMood(true, 750 + baseMeat).execute(embezzlerCount());
+  safeRestore();
+  freeFightMood().execute(50);
+  useBuffExtenders();
+  burnLibrams(400);
+  if (
+    globalOptions.ascending &&
+    questStep("questM16Temple") > 0 &&
+    get("lastTempleAdventures") < myAscensions() &&
+    acquire(1, $item`stone wool`, 3 * get("valueOfAdventure") + 100, false) > 0
+  ) {
+    ensureEffect($effect`Stone-Faced`);
+    setChoice(582, 1);
+    setChoice(579, 3);
+    while (get("lastTempleAdventures") < myAscensions()) {
+      const run = tryFindFreeRun() ?? ltbRun();
+      if (!run) break;
+      useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar());
+      run.constraints.preparation?.();
+      freeFightOutfit(run.constraints.equipmentRequirements?.());
+      adventureMacro($location`The Hidden Temple`, run.macro);
+    }
+  }
 
 	bathroomFinance(embezzlerCount());
 
