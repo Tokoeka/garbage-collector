@@ -1380,6 +1380,13 @@ const freeFightSources = [
 	),
 
 	new FreeFight(
+    () => (get("ownsSpeakeasy", false) ? 3 - get("_speakeasyFreeFights", 0) : 0),
+    // eslint-disable-next-line libram/verify-constants
+    () => adv1($location`An Unusually Quiet Barroom Brawl`, -1, ""),
+    true
+  ),
+
+  new FreeFight(
 		() =>
 			CombatLoversLocket.have() &&
 			!!locketMonster() &&
