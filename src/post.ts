@@ -24,18 +24,17 @@ import {
 	$locations,
 	$skill,
 	$slot,
-	adventureMacro,
 	AutumnAton,
 	get,
 	getRemainingStomach,
 	have,
 	JuneCleaver,
-	Macro,
 	property,
 	uneffect,
 	withProperty,
 } from "libram";
 import { acquire } from "./acquire";
+import { garboAdventure, Macro } from "./combat";
 import { computeDiet, consumeDiet } from "./diet";
 import {
 	bestJuneCleaverOption,
@@ -151,7 +150,7 @@ function juneCleave(): void {
 			if (have($effect`Feeling Lost`)) {
 				uneffect($effect`Feeling Lost`);
 			}
-			adventureMacro($location`Noob Cave`, Macro.abort());
+			garboAdventure($location`Noob Cave`, Macro.abort());
 			if (["Poetic Justice", "Lost and Found"].includes(get("lastEncounter"))) {
 				uneffect($effect`Beaten Up`);
 			}
