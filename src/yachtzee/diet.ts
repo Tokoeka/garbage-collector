@@ -457,6 +457,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 
 	const havePYECCharge = pyecAvailable();
 	const haveDistentionPill = !get("_distentionPillUsed") && have($item`distention pill`);
+  visitUrl(`desc_item.php?whichitem=${$item`designer sweatpants`.descid}`); // Ensure that our sweat tracker is updated
 	const sweatOutsAvailable = clamp(
 		Math.floor(get("sweat") / 25),
 		0,
@@ -628,7 +629,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 			? 1
 			: 0;
 	const borisBreads =
-		!get("unknownRecipe10978", true) &&
+		!get("unknownRecipe10978") &&
 		haveEffect($effect`Inspired Chef`) < yachtzeeTurns &&
 		myFullness() + 1 + slidersToEat * 5 + toastsToEat + horseradishes <=
 			fullnessLimit() + toInt(haveDistentionPill)

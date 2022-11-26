@@ -424,7 +424,7 @@ export function checkGithubVersion(): void {
 						.commit
 				}.`
 			);
-			print(`Release Version: ${releaseCommit}.`);
+			print(`Release Version: ${releaseCommit?.sha}.`);
 		}
 	}
 }
