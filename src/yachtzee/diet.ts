@@ -635,6 +635,15 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 			fullnessLimit() + toInt(haveDistentionPill)
 			? 1
 			: 0;
+	const deepDish =
+		globalOptions.ascending &&
+		!get("uknownRecipe11000") && 
+		haveEffect($effect`In the Depths`) < yachtzeeTurns && 
+		!get("deepDishOfLegendEaten") &&
+		myFullness() + 2 + slidersToEat * 5 + toastsToEat + horseradishes + borisBreads <=
+			fullnessLimit() + toInt(haveDistentionPill)
+			? 1
+			: 0;
 
 	const earlyMeatDropsEstimate =
 		numericModifier("Meat Drop") +
@@ -659,7 +668,8 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 		yachtzeePotionSetup(yachtzeeTurns, true) +
 		cologneToChew * ((yachtzeeTurns + 60 + 5 * toInt(havePYECCharge)) * 1000 - colognePrice) +
 		(horseradishes > 0 ? yachtzeeTurns * 1000 : 0) +
-		(borisBreads > 0 ? yachtzeeTurns * 1000 : 0);
+		(borisBreads > 0 ? yachtzeeTurns * 1000 : 0) +
+		(deepDish > 0 ? yachtzeeTurns * 375 : 0 );
 
 	// We assume that the embezzlers after yachtzee chaining would still benefit from our start-of-day buffs
 	// so the assumption is that all the gregged embezzlies can be approximated as marginal KGEs with profits of 3 * VOA
@@ -713,6 +723,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 		["beggin' cologne", cologneToChew],
 		["jumping horseradish", horseradishes],
 		["Boris's bread", borisBreads],
+		["Deep Dish of Legend", deepDish],
 	];
 
 	const specialEntries: [string, number, (n: number, name?: string) => void][] = (
@@ -778,6 +789,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 	acquire(filters, $item`mojo filter`, 2 * mallPrice($item`mojo filter`));
 	acquire(horseradishes, $item`jumping horseradish`, 60000);
 	acquire(borisBreads, $item`Boris's bread`, 60000);
+	acquire(deepDish, $item`Deep Dish of Legend`, 60000)
 
 	// Get fishy turns
 	print("Getting fishy turns", "purple");
