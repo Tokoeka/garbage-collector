@@ -1484,7 +1484,7 @@ const freeFightSources = [
 
 				const reqs = [
 					new Requirement(["100 init", "Pickpocket Chance"], {
-						forceEquip: $items`mayfly bait necklace, Pantsgiving`,
+						forceEquip: $items`mayfly bait necklace, Pantsgiving, tiny stillsuit`,
 						bonusEquip: new Map(
 							$items`carnivorous potted plant`.map((item) => [item, 100])
 						),
