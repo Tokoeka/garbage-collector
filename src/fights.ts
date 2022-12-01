@@ -1347,9 +1347,15 @@ const freeFightSources = [
 		() =>
 			get("neverendingPartyAlways") && questStep("_questPartyFair") < 999
 				? clamp(
-						10 - get("_neverendingPartyFreeTurns") - (get("_thesisDelivered") ? 0 : 1),
+            
+						10 -
+              get("_neverendingPartyFreeTurns") -
+              (get("_thesisDelivered") || !have($familiar`Pocket Professor`) ? 0 : 1),
+           
 						0,
+           
 						10
+          
 				  )
 				: 0,
 		() => {
