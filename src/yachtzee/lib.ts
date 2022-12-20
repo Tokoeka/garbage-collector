@@ -5,6 +5,7 @@ import {
   $item,
   $items,
   $location,
+  $monster,
   $skill,
   get,
   getActiveSongs,
@@ -18,7 +19,7 @@ import {
 } from "libram";
 import { withStash } from "../clan";
 import { garboAdventureAuto, Macro } from "../combat";
-import { EmbezzlerFight, embezzlerSources } from "../embezzler";
+import { copyTarget, EmbezzlerFight, embezzlerSources } from "../embezzler";
 import { freeFightFamiliar } from "../familiar";
 import { globalOptions, ltbRun, realmAvailable } from "../lib";
 import { freeFightOutfit } from "../outfit";
@@ -30,10 +31,10 @@ const ignoredSources = [
   "Lucky!",
   "11-leaf clover (untapped potential)",
 ];
-export const expectedEmbezzlers = sum(
+export const expectedEmbezzlers = copyTarget === $monster`knob goblin embezzler` ? sum(
   embezzlerSources.filter((source: EmbezzlerFight) => !ignoredSources.includes(source.name)),
   (source: EmbezzlerFight) => source.potential()
-);
+) : 0;
 
 export function pyecAvailable(): boolean {
   if (get("_PYECAvailable") === "") {

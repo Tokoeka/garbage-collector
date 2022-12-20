@@ -54,6 +54,7 @@ import {
   SourceTerminal,
   StrictMacro,
 } from "libram";
+import { copyTarget } from "./embezzler";
 import { canOpenRedPresent, meatFamiliar, timeToMeatify } from "./familiar";
 import { propertyManager } from "./lib";
 import { digitizedMonstersRemaining } from "./turns";
@@ -277,7 +278,7 @@ export class Macro extends StrictMacro {
 
     return this.externalIf(
       shouldRedigitize(),
-      Macro.if_($monster`Knob Goblin Embezzler`, Macro.trySkill($skill`Digitize`))
+      Macro.if_(copyTarget, Macro.trySkill($skill`Digitize`))
     )
       .familiarActions()
       .tryHaveSkill($skill`Sing Along`)
@@ -623,8 +624,8 @@ function customizeMacro<M extends StrictMacro>(macro: M) {
       Macro.externalIf(
         haveEquipped($item`backup camera`) &&
           get("_backUpUses") < 11 &&
-          get("lastCopyableMonster") === $monster`Knob Goblin Embezzler` &&
-          myFamiliar() === meatFamiliar(),
+          ((get("lastCopyableMonster") === $monster`Knob Goblin Embezzler` &&
+          myFamiliar() === meatFamiliar()) || get("lastCopyableMonster") === copyTarget),
         Macro.skill($skill`Back-Up to your Last Enemy`).step(macro),
         Macro.basicCombat()
       )

@@ -140,6 +140,7 @@ import { freeFightMood, meatMood, useBuffExtenders } from "./mood";
 import { freeFightOutfit, meatOutfit, tryFillLatte, waterBreathingEquipment } from "./outfit";
 import { bathroomFinance, potionSetup } from "./potions";
 import {
+  copyTarget,
   embezzlerCount,
   embezzlerMacro,
   embezzlerSources,
@@ -200,7 +201,7 @@ function embezzlerSetup() {
   setLocation($location`none`);
   potionSetup(false);
   maximize("MP", false);
-  meatMood(true, 750 + baseMeat).execute(embezzlerCount());
+  meatMood(true, copyTarget === $monster`Knob Goblin Embezzler` ? (750 + baseMeat) : (baseMeat - 250)).execute(embezzlerCount());
   safeRestore();
   freeFightMood().execute(50);
   useBuffExtenders();

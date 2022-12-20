@@ -39,6 +39,7 @@ import {
 } from "libram";
 import { garboAdventure, garboAdventureAuto, Macro, withMacro } from "./combat";
 import { computeDiet, consumeDiet } from "./diet";
+import { copyTarget } from "./embezzler";
 import { barfFamiliar, freeFightFamiliar, meatFamiliar } from "./familiar";
 import { deliverThesisIfAble } from "./fights";
 import {
@@ -259,7 +260,7 @@ const turns: AdventureAction[] = [
         // Hacky fix for when we fail init to embezzler, who are special monsters
         // Macro autoattacks fail when you lose the jump to special monsters
         Macro.if_(
-          `(monsterid ${embezzler.id}) && !gotjump && !(pastround 2)`,
+          `(monsterid ${copyTarget.id}) && !gotjump && !(pastround 2)`,
           Macro.externalIf(underwater, Macro.item($item`pulled green taffy`)).meatKill()
         ).abort()
       );
@@ -296,13 +297,19 @@ const turns: AdventureAction[] = [
   {
     name: "Envyfish Egg",
     available: () =>
-      have($item`envyfish egg`) && get("envyfishMonster") === embezzler && !get("_envyfishEggUsed"),
+      have($item`envyfish egg`) && get("envyfishMonster") === copyTarget && !get("_envyfishEggUsed"),
     execute: () => {
-      embezzlerPrep();
-      withMacro(Macro.meatKill(), () => use($item`envyfish egg`), true);
+      if (copyTarget === $monster`knob goblin embezzler`) {
+        embezzlerPrep();
+        withMacro(Macro.meatKill(), () => use($item`envyfish egg`), true);
+      }
+      else {
+        freeFightPrep();
+        withMacro(Macro.basicCombat(), () => use($item`envyfish egg`), true);
+      }
       return get("_envyfishEggUsed");
     },
-    spendsTurn: true,
+    spendsTurn: () => !copyTarget?.attributes.includes("FREE"),
     sobriety: Sobriety.EITHER,
   },
   {
@@ -323,6 +330,7 @@ const turns: AdventureAction[] = [
         SourceTerminal.educate([$skill`Extract`, $skill`Duplicate`]);
       }
       const macro = Macro.if_(embezzler, Macro.meatKill())
+        .if_(copyTarget, Macro.basicCombat())
         .familiarActions()
         .externalIf(usingDuplicate, Macro.trySkill($skill`Duplicate`))
         .skill($skill`Spit jurassic acid`);
@@ -397,8 +405,8 @@ function runTurn() {
   if (spentATurn) {
     if (!expectToSpendATurn) print(`We unexpectedly spent a turn doing ${turn.name}!`, "red");
 
-    const foughtAnEmbezzler = get("lastEncounter") === "Knob Goblin Embezzler";
-    if (foughtAnEmbezzler) logEmbezzler(turn.name);
+    const foughtACopyTarget = get("lastEncounter") === copyTarget.name;
+    if (foughtACopyTarget) logEmbezzler(turn.name);
 
     const needTurns = myAdventures() === 1 + globalOptions.saveTurns && sober();
     if (needTurns) generateTurnsAtEndOfDay();

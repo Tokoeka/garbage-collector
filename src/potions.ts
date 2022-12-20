@@ -25,6 +25,7 @@ import {
   $item,
   $items,
   $location,
+  $monster,
   clamp,
   get,
   getActiveEffects,
@@ -44,7 +45,7 @@ import {
   pillkeeperOpportunityCost,
   turnsToNC,
 } from "./lib";
-import { embezzlerCount } from "./embezzler";
+import { copyTarget, embezzlerCount } from "./embezzler";
 import { usingPurse } from "./outfit";
 import { estimatedTurns } from "./turns";
 
@@ -378,7 +379,7 @@ export function doublingPotions(embezzlers: number): Potion[] {
 export function potionSetup(embezzlersOnly: boolean): void {
   // TODO: Count PYEC.
   // TODO: Count free fights (25 meat each for most).
-  const embezzlers = embezzlerCount();
+  const embezzlers = copyTarget === $monster`Knob goblin embezzler` ? embezzlerCount() : 0;
 
   if (have($item`Eight Days a Week Pill Keeper`) && !get("_freePillKeeperUsed")) {
     const possibleDoublingPotions = doublingPotions(embezzlers);
@@ -418,10 +419,11 @@ export function potionSetup(embezzlersOnly: boolean): void {
 
 /**
  * Uses a Greenspan iff profitable; does not account for PYEC/LTC, or running out of adventures with the ascend flag.
- * @param embezzlers Do we want to account for embezzlers when calculating the value of bathroom finance?
+ * @param embezzlers Number of embezzler we expect to encounter.
  */
 export function bathroomFinance(embezzlers: number): void {
   if (have($effect`Buy!  Sell!  Buy!  Sell!`)) return;
+  if (copyTarget !== $monster`Knob Goblin Embezzler`) return;
 
   // Average meat % for embezzlers is sum of arithmetic series, 2 * sum(1 -> embezzlers)
   const averageEmbezzlerGross = ((baseMeat + 750) * 2 * (embezzlers + 1)) / 2 / 100;
