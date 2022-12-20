@@ -169,6 +169,8 @@ export function main(argString = ""): void {
       globalOptions.yachtzeeChain = true;
     } else if (arg.match(/quick/)) {
       globalOptions.quickMode = true;
+    } else if (arg.match(/noembezzler/i)) {
+      globalOptions.garboween = true;
     } else if (arg.match(/version/i)) {
       return;
     } else if (arg) {
