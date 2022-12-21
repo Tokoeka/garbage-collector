@@ -625,7 +625,8 @@ function customizeMacro<M extends StrictMacro>(macro: M) {
         haveEquipped($item`backup camera`) &&
           get("_backUpUses") < 11 &&
           ((get("lastCopyableMonster") === $monster`Knob Goblin Embezzler` &&
-          myFamiliar() === meatFamiliar()) || get("lastCopyableMonster") === copyTarget),
+            myFamiliar() === meatFamiliar()) ||
+            get("lastCopyableMonster") === copyTarget),
         Macro.skill($skill`Back-Up to your Last Enemy`).step(macro),
         Macro.basicCombat()
       )

@@ -25,7 +25,6 @@ import {
   $item,
   $items,
   $location,
-  $monster,
   clamp,
   get,
   getActiveEffects,
@@ -45,7 +44,7 @@ import {
   pillkeeperOpportunityCost,
   turnsToNC,
 } from "./lib";
-import { copyTarget, embezzlerCount } from "./embezzler";
+import { embezzlerCount } from "./embezzler";
 import { usingPurse } from "./outfit";
 import { estimatedTurns } from "./turns";
 
@@ -379,7 +378,7 @@ export function doublingPotions(embezzlers: number): Potion[] {
 export function potionSetup(embezzlersOnly: boolean): void {
   // TODO: Count PYEC.
   // TODO: Count free fights (25 meat each for most).
-  const embezzlers = copyTarget === $monster`Knob goblin embezzler` ? embezzlerCount() : 0;
+  const embezzlers = globalOptions.garboween ? 0 : embezzlerCount();
 
   if (have($item`Eight Days a Week Pill Keeper`) && !get("_freePillKeeperUsed")) {
     const possibleDoublingPotions = doublingPotions(embezzlers);
@@ -423,7 +422,7 @@ export function potionSetup(embezzlersOnly: boolean): void {
  */
 export function bathroomFinance(embezzlers: number): void {
   if (have($effect`Buy!  Sell!  Buy!  Sell!`)) return;
-  if (copyTarget !== $monster`Knob Goblin Embezzler`) return;
+  if (globalOptions.garboween) return;
 
   // Average meat % for embezzlers is sum of arithmetic series, 2 * sum(1 -> embezzlers)
   const averageEmbezzlerGross = ((baseMeat + 750) * 2 * (embezzlers + 1)) / 2 / 100;

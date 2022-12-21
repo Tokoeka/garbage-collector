@@ -71,7 +71,6 @@ import {
   sum,
   uneffect,
 } from "libram";
-import { copyTarget } from "./embezzler";
 import { garboValue } from "./session";
 
 export const embezzlerLog: {
@@ -130,9 +129,8 @@ export const baseMeat =
     : 250;
 
 export function averageEmbezzlerNet(): number {
-  if (copyTarget === $monster`Knob Goblin Embezzler`) return ((baseMeat + 750) * meatDropModifier()) / 100;
+  if (!globalOptions.garboween) return ((baseMeat + 750) * meatDropModifier()) / 100;
   else return Math.min(1000, ((baseMeat - 250) * meatDropModifier()) / 100);
-
 }
 
 export function averageTouristNet(): number {

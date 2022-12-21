@@ -297,15 +297,16 @@ const turns: AdventureAction[] = [
   {
     name: "Envyfish Egg",
     available: () =>
-      have($item`envyfish egg`) && get("envyfishMonster") === copyTarget && !get("_envyfishEggUsed"),
+      have($item`envyfish egg`) &&
+      get("envyfishMonster") === copyTarget &&
+      !get("_envyfishEggUsed"),
     execute: () => {
-      if (copyTarget === $monster`knob goblin embezzler`) {
-        embezzlerPrep();
-        withMacro(Macro.meatKill(), () => use($item`envyfish egg`), true);
-      }
-      else {
+      if (globalOptions.garboween) {
         freeFightPrep();
         withMacro(Macro.basicCombat(), () => use($item`envyfish egg`), true);
+      } else {
+        embezzlerPrep();
+        withMacro(Macro.meatKill(), () => use($item`envyfish egg`), true);
       }
       return get("_envyfishEggUsed");
     },

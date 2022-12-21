@@ -66,7 +66,7 @@ import {
 } from "libram";
 import { acquire, priceCaps } from "./acquire";
 import { withVIPClan } from "./clan";
-import { copyTarget, embezzlerCount } from "./embezzler";
+import { embezzlerCount } from "./embezzler";
 import { expectedGregs } from "./extrovermectin";
 import {
   arrayEquals,
@@ -450,7 +450,7 @@ function gregariousCount(): {
 
 function copiers(): MenuItem<Note>[] {
   // assuming embezzler is worth 4 * MPA and a marginal turn is 1 * MPA, the differential is 3 * MPA
-  const embezzlerDifferential = copyTarget === $monster`knob goblin embezzler` ? 3 * MPA : 0;
+  const embezzlerDifferential = globalOptions.garboween ? 0 : 3 * MPA;
   const { expectedGregariousFights, marginalGregariousFights } = gregariousCount();
   const extros =
     myInebriety() > inebrietyLimit()
@@ -680,7 +680,7 @@ interface DietPlanner {
   (menu: MenuItem<Note>[]): Diet<Note>;
 }
 function balanceMenu(baseMenu: MenuItem<Note>[], dietPlanner: DietPlanner): MenuItem<Note>[] {
-  const baseEmbezzlers = copyTarget === $monster`knob goblin embezzler` ? embezzlerCount() : 0;
+  const baseEmbezzlers = globalOptions.garboween ? 0 : embezzlerCount();
   function rebalance(
     menu: MenuItem<Note>[],
     iterations: number,

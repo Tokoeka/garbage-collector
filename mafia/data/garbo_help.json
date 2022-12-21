@@ -30,6 +30,10 @@
     "description": "*EXPERIMENTAL* garbo will sacrifice some optimal behaviors to run quicker. Estimated and actual profits may be less accurate in this mode."
   },
   {
+    "tableItem": "noturns",
+    "description": "*EXPERIMENTAL* garbo will not fight embezzlers, spending the resources it generally uses on embezzlers on copying a free fight (witchess monster / sausage goblin) instead. Auto-assumes nobarf."
+  },
+  {
     "tableItem": "Note on Arguments:",
     "description": "You can use multiple arguments in conjunction, e.g. \"garbo nobarf ascend\"."
   },

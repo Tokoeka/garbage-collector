@@ -59,8 +59,10 @@ import {
 import { waterBreathingEquipment } from "./outfit";
 import { DraggableFight, wanderWhere } from "./wanderer";
 
-//const embezzler = $monster`Knob Goblin Embezzler`;
-const copyTarget = globalOptions.garboween ? (bestDigitizeTarget() ?? $monster.none) : $monster`Knob Goblin Embezzler`;
+// const embezzler = $monster`Knob Goblin Embezzler`;
+export const copyTarget = globalOptions.garboween
+  ? bestDigitizeTarget() ?? $monster.none
+  : $monster`Knob Goblin Embezzler`;
 
 /**
  * Configure the behavior of the fights in use in different parts of the fight engine
@@ -318,12 +320,14 @@ export const chainStarters = [
       have($item`Eight Days a Week Pill Keeper`) &&
       canAdventure($location`Cobb's Knob Treasury`) &&
       !get("_freePillKeeperUsed") &&
-      !have($effect`Lucky!`),
+      !have($effect`Lucky!`) &&
+      !globalOptions.garboween,
     () =>
       have($item`Eight Days a Week Pill Keeper`) &&
       canAdventure($location`Cobb's Knob Treasury`) &&
       !get("_freePillKeeperUsed") &&
-      !have($effect`Lucky!`)
+      !have($effect`Lucky!`) &&
+      !globalOptions.garboween
         ? 1
         : 0,
     (options: EmbezzlerFightRunOptions) => {
@@ -449,7 +453,9 @@ export const copySources = [
   new EmbezzlerFight(
     "Green Taffy",
     () =>
-      have($item`envyfish egg`) && get("envyfishMonster") === copyTarget && !get("_envyfishEggUsed"),
+      have($item`envyfish egg`) &&
+      get("envyfishMonster") === copyTarget &&
+      !get("_envyfishEggUsed"),
     () =>
       have($item`envyfish egg`) && get("envyfishMonster") === copyTarget && !get("_envyfishEggUsed")
         ? 1
@@ -462,9 +468,9 @@ export const copySources = [
     "Screencapped Monster",
     () =>
       have($item`screencapped monster`) &&
-      property.getString("screencappedMonster") === "Knob Goblin Embezzler",
+      property.getString("screencappedMonster") === copyTarget.name,
     () =>
-      property.getString("screencappedMonster") === "Knob Goblin Embezzler"
+      property.getString("screencappedMonster") === copyTarget.name
         ? itemAmount($item`screencapped monster`)
         : 0,
     (options: EmbezzlerFightRunOptions) => {
@@ -474,10 +480,9 @@ export const copySources = [
   new EmbezzlerFight(
     "Sticky Clay Homunculus",
     () =>
-      have($item`sticky clay homunculus`) &&
-      property.getString("crudeMonster") === "Knob Goblin Embezzler",
+      have($item`sticky clay homunculus`) && property.getString("crudeMonster") === copyTarget.name,
     () =>
-      property.getString("crudeMonster") === "Knob Goblin Embezzler"
+      property.getString("crudeMonster") === copyTarget.name
         ? itemAmount($item`sticky clay homunculus`)
         : 0,
     (options: EmbezzlerFightRunOptions) =>
@@ -488,8 +493,16 @@ export const copySources = [
 export const wanderSources = [
   new EmbezzlerFight(
     "Lucky!",
-    () => canAdventure($location`Cobb's Knob Treasury`) && have($effect`Lucky!`),
-    () => (canAdventure($location`Cobb's Knob Treasury`) && have($effect`Lucky!`) ? 1 : 0),
+    () =>
+      canAdventure($location`Cobb's Knob Treasury`) &&
+      have($effect`Lucky!`) &&
+      !globalOptions.garboween,
+    () =>
+      canAdventure($location`Cobb's Knob Treasury`) &&
+      have($effect`Lucky!`) &&
+      !globalOptions.garboween
+        ? 1
+        : 0,
     (options: EmbezzlerFightRunOptions) => {
       const adventureFunction = options.useAuto ? garboAdventureAuto : garboAdventure;
       adventureFunction($location`Cobb's Knob Treasury`, options.macro, options.macro);
@@ -792,10 +805,7 @@ export const emergencyChainStarters = [
     () => {
       const potential = Math.floor(embezzlerCount());
       if (potential < 1) return false;
-      if (!canAdventure($location`Cobb's Knob Treasury`)) {
-        return false;
-      }
-      if (copyTarget !== $monster`Knob Goblin Embezzler`) {
+      if (!canAdventure($location`Cobb's Knob Treasury`) || globalOptions.garboween) {
         return false;
       }
       // Don't use clovers if wishes are available and cheaper
@@ -838,9 +848,6 @@ export const emergencyChainStarters = [
       if (potential < 1) return false;
       if (get("_genieFightsUsed") >= 3) return false;
       if (globalOptions.askedAboutWish) return globalOptions.wishAnswer;
-      if (copyTarget !== $monster`Knob Goblin Embezzler`) {
-        return false;
-      }
       const profit = (potential + 1) * averageEmbezzlerNet() - WISH_VALUE;
       if (profit < 0) return false;
       print(`You have the following ${copyTarget.name}-sources untapped right now:`, HIGHLIGHT);
