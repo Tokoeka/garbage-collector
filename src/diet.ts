@@ -66,17 +66,10 @@ import {
 } from "libram";
 import { acquire, priceCaps } from "./acquire";
 import { withVIPClan } from "./clan";
+import { globalOptions } from "./config";
 import { embezzlerCount } from "./embezzler";
 import { expectedGregs } from "./extrovermectin";
-import {
-	arrayEquals,
-	baseMeat,
-	globalOptions,
-	HIGHLIGHT,
-	maxBy,
-	realmAvailable,
-	userConfirmDialog,
-} from "./lib";
+import { arrayEquals, baseMeat, HIGHLIGHT, maxBy, realmAvailable, userConfirmDialog } from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
 import { garboValue } from "./session";
@@ -246,7 +239,7 @@ export function nonOrganAdventures(): void {
 		useSkill(casts, $skill`Ancestral Recall`);
 	}
 
-	if (globalOptions.ascending) useIfUnused($item`borrowed time`, "_borrowedTimeUsed", 5 * MPA);
+	if (globalOptions.ascend) useIfUnused($item`borrowed time`, "_borrowedTimeUsed", 5 * MPA);
 }
 
 function pillCheck(): void {
@@ -328,7 +321,7 @@ function menu(): MenuItem<Note>[] {
 	const boxingDayCareItems = $items`glass of raw eggs, punch-drunk punch`.filter((item) =>
 		have(item)
 	);
-	const pilsners = $items`astral pilsner`.filter((item) => globalOptions.ascending && have(item));
+	const pilsners = $items`astral pilsner`.filter((item) => globalOptions.ascend && have(item));
 	const limitedItems = [...boxingDayCareItems, ...pilsners].map(
 		(item) => new MenuItem<Note>(item, { maximum: availableAmount(item) })
 	);
@@ -580,7 +573,7 @@ export function potionMenu(
 		: [];
 
 	const foodCone =
-		realmAvailable("stench") || (globalOptions.simulateDiet && !globalOptions.noBarf)
+		realmAvailable("stench") || (globalOptions.simdiet && !globalOptions.nobarf)
 			? limitedPotion(
 					$item`Dinsey food-cone`,
 					Math.floor(availableAmount($item`FunFunds™`) / 2),
@@ -590,7 +583,7 @@ export function potionMenu(
 			  )
 			: [];
 
-	const borisBread = !get("unknownRecipe10978", true) // this property is true if you don't know the recipe, false if you do
+	const borisBread = !get("unknownRecipe10978") // this property is true if you don't know the recipe, false if you do
 		? potion($item`Boris's bread`, { price: 2 * ingredientCost($item`Yeast of Boris`) })
 		: [];
 
@@ -612,7 +605,7 @@ export function potionMenu(
     });
   };
 
-  const ofLegendMenuItems = globalOptions.ascending
+  const ofLegendMenuItems = globalOptions.ascend
     ? [
         ...ofLegendPotion($item`Calzone of Legend`, "calzoneOfLegendEaten"),
         ...ofLegendPotion($item`Pizza of Legend`, "pizzaOfLegendEaten"),
@@ -1070,7 +1063,7 @@ export function runDiet(): void {
 
 		const dietBuilder = computeDiet();
 
-		if (globalOptions.simulateDiet) {
+		if (globalOptions.simdiet) {
 			print("===== SIMULATED DIET =====");
 			if (!get("_mimeArmyShotglassUsed") && have($item`mime army shotglass`)) {
 				printDiet(dietBuilder.shotglass(), "SHOTGLASS");

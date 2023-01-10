@@ -38,18 +38,18 @@ import {
 	SourceTerminal,
 } from "libram";
 import { garboAdventure, garboAdventureAuto, Macro, withMacro } from "./combat";
+import { globalOptions } from "./config";
 import { computeDiet, consumeDiet } from "./diet";
 import { barfFamiliar, freeFightFamiliar, meatFamiliar } from "./familiar";
 import { deliverThesisIfAble } from "./fights";
 import {
-	embezzlerLog,
-	globalOptions,
-	kramcoGuaranteed,
-	questStep,
-	romanticMonsterImpossible,
-	safeRestore,
-	setChoice,
-	sober,
+  embezzlerLog,
+  kramcoGuaranteed,
+  questStep,
+  romanticMonsterImpossible,
+  safeRestore,
+  setChoice,
+  sober,
 } from "./lib";
 import { meatMood } from "./mood";
 import {
@@ -316,17 +316,19 @@ const turns: AdventureAction[] = [
 			!have($effect`Everything Looks Yellow`) &&
 			romanticMonsterImpossible(),
 		execute: () => {
+      const usingDuplicate = SourceTerminal.have() && SourceTerminal.duplicateUsesRemaining() > 0;
+
 			const location = wanderWhere("yellow ray");
-			const familiar = freeFightFamiliar({ location });
+			const familiar = freeFightFamiliar({ location, allowAttackFamiliars: !usingDuplicate });
 			useFamiliar(familiar);
 			freeFightOutfit(new Requirement([], { forceEquip: $items`Jurassic Parka` }));
 			cliExecute("parka dilophosaur");
-			if (SourceTerminal.have() && SourceTerminal.duplicateUsesRemaining() > 0) {
+			if (usingDuplicate) {
 				SourceTerminal.educate([$skill`Extract`, $skill`Duplicate`]);
 			}
 			const macro = Macro.if_(embezzler, Macro.meatKill())
 				.familiarActions()
-				.trySkill($skill`Duplicate`)
+				.externalIf(usingDuplicate, Macro.trySkill($skill`Duplicate`))
 				.skill($skill`Spit jurassic acid`);
 			garboAdventureAuto(location, macro);
 			if (SourceTerminal.have()) {
@@ -340,7 +342,7 @@ const turns: AdventureAction[] = [
 	{
 		name: "Map for Pills",
 		available: () =>
-			globalOptions.ascending &&
+			globalOptions.ascend &&
 			clamp(myAdventures() - digitizedMonstersRemaining(), 1, myAdventures()) <=
 				availableAmount($item`Map to Safety Shelter Grimace Prime`),
 		execute: () => {
@@ -448,7 +450,7 @@ function generateTurnsAtEndOfDay(): void {
 	if (
 		have($item`designer sweatpants`) &&
 		myAdventures() === 1 + globalOptions.saveTurns &&
-		!globalOptions.noDiet
+		!globalOptions.nodiet
 	) {
 		while (get("_sweatOutSomeBoozeUsed") < 3 && get("sweat") >= 25 && myInebriety() > 0) {
 			useSkill($skill`Sweat Out Some Booze`);

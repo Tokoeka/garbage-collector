@@ -12,28 +12,28 @@ import {
 	weaponHands,
 } from "kolmafia";
 import {
-	$effect,
-	$item,
-	$items,
-	$location,
-	$monster,
-	$monsters,
-	$skill,
-	$slot,
-	clamp,
-	CrystalBall,
-	get,
-	getBanishedMonsters,
-	have,
-	property,
-	Requirement,
-	tryFindFreeRun,
+  $effect,
+  $item,
+  $items,
+  $location,
+  $monster,
+  $skill,
+  $slot,
+  clamp,
+  CrystalBall,
+  get,
+  getBanishedMonsters,
+  have,
+  property,
+  Requirement,
+  tryFindFreeRun,
 } from "libram";
 import { freeFightFamiliar } from "./familiar";
-import { globalOptions, latteActionSourceFinderConstraints, ltbRun, maxBy, setChoice } from "./lib";
+import { latteActionSourceFinderConstraints, ltbRun, maxBy, setChoice } from "./lib";
 import { garboAdventure, Macro } from "./combat";
 import { embezzlerMacro } from "./embezzler";
 import { acquire } from "./acquire";
+import { globalOptions } from "./config";
 
 export function expectedGregs(): number[] {
 	const baseGregs = 3;
@@ -73,7 +73,7 @@ export function doingExtrovermectin(): boolean {
 	return (
 		get("beGregariousCharges") > 0 ||
 		get("beGregariousFightsLeft") > 0 ||
-		(globalOptions.yachtzeeChain && !get("_garboYachtzeeChainCompleted"))
+		(globalOptions.prefs.yachtzeechain && !get("_garboYachtzeeChainCompleted"))
 	);
 }
 
@@ -110,31 +110,30 @@ export function saberCrateIfSafe(): void {
 	do {
 		const run = tryFindFreeRun() ?? ltbRun();
 
-		useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false }));
-		run.constraints.preparation?.();
-		new Requirement([], {
-			forceEquip: $items`Fourth of May Cosplay Saber`,
-			preventEquip: $items`Kramco Sausage-o-Matic™`,
-		})
-			.merge(run.constraints.equipmentRequirements?.() ?? new Requirement([], {}))
-			.maximize();
-		setChoice(1387, 2);
-		garboAdventure(
-			$location`Noob Cave`,
-			Macro.if_($monster`crate`, Macro.skill($skill`Use the Force`))
-				.if_($monsters`giant rubber spider, time-spinner prank`, Macro.kill())
-				.if_($monster`sausage goblin`, Macro.kill())
-				.ifHolidayWanderer(run.macro)
-				.abort()
-		);
-	} while (
-		[
-			"Puttin' it on Wax",
-			"Wooof! Wooooooof!",
-			"Playing Fetch*",
-			"Your Dog Found Something Again",
-		].includes(get("lastEncounter"))
-	);
+    useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false }));
+    run.constraints.preparation?.();
+    new Requirement([], {
+      forceEquip: $items`Fourth of May Cosplay Saber`,
+      preventEquip: $items`Kramco Sausage-o-Matic™`,
+    })
+      .merge(run.constraints.equipmentRequirements?.() ?? new Requirement([], {}))
+      .maximize();
+    setChoice(1387, 2);
+    garboAdventure(
+      $location`Noob Cave`,
+      Macro.if_($monster`crate`, Macro.skill($skill`Use the Force`))
+        .if_($monster`sausage goblin`, Macro.kill())
+        .ifHolidayWanderer(run.macro)
+        .abort()
+    );
+  } while (
+    [
+      "Puttin' it on Wax",
+      "Wooof! Wooooooof!",
+      "Playing Fetch*",
+      "Your Dog Found Something Again",
+    ].includes(get("lastEncounter"))
+  );
 }
 
 /**
@@ -187,37 +186,33 @@ function initializeCrates(): void {
 				.trySkill($skill`Use the Force`)
 				.step(run.macro);
 
-			// equip latte and saber for lattesniff and saberfriends, if we want to
-			// Crank up ML to make sure the crate survives several rounds; we may have some passive damage
-			useFamiliar(
-				run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false })
-			);
-			run.constraints.preparation?.();
-			new Requirement(["100 Monster Level"], {
-				forceEquip: $items`latte lovers member's mug, Fourth of May Cosplay Saber`.filter(
-					(item) => have(item)
-				),
-				preventEquip: $items`carnivorous potted plant`,
-			})
-				.merge(run.constraints.equipmentRequirements?.() ?? new Requirement([], {}))
-				.maximize();
-			garboAdventure(
-				$location`Noob Cave`,
-				Macro.if_($monster`crate`, macro)
-					.if_($monsters`giant rubber spider, time-spinner prank`, Macro.kill())
-					.ifHolidayWanderer(run.macro)
-					.abort()
-			);
-			visitUrl(`desc_effect.php?whicheffect=${$effect`On the Trail`.descid}`);
-		} else if (
-			crateStrategy() === "Saber" &&
-			(get("_saberForceMonster") !== $monster`crate` ||
-				get("_saberForceMonsterCount") === 0) &&
-			get("_saberForceUses") < 5
-		) {
-			saberCrateIfSafe();
-		} else break; // we can break the loop if there's nothing to do
-	} while (!["crate", "Using the Force"].includes(get("lastEncounter"))); // loop until we actually hit a crate
+      // equip latte and saber for lattesniff and saberfriends, if we want to
+      // Crank up ML to make sure the crate survives several rounds; we may have some passive damage
+      useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false }));
+      run.constraints.preparation?.();
+      new Requirement(["100 Monster Level"], {
+        forceEquip: $items`latte lovers member's mug, Fourth of May Cosplay Saber`.filter((item) =>
+          have(item)
+        ),
+        preventEquip: $items`carnivorous potted plant`,
+      })
+        .merge(run.constraints.equipmentRequirements?.() ?? new Requirement([], {}))
+        .maximize();
+      garboAdventure(
+        $location`Noob Cave`,
+        Macro.if_($monster`crate`, macro)
+          .ifHolidayWanderer(run.macro)
+          .abort()
+      );
+      visitUrl(`desc_effect.php?whicheffect=${$effect`On the Trail`.descid}`);
+    } else if (
+      crateStrategy() === "Saber" &&
+      (get("_saberForceMonster") !== $monster`crate` || get("_saberForceMonsterCount") === 0) &&
+      get("_saberForceUses") < 5
+    ) {
+      saberCrateIfSafe();
+    } else break; // we can break the loop if there's nothing to do
+  } while (!["crate", "Using the Force"].includes(get("lastEncounter"))); // loop until we actually hit a crate
 }
 
 function initializeDireWarren(): void {
@@ -255,27 +250,25 @@ function initializeDireWarren(): void {
 			forceEquip: [availableClub],
 		}).maximize();
 
-		do {
-			garboAdventure(
-				$location`The Dire Warren`,
-				Macro.if_($monster`fluffy bunny`, Macro.skill($skill`Batter Up!`)).step(
-					embezzlerMacro()
-				)
-			);
-		} while (
-			"fluffy bunny" !== get("lastEncounter") &&
-			banishedMonsters.get($skill`Batter Up!`) !== $monster`fluffy bunny`
-		);
-	} else {
-		const banish = maxBy(options, mallPrice, true);
-		acquire(1, banish, 50000, true);
-		do {
-			garboAdventure(
-				$location`The Dire Warren`,
-				Macro.if_($monster`fluffy bunny`, Macro.item(banish)).step(embezzlerMacro())
-			);
-		} while ("fluffy bunny" !== get("lastEncounter"));
-	}
+    do {
+      garboAdventure(
+        $location`The Dire Warren`,
+        Macro.if_($monster`fluffy bunny`, Macro.skill($skill`Batter Up!`)).step(embezzlerMacro())
+      );
+    } while (myFury() >= 5 && banishedMonsters.get($skill`Batter Up!`) !== $monster`fluffy bunny`);
+  } else {
+    const banish = maxBy(options, mallPrice, true);
+    acquire(1, banish, 50000, true);
+    do {
+      garboAdventure(
+        $location`The Dire Warren`,
+        Macro.if_($monster`fluffy bunny`, Macro.item(banish)).step(embezzlerMacro())
+      );
+    } while (
+      "fluffy bunny" !== get("lastEncounter") &&
+      !get("banishedMonsters").includes("fluffy bunny")
+    );
+  }
 }
 
 export function initializeExtrovermectinZones(): void {

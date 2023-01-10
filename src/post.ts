@@ -35,17 +35,18 @@ import {
 } from "libram";
 import { acquire } from "./acquire";
 import { garboAdventure, Macro } from "./combat";
+import { globalOptions } from "./config";
 import { computeDiet, consumeDiet } from "./diet";
 import {
-	bestJuneCleaverOption,
-	globalOptions,
-	juneCleaverChoiceValues,
-	maxBy,
-	safeInterrupt,
-	safeRestore,
-	setChoice,
-	valueJuneCleaverOption,
+  bestJuneCleaverOption,
+  juneCleaverChoiceValues,
+  maxBy,
+  safeInterrupt,
+  safeRestore,
+  setChoice,
+  valueJuneCleaverOption,
 } from "./lib";
+import { teleportEffects } from "./mood";
 import { garboAverageValue, garboValue, sessionSinceStart } from "./session";
 
 function coldMedicineCabinet(): void {
@@ -62,7 +63,7 @@ function coldMedicineCabinet(): void {
 	let match;
 	const regexp = /descitem\((\d+)\)/g;
 	const itemChoices = new Map<Item, number>();
-	if (!globalOptions.noBarf) {
+	if (!globalOptions.nobarf) {
 		// if spending turns at barf, we probably will be able to get an extro so always consider it
 		itemChoices.set($item`Extrovermectin™`, -1);
 	}
@@ -85,14 +86,14 @@ function coldMedicineCabinet(): void {
 function fillPantsgivingFullness(): void {
 	if (
 		getRemainingStomach() > 0 &&
-		(!globalOptions.yachtzeeChain || get("_garboYachtzeeChainCompleted", false))
+		(!globalOptions.prefs.yachtzeechain || get("_garboYachtzeeChainCompleted", false))
 	) {
 		consumeDiet(computeDiet().pantsgiving(), "PANTSGIVING");
 	}
 }
 
 function fillSweatyLiver(): void {
-	if (globalOptions.yachtzeeChain && !get("_garboYachtzeeChainCompleted", false)) return;
+	if (globalOptions.prefs.yachtzeechain && !get("_garboYachtzeeChainCompleted", false)) return;
 
 	const castsWanted = 3 - get("_sweatOutSomeBoozeUsed");
 	if (castsWanted <= 0 || !have($item`designer sweatpants`)) return;
@@ -143,7 +144,7 @@ function skipJuneCleaverChoices(): void {
 	}
 }
 function juneCleave(): void {
-	if (get("_juneCleaverFightsLeft") <= 0) {
+	if (get("_juneCleaverFightsLeft") <= 0 && teleportEffects.every((e) => !have(e))) {
 		equip($slot`weapon`, $item`June cleaver`);
 		skipJuneCleaverChoices();
 		withProperty("recoveryScript", "", () => {
@@ -165,13 +166,15 @@ function stillsuit() {
 	}
 }
 
+let funguyWorthIt = true;
 function funguySpores() {
 	// Mush-Mouth will drop an expensive mushroom if you do a combat with one turn of it left
 	if (
 		myLevel() >= 15 && // It applies -100 to all stats, and Level 15 seems to be a reasonable place where you will survive -100 to all stats
 		!have($effect`Mush-Mouth`) &&
-		(!globalOptions.ascending || myAdventures() > 11) &&
-		get("dinseyRollercoasterNext") // If it were to expire on a rails adventure, you'd waste the cost of the spore. Using it when next turn is rails is easiest way to make sure it won't
+		(!globalOptions.ascend || myAdventures() > 11) &&
+		get("dinseyRollercoasterNext") && // If it were to expire on a rails adventure, you'd waste the cost of the spore. Using it when next turn is rails is easiest way to make sure it won't
+    funguyWorthIt
 	) {
 		// According to wiki, it has a 75% chance of being a stat mushroom and 25% chance of being another mushroom
 		const value =
@@ -185,16 +188,16 @@ function funguySpores() {
 				);
 		if (acquire(1, $item`Fun-Guy spore`, value, false) > 0) {
 			use($item`Fun-Guy spore`);
-		}
+		} else funguyWorthIt = false;
 	}
 }
 
-const autumnAtonZones = $locations`The Toxic Teacups, The Oasis, The Deep Dark Jungle, The Bubblin' Caldera, The Sleazy Back Alley`;
+const autumnAtonZones = $locations`El Vibrato Island, The Toxic Teacups, The Oasis, The Deep Dark Jungle, The Bubblin' Caldera, The Sleazy Back Alley`;
 
 export default function postCombatActions(skipDiet = false): void {
 	juneCleave();
 	numberology();
-	if (!skipDiet && !globalOptions.noDiet) {
+	if (!skipDiet && !globalOptions.nodiet) {
 		fillPantsgivingFullness();
 		fillSweatyLiver();
 	}
@@ -204,7 +207,7 @@ export default function postCombatActions(skipDiet = false): void {
 	updateMallPrices();
 	stillsuit();
 	funguySpores();
-	if (globalOptions.ascending || AutumnAton.turnsForQuest() < myAdventures() + 10) {
+	if (globalOptions.ascend || AutumnAton.turnsForQuest() < myAdventures() + 10) {
 		AutumnAton.sendTo(autumnAtonZones);
 	}
 }
