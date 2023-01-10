@@ -45,12 +45,12 @@ import { globalOptions } from "./config";
 import { mallMin } from "./diet";
 import { meatFamiliar } from "./familiar";
 import {
-  baseMeat,
-  bestJuneCleaverOption,
-  BonusEquipMode,
-  juneCleaverChoiceValues,
-  realmAvailable,
-  valueJuneCleaverOption,
+	baseMeat,
+	bestJuneCleaverOption,
+	BonusEquipMode,
+	juneCleaverChoiceValues,
+	realmAvailable,
+	valueJuneCleaverOption,
 } from "./lib";
 import { garboAverageValue, garboValue } from "./session";
 import { estimatedTurns } from "./turns";
@@ -350,7 +350,7 @@ export function bonusGear(
 		...pantogramPants(),
 		...bagOfManyConfections(),
 		...stickers(equipMode),
-    ...powerGlove(),
+		...powerGlove(),
 		...(valueCircumstantialBonus
 			? new Map<Item, number>([
 					...(!["embezzler", "dmt"].includes(equipMode) ? pantsgiving() : []),
@@ -460,10 +460,10 @@ export function usingThumbRing(): boolean {
 let juneCleaverEV: number | null = null;
 function juneCleaver(equipMode: BonusEquipMode): Map<Item, number> {
 	if (
-    !have($item`June cleaver`) ||
-    get("_juneCleaverFightsLeft") > estimatedTurns() ||
-    !get("_juneCleaverFightsLeft")
-  ) {
+		!have($item`June cleaver`) ||
+		get("_juneCleaverFightsLeft") > estimatedTurns() ||
+		!get("_juneCleaverFightsLeft")
+	) {
 		return new Map();
 	}
 	if (!juneCleaverEV) {
@@ -503,23 +503,23 @@ function juneCleaver(equipMode: BonusEquipMode): Map<Item, number> {
 function stickers(equipMode: BonusEquipMode): Map<Item, number> {
 	if (equipMode === "embezzler") return new Map();
 
-  const cost = sumNumbers(
-    $slots`sticker1, sticker2, sticker3`.map((s) => mallPrice(equippedItem(s)) / 20)
-  );
-  return new Map([
-    [$item`scratch 'n' sniff sword`, -1 * cost],
-    [$item`scratch 'n' sniff crossbow`, -1 * cost],
-  ]);
+	const cost = sumNumbers(
+		$slots`sticker1, sticker2, sticker3`.map((s) => mallPrice(equippedItem(s)) / 20)
+	);
+	return new Map([
+		[$item`scratch 'n' sniff sword`, -1 * cost],
+		[$item`scratch 'n' sniff crossbow`, -1 * cost],
+	]);
 }
 
 function powerGlove(): Map<Item, number> {
-  if (!have($item`Powerful Glove`)) return new Map();
-  // 23% proc rate, according to the wiki
-  // https://kol.coldfront.net/thekolwiki/index.php/Powerful_Glove
-  return new Map([
-    [
-      $item`Powerful Glove`,
-      0.25 * garboAverageValue(...$items`blue pixel, green pixel, red pixel, white pixel`),
-    ],
-  ]);
+	if (!have($item`Powerful Glove`)) return new Map();
+	// 23% proc rate, according to the wiki
+	// https://kol.coldfront.net/thekolwiki/index.php/Powerful_Glove
+	return new Map([
+		[
+			$item`Powerful Glove`,
+			0.25 * garboAverageValue(...$items`blue pixel, green pixel, red pixel, white pixel`),
+		],
+	]);
 }

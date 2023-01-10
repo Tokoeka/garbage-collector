@@ -140,10 +140,11 @@ export function meatMood(urKels = false, meat = baseMeat): Mood {
 			useSkill($skill`Chorale of Companionship`, 10 - get("_companionshipCasts"));
 		}
 	}
-
-	if (have($item`lodestone`) && !get("_lodestonetUsed", false)) {
-    use($item`lodestone`);
-  }
+// eslint-disable-next-line libram/verify-constants
+	if (have($item`lodestone`) && !get("_lodestoneUsed", false)) {
+		// eslint-disable-next-line libram/verify-constants
+		use($item`lodestone`);
+	}
 
 	shrugBadEffects();
 
@@ -200,9 +201,9 @@ export function freeFightMood(...additionalEffects: Effect[]): Mood {
 	if (have($item`The Legendary Beat`) && !get("_legendaryBeat")) {
 		use($item`The Legendary Beat`);
 	}
-  if (have($item`portable steam unit`) && !get("_portableSteamUnitUsed", false)) {
-    use($item`portable steam unit`);
-  }
+	if (have($item`portable steam unit`) && !get("_portableSteamUnitUsed", false)) {
+		use($item`portable steam unit`);
+	}
 	shrugBadEffects(...additionalEffects);
 
 	if (getWorkshed() === $item`Asdon Martin keyfob`) mood.drive(AsdonMartin.Driving.Observantly);
@@ -239,10 +240,10 @@ export const teleportEffects = $effects`Teleportitis, Feeling Lost, Funday!`;
 const otherwiseBadEffects = $effects`Temporary Blindness`;
 export function shrugBadEffects(...exclude: Effect[]): void {
 	[...stings, ...textAlteringEffects, ...teleportEffects, ...otherwiseBadEffects].forEach(
-    (effect) => {
-  		if (have(effect) && !exclude.includes(effect)) {
-  			uneffect(effect);
-      }
+		(effect) => {
+			if (have(effect) && !exclude.includes(effect)) {
+				uneffect(effect);
+			}
 		}
 	);
 }

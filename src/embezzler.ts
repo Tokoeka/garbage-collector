@@ -22,38 +22,38 @@ import {
 	wait,
 } from "kolmafia";
 import {
-  $effect,
-  $familiar,
-  $item,
-  $items,
-  $location,
-  $locations,
-  $monster,
-  $skill,
-  ChateauMantegna,
-  CombatLoversLocket,
-  Counter,
-  CrystalBall,
-  get,
-  have,
-  property,
-  questStep,
-  Requirement,
-  set,
-  SourceTerminal,
-  sum,
+	$effect,
+	$familiar,
+	$item,
+	$items,
+	$location,
+	$locations,
+	$monster,
+	$skill,
+	ChateauMantegna,
+	CombatLoversLocket,
+	Counter,
+	CrystalBall,
+	get,
+	have,
+	property,
+	questStep,
+	Requirement,
+	set,
+	SourceTerminal,
+	sum,
 } from "libram";
 import { acquire } from "./acquire";
 import { garboAdventure, garboAdventureAuto, Macro, shouldRedigitize, withMacro } from "./combat";
 import { globalOptions } from "./config";
 import { crateStrategy, doingExtrovermectin, equipOrbIfDesired } from "./extrovermectin";
 import {
-  averageEmbezzlerNet,
-  HIGHLIGHT,
-  ltbRun,
-  setChoice,
-  userConfirmDialog,
-  WISH_VALUE,
+	averageEmbezzlerNet,
+	HIGHLIGHT,
+	ltbRun,
+	setChoice,
+	userConfirmDialog,
+	WISH_VALUE,
 } from "./lib";
 import { waterBreathingEquipment } from "./outfit";
 import { DraggableFight, wanderWhere } from "./wanderer";
@@ -236,33 +236,34 @@ function faxEmbezzler(): void {
 }
 
 export const embezzlerMacro = (): Macro =>
-  Macro.if_(
-    embezzler,
-    Macro.if_($location`The Briny Deeps`, Macro.tryCopier($item`pulled green taffy`))
-      .externalIf(
-        myFamiliar() === $familiar`Reanimated Reanimator`,
-        Macro.trySkill($skill`Wink at`)
-      )
-      .externalIf(
-        myFamiliar() === $familiar`Obtuse Angel`,
-        Macro.trySkill($skill`Fire a badly romantic arrow`)
-      )
-      .externalIf(
-        get("beGregariousCharges") > 0 &&
-          (get("beGregariousMonster") !== embezzler || get("beGregariousFightsLeft") === 0),
-        Macro.trySkill($skill`Be Gregarious`)
-      )
-      .externalIf(
-        SourceTerminal.getDigitizeMonster() !== embezzler || shouldRedigitize(),
-        Macro.tryCopier($skill`Digitize`)
-      )
-      .tryCopier($item`Spooky Putty sheet`)
-      .tryCopier($item`Rain-Doh black box`)
-      .tryCopier($item`4-d camera`)
-      .tryCopier($item`unfinished ice sculpture`)
-      .externalIf(get("_enamorangs") === 0, Macro.tryCopier($item`LOV Enamorang`))
-      .meatKill()
-  ).abort();
+	Macro.if_(
+		embezzler,
+		Macro.if_($location`The Briny Deeps`, Macro.tryCopier($item`pulled green taffy`))
+			.externalIf(
+				myFamiliar() === $familiar`Reanimated Reanimator`,
+				Macro.trySkill($skill`Wink at`)
+			)
+			.externalIf(
+				myFamiliar() === $familiar`Obtuse Angel`,
+				Macro.trySkill($skill`Fire a badly romantic arrow`)
+			)
+			.externalIf(
+				get("beGregariousCharges") > 0 &&
+					(get("beGregariousMonster") !== embezzler ||
+						get("beGregariousFightsLeft") === 0),
+				Macro.trySkill($skill`Be Gregarious`)
+			)
+			.externalIf(
+				SourceTerminal.getDigitizeMonster() !== embezzler || shouldRedigitize(),
+				Macro.tryCopier($skill`Digitize`)
+			)
+			.tryCopier($item`Spooky Putty sheet`)
+			.tryCopier($item`Rain-Doh black box`)
+			.tryCopier($item`4-d camera`)
+			.tryCopier($item`unfinished ice sculpture`)
+			.externalIf(get("_enamorangs") === 0, Macro.tryCopier($item`LOV Enamorang`))
+			.meatKill()
+	).abort();
 
 const wandererFailsafeMacro = () =>
 	Macro.externalIf(

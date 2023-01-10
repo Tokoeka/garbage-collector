@@ -38,13 +38,13 @@ import { garboAdventure, Macro } from "./combat";
 import { globalOptions } from "./config";
 import { computeDiet, consumeDiet } from "./diet";
 import {
-  bestJuneCleaverOption,
-  juneCleaverChoiceValues,
-  maxBy,
-  safeInterrupt,
-  safeRestore,
-  setChoice,
-  valueJuneCleaverOption,
+	bestJuneCleaverOption,
+	juneCleaverChoiceValues,
+	maxBy,
+	safeInterrupt,
+	safeRestore,
+	setChoice,
+	valueJuneCleaverOption,
 } from "./lib";
 import { teleportEffects } from "./mood";
 import { garboAverageValue, garboValue, sessionSinceStart } from "./session";
@@ -174,7 +174,7 @@ function funguySpores() {
 		!have($effect`Mush-Mouth`) &&
 		(!globalOptions.ascend || myAdventures() > 11) &&
 		get("dinseyRollercoasterNext") && // If it were to expire on a rails adventure, you'd waste the cost of the spore. Using it when next turn is rails is easiest way to make sure it won't
-    funguyWorthIt
+		funguyWorthIt
 	) {
 		// According to wiki, it has a 75% chance of being a stat mushroom and 25% chance of being another mushroom
 		const value =

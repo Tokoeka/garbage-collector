@@ -46,15 +46,15 @@ import {
 import { nonOrganAdventures, runDiet } from "./diet";
 import { dailyFights, freeFights, printEmbezzlerLog } from "./fights";
 import {
-  bestJuneCleaverOption,
-  checkGithubVersion,
-  HIGHLIGHT,
-  maxBy,
-  printLog,
-  propertyManager,
-  questStep,
-  safeRestore,
-  userConfirmDialog,
+	bestJuneCleaverOption,
+	checkGithubVersion,
+	HIGHLIGHT,
+	maxBy,
+	printLog,
+	propertyManager,
+	questStep,
+	safeRestore,
+	userConfirmDialog,
 } from "./lib";
 import { meatMood, useBuffExtenders } from "./mood";
 import postCombatActions from "./post";
@@ -98,17 +98,17 @@ export function main(argString = ""): void {
 	sinceKolmafiaRevision(27075);
 	checkGithubVersion();
 
-  Args.fill(globalOptions, argString);
+	Args.fill(globalOptions, argString);
 	if (globalOptions.version) return; // Since we always print the version, all done!
-  if (globalOptions.help) {
-    Args.showHelp(globalOptions);
-    return;
-  }
+	if (globalOptions.help) {
+		Args.showHelp(globalOptions);
+		return;
+	}
 
-  const completedProperty = "_garboCompleted";
-  set(completedProperty, "");
+	const completedProperty = "_garboCompleted";
+	set(completedProperty, "");
 
-  if (globalOptions.prefs.autoUserConfirm) {
+	if (globalOptions.prefs.autoUserConfirm) {
 		print(
 			"I have set auto-confirm to true and accept all ramifications that come with that.",
 			"red"
@@ -144,14 +144,14 @@ export function main(argString = ""): void {
 		);
 	}
 
-  if (globalOptions.prefs.valueOfAdventure && globalOptions.prefs.valueOfAdventure <= 3500) {
-    throw `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, which is too low for barf farming to be worthwhile. If you forgot to set it, use "set valueOfAdventure = XXXX" to set it to your marginal turn meat value.`;
-  }
+	if (globalOptions.prefs.valueOfAdventure && globalOptions.prefs.valueOfAdventure <= 3500) {
+		throw `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, which is too low for barf farming to be worthwhile. If you forgot to set it, use "set valueOfAdventure = XXXX" to set it to your marginal turn meat value.`;
+	}
 	if (globalOptions.prefs.valueOfAdventure && globalOptions.prefs.valueOfAdventure >= 25000) {
-    throw `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, which is definitely incorrect. Please set it to your reliable marginal turn value.`;
-  }
-  if (globalOptions.prefs.valueOfAdventure && globalOptions.prefs.valueOfAdventure >= 8000) {
-    const proceedRegardless = userConfirmDialog(
+		throw `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, which is definitely incorrect. Please set it to your reliable marginal turn value.`;
+	}
+	if (globalOptions.prefs.valueOfAdventure && globalOptions.prefs.valueOfAdventure >= 8000) {
+		const proceedRegardless = userConfirmDialog(
 			`Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, which is possibly wrong. Are you sure you want to garbologize with that VOA?`,
 			false
 		);
@@ -160,13 +160,13 @@ export function main(argString = ""): void {
 		}
 	}
 
-  if (globalOptions.turns) {
-    if (globalOptions.turns >= 0) {
-      globalOptions.stopTurncount = myTurncount() + globalOptions.turns;
-    } else {
-      globalOptions.saveTurns = -globalOptions.turns;
-    }
-  }
+	if (globalOptions.turns) {
+		if (globalOptions.turns >= 0) {
+			globalOptions.stopTurncount = myTurncount() + globalOptions.turns;
+		} else {
+			globalOptions.saveTurns = -globalOptions.turns;
+		}
+	}
 
 	if (stashItems.length > 0) {
 		if (
@@ -279,74 +279,74 @@ export function main(argString = ""): void {
 			? 100000
 			: get("maximizerCombinationLimit");
 
-    propertyManager.set({
-      logPreferenceChange: true,
-      logPreferenceChangeFilter: [
-        ...new Set([
-          ...get("logPreferenceChangeFilter").split(","),
-          "libram_savedMacro",
-          "maximizerMRUList",
-          "testudinalTeachings",
-          "garboEmbezzlerDate",
-          "garboEmbezzlerCount",
-          "garboEmbezzlerSources",
-          "spadingData",
-        ]),
-      ]
-        .sort()
-        .filter((a) => a)
-        .join(","),
-      battleAction: "custom combat script",
-      customCombatScript: "garbo",
-      autoSatisfyWithMall: true,
-      autoSatisfyWithNPCs: true,
-      autoSatisfyWithCoinmasters: true,
-      autoSatisfyWithStash: false,
-      dontStopForCounters: true,
-      maximizerFoldables: true,
-      hpAutoRecovery: -0.05,
-      hpAutoRecoveryTarget: 0.0,
-      mpAutoRecovery: -0.05,
-      mpAutoRecoveryTarget: 0.0,
-      afterAdventureScript: "",
-      betweenBattleScript: "",
-      choiceAdventureScript: "",
-      counterScript: "",
-      familiarScript: "",
-      currentMood: "apathetic",
-      autoTuxedo: true,
-      autoPinkyRing: true,
-      autoGarish: true,
-      allowNonMoodBurning: !globalOptions.ascend,
-      allowSummonBurning: true,
-      libramSkillsSoftcore: "none", // Don't cast librams when mana burning, handled manually based on sale price
-      valueOfInventory: 2,
-      suppressMallPriceCacheMessages: true,
-      maximizerCombinationLimit: maximizerCombinationLimit,
-    });
-    let bestHalloweiner = 0;
-    if (haveInCampground($item`haunted doghouse`)) {
-      const halloweinerOptions: { price: number; choiceId: number }[] = (
-        [
-          [$items`bowl of eyeballs, bowl of mummy guts, bowl of maggots`, 1],
-          [$items`blood and blood, Jack-O-Lantern beer, zombie`, 2],
-          [$items`wind-up spider, plastic nightmare troll, Telltale™ rubber heart`, 3],
-        ] as [Item[], number][]
-      ).map(([halloweinerOption, choiceId]) => {
-        return {
-          price: garboAverageValue(...halloweinerOption),
-          choiceId: choiceId,
-        };
-      });
-      bestHalloweiner = maxBy(halloweinerOptions, "price").choiceId;
-    }
-    propertyManager.setChoices({
-      1106: 3, // Ghost Dog Chow
-      1107: 1, // tennis ball
-      1108: bestHalloweiner,
-      1340: 1, // Accept the doctor quest
-      1341: 1, // Cure her poison
-    });
+		propertyManager.set({
+			logPreferenceChange: true,
+			logPreferenceChangeFilter: [
+				...new Set([
+					...get("logPreferenceChangeFilter").split(","),
+					"libram_savedMacro",
+					"maximizerMRUList",
+					"testudinalTeachings",
+					"garboEmbezzlerDate",
+					"garboEmbezzlerCount",
+					"garboEmbezzlerSources",
+					"spadingData",
+				]),
+			]
+				.sort()
+				.filter((a) => a)
+				.join(","),
+			battleAction: "custom combat script",
+			customCombatScript: "garbo",
+			autoSatisfyWithMall: true,
+			autoSatisfyWithNPCs: true,
+			autoSatisfyWithCoinmasters: true,
+			autoSatisfyWithStash: false,
+			dontStopForCounters: true,
+			maximizerFoldables: true,
+			hpAutoRecovery: -0.05,
+			hpAutoRecoveryTarget: 0.0,
+			mpAutoRecovery: -0.05,
+			mpAutoRecoveryTarget: 0.0,
+			afterAdventureScript: "",
+			betweenBattleScript: "",
+			choiceAdventureScript: "",
+			counterScript: "",
+			familiarScript: "",
+			currentMood: "apathetic",
+			autoTuxedo: true,
+			autoPinkyRing: true,
+			autoGarish: true,
+			allowNonMoodBurning: !globalOptions.ascend,
+			allowSummonBurning: true,
+			libramSkillsSoftcore: "none", // Don't cast librams when mana burning, handled manually based on sale price
+			valueOfInventory: 2,
+			suppressMallPriceCacheMessages: true,
+			maximizerCombinationLimit: maximizerCombinationLimit,
+		});
+		let bestHalloweiner = 0;
+		if (haveInCampground($item`haunted doghouse`)) {
+			const halloweinerOptions: { price: number; choiceId: number }[] = (
+				[
+					[$items`bowl of eyeballs, bowl of mummy guts, bowl of maggots`, 1],
+					[$items`blood and blood, Jack-O-Lantern beer, zombie`, 2],
+					[$items`wind-up spider, plastic nightmare troll, Telltale™ rubber heart`, 3],
+				] as [Item[], number][]
+			).map(([halloweinerOption, choiceId]) => {
+				return {
+					price: garboAverageValue(...halloweinerOption),
+					choiceId: choiceId,
+				};
+			});
+			bestHalloweiner = maxBy(halloweinerOptions, "price").choiceId;
+		}
+		propertyManager.setChoices({
+			1106: 3, // Ghost Dog Chow
+			1107: 1, // tennis ball
+			1108: bestHalloweiner,
+			1340: 1, // Accept the doctor quest
+			1341: 1, // Cure her poison
+		});
 
 		if (JuneCleaver.have()) {
 			propertyManager.setChoices(
@@ -403,7 +403,8 @@ export function main(argString = ""): void {
 
 				if (
 					!globalOptions.nodiet &&
-					(!globalOptions.prefs.yachtzeechain || get("_garboYachtzeeChainCompleted", false))
+					(!globalOptions.prefs.yachtzeechain ||
+						get("_garboYachtzeeChainCompleted", false))
 				) {
 					runDiet();
 				} else if (!globalOptions.simdiet) {
@@ -475,5 +476,5 @@ export function main(argString = ""): void {
 		printGarboSession();
 		printLog(HIGHLIGHT);
 	}
-  set(completedProperty, `garbo ${argString}`);
+	set(completedProperty, `garbo ${argString}`);
 }

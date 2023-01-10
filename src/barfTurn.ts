@@ -43,13 +43,13 @@ import { computeDiet, consumeDiet } from "./diet";
 import { barfFamiliar, freeFightFamiliar, meatFamiliar } from "./familiar";
 import { deliverThesisIfAble } from "./fights";
 import {
-  embezzlerLog,
-  kramcoGuaranteed,
-  questStep,
-  romanticMonsterImpossible,
-  safeRestore,
-  setChoice,
-  sober,
+	embezzlerLog,
+	kramcoGuaranteed,
+	questStep,
+	romanticMonsterImpossible,
+	safeRestore,
+	setChoice,
+	sober,
 } from "./lib";
 import { meatMood } from "./mood";
 import {
@@ -316,7 +316,8 @@ const turns: AdventureAction[] = [
 			!have($effect`Everything Looks Yellow`) &&
 			romanticMonsterImpossible(),
 		execute: () => {
-      const usingDuplicate = SourceTerminal.have() && SourceTerminal.duplicateUsesRemaining() > 0;
+			const usingDuplicate =
+				SourceTerminal.have() && SourceTerminal.duplicateUsesRemaining() > 0;
 
 			const location = wanderWhere("yellow ray");
 			const familiar = freeFightFamiliar({ location, allowAttackFamiliars: !usingDuplicate });

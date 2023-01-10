@@ -18,21 +18,23 @@ import { ESTIMATED_OVERDRUNK_TURNS } from "./lib";
  * @returns A guess of how many runs garbo will run in total
  */
 export function estimatedTurns(): number {
-  // Assume roughly 2 fullness from pantsgiving and 8 adventures/fullness.
-  const pantsgivingAdventures = have($item`Pantsgiving`)
-    ? Math.max(0, 2 - get("_pantsgivingFullness")) * 8
-    : 0;
-  const potentialSausages =
-    itemAmount($item`magical sausage`) + itemAmount($item`magical sausage casing`);
-  const sausageAdventures = have($item`Kramco Sausage-o-Matic™`)
-    ? Math.min(potentialSausages, 23 - get("_sausagesEaten"))
-    : 0;
-  const thesisAdventures = have($familiar`Pocket Professor`) && !get("_thesisDelivered") ? 11 : 0;
-  const nightcapAdventures =
-    globalOptions.ascend && myInebriety() <= inebrietyLimit() && have($item`Drunkula's wineglass`)
-      ? ESTIMATED_OVERDRUNK_TURNS
-      : 0;
-  const thumbRingMultiplier = usingThumbRing() ? 1 / 0.96 : 1;
+	// Assume roughly 2 fullness from pantsgiving and 8 adventures/fullness.
+	const pantsgivingAdventures = have($item`Pantsgiving`)
+		? Math.max(0, 2 - get("_pantsgivingFullness")) * 8
+		: 0;
+	const potentialSausages =
+		itemAmount($item`magical sausage`) + itemAmount($item`magical sausage casing`);
+	const sausageAdventures = have($item`Kramco Sausage-o-Matic™`)
+		? Math.min(potentialSausages, 23 - get("_sausagesEaten"))
+		: 0;
+	const thesisAdventures = have($familiar`Pocket Professor`) && !get("_thesisDelivered") ? 11 : 0;
+	const nightcapAdventures =
+		globalOptions.ascend &&
+		myInebriety() <= inebrietyLimit() &&
+		have($item`Drunkula's wineglass`)
+			? ESTIMATED_OVERDRUNK_TURNS
+			: 0;
+	const thumbRingMultiplier = usingThumbRing() ? 1 / 0.96 : 1;
 
 	// We need to estimate adventures from our organs if we are only dieting after yachtzee chaining
 	const yachtzeeTurns = 30; // guesstimate

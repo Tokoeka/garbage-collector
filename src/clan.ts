@@ -50,7 +50,7 @@ export function withVIPClan<T>(action: () => T): T {
 			)
 		) {
 			clanIdOrName = getClanId();
-      globalOptions.prefs.vipClan = `${clanIdOrName}`;
+			globalOptions.prefs.vipClan = `${clanIdOrName}`;
 			set("garbo_vipClan", clanIdOrName);
 		}
 	}

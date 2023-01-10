@@ -31,29 +31,29 @@ import {
 	retrieveItem,
 	runCombat,
 	setAutoAttack,
-  setCcs,
+	setCcs,
 	Skill,
 	visitUrl,
 	writeCcs,
 } from "kolmafia";
 import {
-  $class,
-  $effect,
-  $familiar,
-  $item,
-  $items,
-  $location,
-  $locations,
-  $monster,
-  $monsters,
-  $skill,
-  $slot,
-  $thralls,
-  Counter,
-  get,
-  have,
-  SourceTerminal,
-  StrictMacro,
+	$class,
+	$effect,
+	$familiar,
+	$item,
+	$items,
+	$location,
+	$locations,
+	$monster,
+	$monsters,
+	$skill,
+	$slot,
+	$thralls,
+	Counter,
+	get,
+	have,
+	SourceTerminal,
+	StrictMacro,
 } from "libram";
 import { canOpenRedPresent, meatFamiliar, timeToMeatify } from "./familiar";
 import { digitizedMonstersRemaining } from "./turns";
@@ -280,78 +280,85 @@ export class Macro extends StrictMacro {
 
 		const willCrit = sealClubberSetup || opsSetup || katanaSetup || capeSetup;
 
-    return this.externalIf(
-      shouldRedigitize(),
-      Macro.if_($monster`Knob Goblin Embezzler`, Macro.trySkill($skill`Digitize`))
-    )
-      .tryHaveSkill($skill`Sing Along`)
-      .familiarActions()
-      .externalIf(
-        digitizedMonstersRemaining() <= 5 - get("_meteorShowerUses") &&
-          have($skill`Meteor Lore`) &&
-          get("_meteorShowerUses") < 5,
-        Macro.if_($monster`Knob Goblin Embezzler`, Macro.trySkill($skill`Meteor Shower`))
-      )
-      .externalIf(
-        get("cosmicBowlingBallReturnCombats") < 1,
-        Macro.trySkill($skill`Bowl Straight Up`)
-      )
-      .externalIf(
-        have($skill`Transcendent Olfaction`) &&
-          (get("olfactedMonster") !== $monster`garbage tourist` || !have($effect`On the Trail`)) &&
-          get("_olfactionsUsed") < 3,
-        Macro.if_($monster`garbage tourist`, Macro.trySkill($skill`Transcendent Olfaction`))
-      )
-      .externalIf(
-        get("_gallapagosMonster") !== $monster`garbage tourist` &&
-          have($skill`Gallapagosian Mating Call`),
-        Macro.if_($monster`garbage tourist`, Macro.trySkill($skill`Gallapagosian Mating Call`))
-      )
-      .externalIf(
-        get("longConMonster") !== $monster`garbage tourist` &&
-          get("_longConUsed") < 5 &&
-          have($skill`Long Con`),
-        Macro.if_($monster`garbage tourist`, Macro.trySkill($skill`Long Con`))
-      )
-      .externalIf(
-        !get("_latteCopyUsed") &&
-          (get("_latteMonster") !== $monster`garbage tourist` ||
-            Counter.get("Latte Monster") > 30) &&
-          have($item`latte lovers member's mug`),
-        Macro.if_($monster`garbage tourist`, Macro.trySkill($skill`Offer Latte to Opponent`))
-      )
-      .externalIf(
-        get("_feelNostalgicUsed") < 3 &&
-          get("lastCopyableMonster") === $monster`garbage tourist` &&
-          have($skill`Feel Nostalgic`),
-        Macro.if_(
-          `!monsterid ${$monster`garbage tourist`.id}`,
-          Macro.trySkill($skill`Feel Nostalgic`)
-        )
-      )
-      .externalIf(opsSetup, Macro.trySkill($skill`Throw Shield`))
-      .meatStasis(willCrit)
-      .externalIf(
-        hippyStoneBroken() && monsterManuelAvailable(),
-        Macro.if_(
-          `(monsterid 1758 || monsterid 1759 || monsterid 1760) && monsterhpbelow ${Math.floor(
-            (100 + numericModifier("Monster Level")) / 5
-          )}`,
-          Macro.trySkill($skill`Feel Superior`)
-        )
-      )
-      .externalIf(sealClubberSetup, Macro.trySkill($skill`Furious Wallop`))
-      .externalIf(opsSetup, Macro.attack())
-      .externalIf(katanaSetup, Macro.trySkill($skill`Summer Siesta`))
-      .externalIf(capeSetup, Macro.trySkill($skill`Precision Shot`))
-      .externalIf(
-        myClass() === $class`Disco Bandit`,
-        Macro.trySkill($skill`Disco Dance of Doom`)
-          .trySkill($skill`Disco Dance II: Electric Boogaloo`)
-          .trySkill($skill`Disco Dance 3: Back in the Habit`)
-      )
-      .kill();
-  }
+		return this.externalIf(
+			shouldRedigitize(),
+			Macro.if_($monster`Knob Goblin Embezzler`, Macro.trySkill($skill`Digitize`))
+		)
+			.tryHaveSkill($skill`Sing Along`)
+			.familiarActions()
+			.externalIf(
+				digitizedMonstersRemaining() <= 5 - get("_meteorShowerUses") &&
+					have($skill`Meteor Lore`) &&
+					get("_meteorShowerUses") < 5,
+				Macro.if_($monster`Knob Goblin Embezzler`, Macro.trySkill($skill`Meteor Shower`))
+			)
+			.externalIf(
+				get("cosmicBowlingBallReturnCombats") < 1,
+				Macro.trySkill($skill`Bowl Straight Up`)
+			)
+			.externalIf(
+				have($skill`Transcendent Olfaction`) &&
+					(get("olfactedMonster") !== $monster`garbage tourist` ||
+						!have($effect`On the Trail`)) &&
+					get("_olfactionsUsed") < 3,
+				Macro.if_($monster`garbage tourist`, Macro.trySkill($skill`Transcendent Olfaction`))
+			)
+			.externalIf(
+				get("_gallapagosMonster") !== $monster`garbage tourist` &&
+					have($skill`Gallapagosian Mating Call`),
+				Macro.if_(
+					$monster`garbage tourist`,
+					Macro.trySkill($skill`Gallapagosian Mating Call`)
+				)
+			)
+			.externalIf(
+				get("longConMonster") !== $monster`garbage tourist` &&
+					get("_longConUsed") < 5 &&
+					have($skill`Long Con`),
+				Macro.if_($monster`garbage tourist`, Macro.trySkill($skill`Long Con`))
+			)
+			.externalIf(
+				!get("_latteCopyUsed") &&
+					(get("_latteMonster") !== $monster`garbage tourist` ||
+						Counter.get("Latte Monster") > 30) &&
+					have($item`latte lovers member's mug`),
+				Macro.if_(
+					$monster`garbage tourist`,
+					Macro.trySkill($skill`Offer Latte to Opponent`)
+				)
+			)
+			.externalIf(
+				get("_feelNostalgicUsed") < 3 &&
+					get("lastCopyableMonster") === $monster`garbage tourist` &&
+					have($skill`Feel Nostalgic`),
+				Macro.if_(
+					`!monsterid ${$monster`garbage tourist`.id}`,
+					Macro.trySkill($skill`Feel Nostalgic`)
+				)
+			)
+			.externalIf(opsSetup, Macro.trySkill($skill`Throw Shield`))
+			.meatStasis(willCrit)
+			.externalIf(
+				hippyStoneBroken() && monsterManuelAvailable(),
+				Macro.if_(
+					`(monsterid 1758 || monsterid 1759 || monsterid 1760) && monsterhpbelow ${Math.floor(
+						(100 + numericModifier("Monster Level")) / 5
+					)}`,
+					Macro.trySkill($skill`Feel Superior`)
+				)
+			)
+			.externalIf(sealClubberSetup, Macro.trySkill($skill`Furious Wallop`))
+			.externalIf(opsSetup, Macro.attack())
+			.externalIf(katanaSetup, Macro.trySkill($skill`Summer Siesta`))
+			.externalIf(capeSetup, Macro.trySkill($skill`Precision Shot`))
+			.externalIf(
+				myClass() === $class`Disco Bandit`,
+				Macro.trySkill($skill`Disco Dance of Doom`)
+					.trySkill($skill`Disco Dance II: Electric Boogaloo`)
+					.trySkill($skill`Disco Dance 3: Back in the Habit`)
+			)
+			.kill();
+	}
 
 	static meatKill(): Macro {
 		return new Macro().meatKill();
@@ -628,22 +635,22 @@ export class Macro extends StrictMacro {
 }
 
 function customizeMacro<M extends StrictMacro>(macro: M) {
-  return Macro.if_($monsters`giant rubber spider, time-spinner prank`, Macro.kill())
-    .externalIf(
-      have($effect`Eldritch Attunement`),
-      Macro.if_($monster`Eldritch Tentacle`, Macro.basicCombat())
-    )
-    .ifHolidayWanderer(
-      Macro.externalIf(
-        haveEquipped($item`backup camera`) &&
-          get("_backUpUses") < 11 &&
-          get("lastCopyableMonster") === $monster`Knob Goblin Embezzler` &&
-          myFamiliar() === meatFamiliar(),
-        Macro.skill($skill`Back-Up to your Last Enemy`).step(macro),
-        Macro.basicCombat()
-      )
-    )
-    .step(macro);
+	return Macro.if_($monsters`giant rubber spider, time-spinner prank`, Macro.kill())
+		.externalIf(
+			have($effect`Eldritch Attunement`),
+			Macro.if_($monster`Eldritch Tentacle`, Macro.basicCombat())
+		)
+		.ifHolidayWanderer(
+			Macro.externalIf(
+				haveEquipped($item`backup camera`) &&
+					get("_backUpUses") < 11 &&
+					get("lastCopyableMonster") === $monster`Knob Goblin Embezzler` &&
+					myFamiliar() === meatFamiliar(),
+				Macro.skill($skill`Back-Up to your Last Enemy`).step(macro),
+				Macro.basicCombat()
+			)
+		)
+		.step(macro);
 }
 
 function makeCcs<M extends StrictMacro>(macro: M) {

@@ -249,8 +249,8 @@ export function completeBarfQuest(): void {
 				}). Proceeding to acquire toxic globules.`,
 				"green"
 			);
-      attemptCompletingBarfQuest =
-  			acquire(20, $item`toxic globule`, (1.5 * globuleCosts) / 20, false) >= 20;
+			attemptCompletingBarfQuest =
+				acquire(20, $item`toxic globule`, (1.5 * globuleCosts) / 20, false) >= 20;
 		} else {
 			attemptCompletingBarfQuest = false;
 			print(
@@ -303,62 +303,63 @@ function checkBarfQuest(): void {
 		return;
 	}
 
-  for (const target of targets) {
-    for (const [idx, qst] of quests.entries()) {
-      if (target === qst) {
-        print(`Accepting Barf Quest: ${qst}`, "blue");
-        visitUrl(`choice.php?whichchoice=1066&pwd&option=${idx + 1}`);
-        return completeBarfQuest();
-      }
-    }
-  }
-  return;
+	for (const target of targets) {
+		for (const [idx, qst] of quests.entries()) {
+			if (target === qst) {
+				print(`Accepting Barf Quest: ${qst}`, "blue");
+				visitUrl(`choice.php?whichchoice=1066&pwd&option=${idx + 1}`);
+				return completeBarfQuest();
+			}
+		}
+	}
+	return;
 }
 
 export function configureSnojo(): void {
-  if (snojoConfigured) return;
+	if (snojoConfigured) return;
 
-  // if we're ascending, pick whichever consumable has the best price
-  // each consumable takes 7 turns and we can spend 10 per day
-  const options = new Map<number, number>([
-    [(10 / 7) * garboValue($item`ancient medicinal herbs`), 1],
-    [(10 / 7) * garboValue($item`ice rice`), 2],
-    [(10 / 7) * garboValue($item`iced plum wine`), 3],
-  ]);
-  // otherwise, assume we're in for at least five days and consider scrolls
-  // we get 7 consumables in 5 days, plus a scroll
-  if (!globalOptions.ascend) {
-    if (get("snojoMuscleWins") < 50) {
-      options.set(
-        (7 * garboValue($item`ancient medicinal herbs`) +
-          garboValue($item`training scroll:  Shattering Punch`)) /
-          5,
-        1
-      );
-    }
-    if (get("snojoMysticalityWins") < 50) {
-      options.set(
-        (7 * garboValue($item`ice rice`) + garboValue($item`training scroll:  Snokebomb`)) / 5,
-        2
-      );
-    }
-    if (get("snojoMoxieWins") < 50) {
-      options.set(
-        (7 * garboValue($item`iced plum wine`) +
-          garboValue($item`training scroll:  Shivering Monkey Technique`)) /
-          5,
-        3
-      );
-    }
-  }
+	// if we're ascending, pick whichever consumable has the best price
+	// each consumable takes 7 turns and we can spend 10 per day
+	const options = new Map<number, number>([
+		[(10 / 7) * garboValue($item`ancient medicinal herbs`), 1],
+		[(10 / 7) * garboValue($item`ice rice`), 2],
+		[(10 / 7) * garboValue($item`iced plum wine`), 3],
+	]);
+	// otherwise, assume we're in for at least five days and consider scrolls
+	// we get 7 consumables in 5 days, plus a scroll
+	if (!globalOptions.ascend) {
+		if (get("snojoMuscleWins") < 50) {
+			options.set(
+				(7 * garboValue($item`ancient medicinal herbs`) +
+					garboValue($item`training scroll:  Shattering Punch`)) /
+					5,
+				1
+			);
+		}
+		if (get("snojoMysticalityWins") < 50) {
+			options.set(
+				(7 * garboValue($item`ice rice`) + garboValue($item`training scroll:  Snokebomb`)) /
+					5,
+				2
+			);
+		}
+		if (get("snojoMoxieWins") < 50) {
+			options.set(
+				(7 * garboValue($item`iced plum wine`) +
+					garboValue($item`training scroll:  Shivering Monkey Technique`)) /
+					5,
+				3
+			);
+		}
+	}
 
-  const bestProfit = Math.max(...options.keys());
-  const option = options.get(bestProfit);
-  if (option) {
-    visitUrl("place.php?whichplace=snojo&action=snojo_controller");
-    runChoice(option);
-    snojoConfigured = true;
-  }
+	const bestProfit = Math.max(...options.keys());
+	const option = options.get(bestProfit);
+	if (option) {
+		visitUrl("place.php?whichplace=snojo&action=snojo_controller");
+		runChoice(option);
+		snojoConfigured = true;
+	}
 }
 
 export const DailyTasks: Task[] = [
@@ -538,12 +539,12 @@ export const DailyTasks: Task[] = [
 		completed: () => !attemptCompletingBarfQuest,
 		do: () => checkBarfQuest(),
 	},
-  {
-    name: "Configure Snojo",
-    ready: () => get("snojoAvailable") && get("_snojoFreeFights") < 10,
-    completed: () => snojoConfigured,
-    do: () => configureSnojo(),
-  },
+	{
+		name: "Configure Snojo",
+		ready: () => get("snojoAvailable") && get("_snojoFreeFights") < 10,
+		completed: () => snojoConfigured,
+		do: () => configureSnojo(),
+	},
 	// Final tasks
 	{
 		name: "Closet Items",
