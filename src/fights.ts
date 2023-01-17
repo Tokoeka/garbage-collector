@@ -714,6 +714,11 @@ const freeFightSources = [
 		}
 	),
 	new FreeFight(
+		() => (have($item`molehill mountain`) && !get("_molehillMountainUsed") ? 1 : 0),
+		() => withMacro(Macro.basicCombat(), () => use($item`molehill mountain`)),
+		true
+	),
+	new FreeFight(
 		() => TunnelOfLove.have() && !TunnelOfLove.isUsed(),
 		() => {
 			TunnelOfLove.fightAll(
@@ -1501,14 +1506,6 @@ const freeFightSources = [
 				return reqs;
 			},
 		}
-	),
-
-	new FreeFight(
-		// eslint-disable-next-line libram/verify-constants
-		() => have($item`molehill mountain`) && !get("_molehillMountainUsed", false),
-		// eslint-disable-next-line libram/verify-constants
-		() => use($item`molehill mountain`),
-		true
 	),
 ];
 

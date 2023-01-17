@@ -1,19 +1,13 @@
 import {
 	cliExecute,
-	descToItem,
 	equip,
-	getWorkshed,
-	handlingChoice,
-	Item,
 	itemAmount,
 	myAdventures,
 	myLevel,
+	myLocation,
 	reverseNumberology,
-	runChoice,
-	totalTurnsPlayed,
 	use,
 	useSkill,
-	visitUrl,
 } from "kolmafia";
 import {
 	$effect,
@@ -25,11 +19,11 @@ import {
 	$skill,
 	$slot,
 	AutumnAton,
+	FloristFriar,
 	get,
 	getRemainingStomach,
 	have,
 	JuneCleaver,
-	property,
 	uneffect,
 	withProperty,
 } from "libram";
@@ -40,7 +34,6 @@ import { computeDiet, consumeDiet } from "./diet";
 import {
 	bestJuneCleaverOption,
 	juneCleaverChoiceValues,
-	maxBy,
 	safeInterrupt,
 	safeRestore,
 	setChoice,
@@ -48,39 +41,19 @@ import {
 } from "./lib";
 import { teleportEffects } from "./mood";
 import { garboAverageValue, garboValue, sessionSinceStart } from "./session";
+import handleWorkshed from "./workshed";
 
-function coldMedicineCabinet(): void {
-	if (getWorkshed() !== $item`cold medicine cabinet`) return;
-
+function floristFriars(): void {
 	if (
-		property.getNumber("_coldMedicineConsults") >= 5 ||
-		property.getNumber("_nextColdMedicineConsult") > totalTurnsPlayed()
+		!FloristFriar.have() ||
+		myLocation() !== $location`Barf Mountain` ||
+		FloristFriar.isFull()
 	) {
 		return;
 	}
-	const options = visitUrl("campground.php?action=workshed");
-	let i = 0;
-	let match;
-	const regexp = /descitem\((\d+)\)/g;
-	const itemChoices = new Map<Item, number>();
-	if (!globalOptions.nobarf) {
-		// if spending turns at barf, we probably will be able to get an extro so always consider it
-		itemChoices.set($item`Extrovermectin™`, -1);
-	}
-
-	while ((match = regexp.exec(options)) !== null) {
-		i++;
-		const item = descToItem(match[1]);
-		itemChoices.set(item, i);
-	}
-
-	const bestItem = maxBy([...itemChoices.keys()], garboValue);
-	const bestChoice = itemChoices.get(bestItem);
-	if (bestChoice && bestChoice > 0) {
-		visitUrl("campground.php?action=workshed");
-		runChoice(bestChoice);
-	}
-	if (handlingChoice()) visitUrl("main.php");
+	[FloristFriar.StealingMagnolia, FloristFriar.AloeGuvnor, FloristFriar.PitcherPlant].forEach(
+		(flower) => flower.plant()
+	);
 }
 
 function fillPantsgivingFullness(): void {
@@ -201,7 +174,8 @@ export default function postCombatActions(skipDiet = false): void {
 		fillPantsgivingFullness();
 		fillSweatyLiver();
 	}
-	coldMedicineCabinet();
+	floristFriars();
+	handleWorkshed();
 	safeInterrupt();
 	safeRestore();
 	updateMallPrices();

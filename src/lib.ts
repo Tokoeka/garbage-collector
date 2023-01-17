@@ -568,3 +568,5 @@ export function maxBy<S extends string | number | symbol, T extends { [x in S]: 
 		return array.reduce((a, b) => (a[optimizer] >= b[optimizer] !== reverse ? a : b));
 	}
 }
+
+export type GarboItemLists = { Newark: string[]; "Feliz Navidad": string[]; trainset: string[] };

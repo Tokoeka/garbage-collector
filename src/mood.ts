@@ -140,7 +140,7 @@ export function meatMood(urKels = false, meat = baseMeat): Mood {
 			useSkill($skill`Chorale of Companionship`, 10 - get("_companionshipCasts"));
 		}
 	}
-// eslint-disable-next-line libram/verify-constants
+	// eslint-disable-next-line libram/verify-constants
 	if (have($item`lodestone`) && !get("_lodestoneUsed", false)) {
 		// eslint-disable-next-line libram/verify-constants
 		use($item`lodestone`);

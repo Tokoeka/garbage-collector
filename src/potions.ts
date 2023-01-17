@@ -44,6 +44,7 @@ import { globalOptions } from "./config";
 
 export type PotionTier = "embezzler" | "overlap" | "barf" | "ascending";
 const banned = $items`Uncle Greenspan's Bathroom Finance Guide`;
+export const failedWishes: Effect[] = [];
 
 const mutuallyExclusiveList: Effect[][] = [
 	$effects`Blue Tongue, Green Tongue, Orange Tongue, Purple Tongue, Red Tongue, Black Tongue`,
@@ -309,7 +310,7 @@ export class Potion {
 		return values.filter((tier) => tier.quantity > 0);
 	}
 
-	use(quantity: number): boolean {
+	private _use(quantity: number): boolean {
 		if (this.useOverride) {
 			return this.useOverride(quantity);
 		} else if (itemType(this.potion) === "potion") {
@@ -318,6 +319,16 @@ export class Potion {
 			// must provide an override for non potions, otherwise they won't use
 			return false;
 		}
+	}
+
+	use(quantity: number): boolean {
+		const effectTurns = haveEffect(this.effect());
+		const result = this._use(quantity);
+		// If we tried wishing but failed, no longer try this wish in the future
+		if (this.potion === $item`pocket wish` && haveEffect(this.effect()) <= effectTurns) {
+			failedWishes.push(this.effect());
+		}
+		return result;
 	}
 }
 
@@ -347,12 +358,9 @@ function useAsValuable(potion: Potion, embezzlers: number, embezzlersOnly: boole
 	return total;
 }
 
-export const farmingPotions = [
-	...Item.all()
-		.filter((item) => item.tradeable && !banned.includes(item) && itemType(item) === "potion")
-		.map((item) => new Potion(item))
-		.filter((potion) => potion.bonusMeat() > 0),
-	...$effects`Braaaaaains, Frosty`.map(
+export const wishPotions = Effect.all()
+	.filter((effect) => !effect.attributes.includes("nohookah"))
+	.map(
 		(effect) =>
 			new Potion($item`pocket wish`, {
 				effect,
@@ -361,7 +369,14 @@ export const farmingPotions = [
 				use: (quantity: number) =>
 					new Array(quantity).fill(0).every(() => cliExecute(`genie effect ${effect}`)),
 			})
-	),
+	);
+
+export const farmingPotions = [
+	...Item.all()
+		.filter((item) => item.tradeable && !banned.includes(item) && itemType(item) === "potion")
+		.map((item) => new Potion(item))
+		.filter((potion) => potion.bonusMeat() > 0),
+	...wishPotions,
 	new Potion($item`papier-mâché toothpicks`),
 ];
 
@@ -375,6 +390,10 @@ export function doublingPotions(embezzlers: number): Potion[] {
 		.map((pair) => pair.potion);
 }
 
+let completedPotionSetup = false;
+export function potionSetupCompleted(): boolean {
+	return completedPotionSetup;
+}
 /**
  * Determines if potions are worth using by comparing against meat-equilibrium. Considers using pillkeeper to double them. Accounts for non-wanderer embezzlers. Does not account for PYEC/LTC, or running out of turns with the ascend flag.
  * @param doEmbezzlers Do we account for embezzlers when deciding what potions are profitable?
@@ -414,7 +433,11 @@ export function potionSetup(embezzlersOnly: boolean): void {
 
 	for (const potion of testPotions) {
 		const effect = potion.effect();
-		if (!excludedEffects.has(effect) && useAsValuable(potion, embezzlers, embezzlersOnly) > 0) {
+		if (
+			!excludedEffects.has(effect) &&
+			!(failedWishes.includes(effect) && potion.potion === $item`pocket wish`) &&
+			useAsValuable(potion, embezzlers, embezzlersOnly) > 0
+		) {
 			for (const excluded of mutuallyExclusive.get(effect) ?? []) {
 				excludedEffects.add(excluded);
 			}
@@ -422,6 +445,7 @@ export function potionSetup(embezzlersOnly: boolean): void {
 	}
 
 	variableMeatPotionsSetup(0, embezzlers);
+	completedPotionSetup = true;
 }
 
 /**
@@ -480,9 +504,13 @@ class VariableMeatPotion {
 	use(quantity: number): boolean {
 		acquire(
 			quantity,
+
 			this.potion,
+
 			(1.2 * retrievePrice(this.potion, quantity)) / quantity,
-			false
+
+			false,
+			2000000
 		);
 		if (availableAmount(this.potion) < quantity) return false;
 		return use(quantity, this.potion);
@@ -532,8 +560,13 @@ class VariableMeatPotion {
 				}`,
 				"blue"
 			);
+			const ascendingOverlap =
+				globalOptions.ascend || globalOptions.nobarf ? 0 : this.softcap / this.duration;
 			const potionsToUse =
-				bestOption.quantity - Math.floor(haveEffect(this.effect) / this.duration);
+				bestOption.quantity +
+				ascendingOverlap -
+				Math.floor(haveEffect(this.effect) / this.duration);
+
 			return Math.max(potionsToUse, 0);
 		}
 		return 0;
@@ -577,10 +610,9 @@ export function variableMeatPotionsSetup(yachtzees: number, embezzlers: number):
 	const potions = [
 		new VariableMeatPotion($item`love song of sugary cuteness`, 20, 2),
 		new VariableMeatPotion($item`pulled yellow taffy`, 50, 2),
-		// To be added in the future. Specifically, we will have to:
-		// 1) accurately estimate the bulk price (potentially in the millions), and
-		// 2) ensure that we have the meat to complete the entire purchase (a partial purchase would be disastrous).
-		// new VariableMeatPotions($item`porcelain candy dish`, 500, 1),
+		...(globalOptions.prefs.candydish
+			? [new VariableMeatPotion($item`porcelain candy dish`, 500, 1)]
+			: []),
 	];
 
 	const excludedEffects = new Set<Effect>();
