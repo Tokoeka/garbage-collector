@@ -1502,6 +1502,14 @@ const freeFightSources = [
 			},
 		}
 	),
+
+	new FreeFight(
+		// eslint-disable-next-line libram/verify-constants
+		() => have($item`molehill mountain`) && !get("_molehillMountainUsed", false),
+		// eslint-disable-next-line libram/verify-constants
+		() => use($item`molehill mountain`),
+		true
+	),
 ];
 
 const freeRunFightSources = [
