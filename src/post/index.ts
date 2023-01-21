@@ -15,7 +15,6 @@ import {
 	$item,
 	$items,
 	$location,
-	$locations,
 	$skill,
 	$slot,
 	AutumnAton,
@@ -27,10 +26,11 @@ import {
 	uneffect,
 	withProperty,
 } from "libram";
-import { acquire } from "./acquire";
-import { garboAdventure, Macro } from "./combat";
-import { globalOptions } from "./config";
-import { computeDiet, consumeDiet } from "./diet";
+import { acquire } from "../acquire";
+import bestAutumnatonLocation from "./autumnaton";
+import { garboAdventure, Macro } from "../combat";
+import { globalOptions } from "../config";
+import { computeDiet, consumeDiet } from "../diet";
 import {
 	bestJuneCleaverOption,
 	juneCleaverChoiceValues,
@@ -38,9 +38,10 @@ import {
 	safeRestore,
 	setChoice,
 	valueJuneCleaverOption,
-} from "./lib";
-import { teleportEffects } from "./mood";
-import { garboAverageValue, garboValue, sessionSinceStart } from "./session";
+} from "../lib";
+import { teleportEffects } from "../mood";
+import { garboAverageValue, garboValue, sessionSinceStart } from "../session";
+import { estimatedTurns } from "../turns";
 import handleWorkshed from "./workshed";
 
 function floristFriars(): void {
@@ -121,9 +122,6 @@ function juneCleave(): void {
 		equip($slot`weapon`, $item`June cleaver`);
 		skipJuneCleaverChoices();
 		withProperty("recoveryScript", "", () => {
-			if (have($effect`Feeling Lost`)) {
-				uneffect($effect`Feeling Lost`);
-			}
 			garboAdventure($location`Noob Cave`, Macro.abort());
 			if (["Poetic Justice", "Lost and Found"].includes(get("lastEncounter"))) {
 				uneffect($effect`Beaten Up`);
@@ -165,8 +163,6 @@ function funguySpores() {
 	}
 }
 
-const autumnAtonZones = $locations`El Vibrato Island, The Toxic Teacups, The Oasis, The Deep Dark Jungle, The Bubblin' Caldera, The Sleazy Back Alley`;
-
 export default function postCombatActions(skipDiet = false): void {
 	juneCleave();
 	numberology();
@@ -181,7 +177,7 @@ export default function postCombatActions(skipDiet = false): void {
 	updateMallPrices();
 	stillsuit();
 	funguySpores();
-	if (globalOptions.ascend || AutumnAton.turnsForQuest() < myAdventures() + 10) {
-		AutumnAton.sendTo(autumnAtonZones);
+	if (globalOptions.ascend || AutumnAton.turnsForQuest() < estimatedTurns()) {
+		AutumnAton.sendTo(bestAutumnatonLocation);
 	}
 }

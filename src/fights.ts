@@ -841,7 +841,6 @@ const freeFightSources = [
 							$skill`Summon Love Mosquito`
 						)
 					)
-					// eslint-disable-next-line libram/verify-constants
 					.tryItem($item`train whistle`)
 					.trySkill($skill`Micrometeorite`)
 					.tryItem($item`Time-Spinner`)
@@ -1385,7 +1384,6 @@ const freeFightSources = [
 
 	new FreeFight(
 		() => (get("ownsSpeakeasy") ? 3 - get("_speakeasyFreeFights") : 0),
-		// eslint-disable-next-line libram/verify-constants
 		() => adv1($location`An Unusually Quiet Barroom Brawl`, -1, ""),
 		true
 	),
