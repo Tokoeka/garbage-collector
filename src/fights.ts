@@ -31,7 +31,7 @@ import {
 	myInebriety,
 	myLevel,
 	myMaxhp,
-	myPathId,
+	myPath,
 	myPrimestat,
 	myThrall,
 	numericModifier,
@@ -68,6 +68,7 @@ import {
 	$locations,
 	$monster,
 	$monsters,
+	$path,
 	$phyla,
 	$phylum,
 	$skill,
@@ -2322,9 +2323,9 @@ function doGhost() {
 function ensureBeachAccess() {
 	if (
 		get("lastDesertUnlock") !== myAscensions() &&
-		myPathId() !== 23 /* Actually Ed the Undying*/
+		myPath() !== $path`Actually Ed the Undying` /* Actually Ed the Undying*/
 	) {
-		cliExecute(`create ${$item`bitchin' meatcar`}`);
+		create($item`bitchin' meatcar`);
 	}
 }
 
