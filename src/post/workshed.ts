@@ -120,7 +120,10 @@ const worksheds = [
 		done: () => {
 			// This will likely always return true or false for now, depending on the start state of garbo
 			// Since we don't actually support using the syringe in combat at this time, the counter will never change
-			return _attemptedMakingTonics || get("_dnaPotionsMade") >= 3;
+			return (
+				(_attemptedMakingTonics || get("_dnaPotionsMade") >= 3) &&
+				haveEffect($effect`Human-Fish Hybrid`) <= 1000
+			);
 		},
 		action: () => {
 			// Just grab whatever tonics for now, since we don't actually have support for DNA
