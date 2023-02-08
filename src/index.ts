@@ -64,7 +64,7 @@ import postCombatActions from "./post";
 import { stashItems, withStash, withVIPClan } from "./clan";
 import { dailySetup, postFreeFightDailySetup } from "./dailies";
 import { potionSetup } from "./potions";
-import { garboAverageValue, printGarboSession, startSession } from "./session";
+import { endSession, garboAverageValue, startSession } from "./session";
 import { yachtzeeChain } from "./yachtzee";
 import barfTurn from "./barfTurn";
 import { estimatedTurns } from "./turns";
@@ -98,7 +98,7 @@ export function canContinue(): boolean {
 }
 
 export function main(argString = ""): void {
-	sinceKolmafiaRevision(27075);
+	sinceKolmafiaRevision(27149);
 	checkGithubVersion();
 
 	Args.fill(globalOptions, argString);
@@ -108,8 +108,13 @@ export function main(argString = ""): void {
 		return;
 	}
 
-	const completedProperty = "_garboCompleted";
-	set(completedProperty, "");
+	if (globalOptions.turns) {
+		if (globalOptions.turns >= 0) {
+			globalOptions.stopTurncount = myTurncount() + globalOptions.turns;
+		} else {
+			globalOptions.saveTurns = -globalOptions.turns;
+		}
+	}
 
 	if (globalOptions.prefs.autoUserConfirm) {
 		print(
@@ -117,6 +122,63 @@ export function main(argString = ""): void {
 			"red"
 		);
 	}
+
+	if (stashItems.length > 0) {
+		if (
+			globalOptions.returnstash ||
+			userConfirmDialog(
+				`Garbo has detected that you have the following items still out of the stash from a previous run of garbo: ${stashItems
+					.map((item) => item.name)
+					.join(", ")}. Would you like us to return these to the stash now?`,
+				true
+			)
+		) {
+			startSession();
+			try {
+				const clanIdOrName = globalOptions.prefs.stashClan;
+				const parsedClanIdOrName =
+					clanIdOrName !== "none"
+						? clanIdOrName.match(/^\d+$/)
+							? parseInt(clanIdOrName)
+							: clanIdOrName
+						: null;
+
+				if (parsedClanIdOrName) {
+					Clan.with(parsedClanIdOrName, () => {
+						for (const item of [...stashItems]) {
+							if (getFoldGroup(item).some((item) => have(item))) {
+								cliExecute(`fold ${item}`);
+							}
+							const retrieved = retrieveItem(item);
+							if (
+								item === $item`Spooky Putty sheet` &&
+								!retrieved &&
+								have($item`Spooky Putty monster`)
+							) {
+								continue;
+							}
+							print(`Returning ${item} to ${getClanName()} stash.`, HIGHLIGHT);
+							if (putStash(item, 1)) {
+								stashItems.splice(stashItems.indexOf(item), 1);
+							}
+						}
+					});
+				} else throw new Error("Error: No garbo_stashClan set.");
+			} finally {
+				endSession(false);
+			}
+		} else {
+			if (
+				userConfirmDialog(
+					"Are you a responsible friend who has already returned their stash clan items, or promise to do so manually at a later time?",
+					true
+				)
+			) {
+				stashItems.splice(0);
+			}
+		}
+	}
+	if (globalOptions.returnstash) return;
 
 	if (
 		!$classes`Seal Clubber, Turtle Tamer, Pastamancer, Sauceror, Disco Bandit, Accordion Thief, Cow Puncher, Snake Oiler, Beanslinger`.includes(
@@ -148,15 +210,6 @@ export function main(argString = ""): void {
 		}
 	}
 
-	if (
-		myInebriety() > inebrietyLimit() &&
-		(!have($item`Drunkula's wineglass`) || !canEquip($item`Drunkula's wineglass`))
-	) {
-		throw new Error(
-			"Go home, you're drunk. And don't own (or can't equip) Drunkula's wineglass. Consider either being sober or owning Drunkula's wineglass and being able to equip it."
-		);
-	}
-
 	if (globalOptions.prefs.valueOfAdventure && globalOptions.prefs.valueOfAdventure <= 3500) {
 		throw `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, which is too low for barf farming to be worthwhile. If you forgot to set it, use "set valueOfAdventure = XXXX" to set it to your marginal turn meat value.`;
 	}
@@ -173,56 +226,17 @@ export function main(argString = ""): void {
 		}
 	}
 
-	if (globalOptions.turns) {
-		if (globalOptions.turns >= 0) {
-			globalOptions.stopTurncount = myTurncount() + globalOptions.turns;
-		} else {
-			globalOptions.saveTurns = -globalOptions.turns;
-		}
+	if (
+		myInebriety() > inebrietyLimit() &&
+		(!have($item`Drunkula's wineglass`) || !canEquip($item`Drunkula's wineglass`))
+	) {
+		throw new Error(
+			"Go home, you're drunk. And don't own (or can't equip) Drunkula's wineglass. Consider either being sober or owning Drunkula's wineglass and being able to equip it."
+		);
 	}
 
-	if (stashItems.length > 0) {
-		if (
-			userConfirmDialog(
-				`Garbo has detected that you have the following items still out of the stash from a previous run of garbo: ${stashItems
-					.map((item) => item.name)
-					.join(",")}. Would you like us to return these to the stash now?`,
-				true
-			)
-		) {
-			const clanIdOrName = globalOptions.prefs.stashClan;
-			const parsedClanIdOrName =
-				clanIdOrName !== "none"
-					? clanIdOrName.match(/^\d+$/)
-						? parseInt(clanIdOrName)
-						: clanIdOrName
-					: null;
-
-			if (parsedClanIdOrName) {
-				Clan.with(parsedClanIdOrName, () => {
-					for (const item of [...stashItems]) {
-						if (getFoldGroup(item).some((item) => have(item))) {
-							cliExecute(`fold ${item}`);
-						}
-						const retrieved = retrieveItem(item);
-						if (
-							item === $item`Spooky Putty sheet` &&
-							!retrieved &&
-							have($item`Spooky Putty monster`)
-						) {
-							continue;
-						}
-						print(`Returning ${item} to ${getClanName()} stash.`, HIGHLIGHT);
-						if (putStash(item, 1)) {
-							stashItems.splice(stashItems.indexOf(item), 1);
-						}
-					}
-				});
-			} else throw new Error("Error: No garbo_stashClan set.");
-		} else {
-			stashItems.splice(0, stashItems.length);
-		}
-	}
+	const completedProperty = "_garboCompleted";
+	set(completedProperty, "");
 
 	startSession();
 	if (!globalOptions.nobarf && !globalOptions.simdiet) {
@@ -342,6 +356,7 @@ export function main(argString = ""): void {
 			valueOfInventory: 2,
 			suppressMallPriceCacheMessages: true,
 			maximizerCombinationLimit: maximizerCombinationLimit,
+			allowNegativeTally: true,
 		});
 		let bestHalloweiner = 0;
 		if (haveInCampground($item`haunted doghouse`)) {
@@ -492,7 +507,7 @@ export function main(argString = ""): void {
 		);
 		if (startingGarden && have(startingGarden)) use(startingGarden);
 		printEmbezzlerLog();
-		printGarboSession();
+		endSession();
 		printLog(HIGHLIGHT);
 	}
 	set(completedProperty, `garbo ${argString}`);
