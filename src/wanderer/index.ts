@@ -1,4 +1,4 @@
-import { availableAmount, Location, print } from "kolmafia";
+import { availableAmount, itemAmount, Location, print } from "kolmafia";
 import { $item, $location, get } from "libram";
 import { HIGHLIGHT, maxBy, propertyManager, sober } from "../lib";
 import { guzzlrFactory } from "./guzzlr";
@@ -40,7 +40,8 @@ export function bestWander(
 				canWander(wanderTarget.location, type) &&
 				(availableAmount($item`Coinspiracy`) < 2000 ||
 					wanderTarget.location === $location`The Deep Dark Jungle` ||
-					get("armoryUnlocked"))
+					get("armoryUnlocked") ||
+					itemAmount($item`Armory keycard`) === 1)
 			) {
 				const wandererLocation: WandererLocation = possibleLocations.get(
 					wanderTarget.location
