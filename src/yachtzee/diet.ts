@@ -558,7 +558,6 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 	const extroPrice = mallPrice($item`Extrovermectin™`);
 	const VOA = get("valueOfAdventure");
 	const embezzlerDifferential = EMBEZZLER_MULTIPLIER() * VOA;
-	// const VPE = get("garbo_valueOfEmbezzler", 10500);
 	const slidersPrice = mallPrice($item`extra-greasy slider`);
 	const pickleJuicePrice = mallPrice($item`jar of fermented pickle juice`);
 	const colognePrice = mallPrice($item`beggin' cologne`);
