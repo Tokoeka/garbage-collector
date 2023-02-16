@@ -69,7 +69,15 @@ import { withVIPClan } from "./clan";
 import { globalOptions } from "./config";
 import { embezzlerCount } from "./embezzler";
 import { expectedGregs } from "./extrovermectin";
-import { arrayEquals, baseMeat, HIGHLIGHT, maxBy, realmAvailable, userConfirmDialog } from "./lib";
+import {
+	arrayEquals,
+	baseMeat,
+	EMBEZZLER_MULTIPLIER,
+	HIGHLIGHT,
+	maxBy,
+	realmAvailable,
+	userConfirmDialog,
+} from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
 import { garboValue } from "./session";
@@ -77,7 +85,6 @@ import synthesize from "./synthesis";
 import { estimatedTurns } from "./turns";
 
 const MPA = get("valueOfAdventure");
-const VPE = get("garbo_valueOfEmbezzler", 10500);
 print(`Using adventure value ${MPA}.`, HIGHLIGHT);
 
 const Mayo = MayoClinic.Mayo;
@@ -464,8 +471,7 @@ function gregariousCount(): {
 }
 
 function copiers(): MenuItem<Note>[] {
-	// assuming embezzler is worth 4 * MPA and a marginal turn is 1 * MPA, the differential is 3 * MPA
-	const embezzlerDifferential = VPE - MPA;
+	const embezzlerDifferential = EMBEZZLER_MULTIPLIER() * MPA;
 	const { expectedGregariousFights, marginalGregariousFights } = gregariousCount();
 	const extros =
 		myInebriety() > inebrietyLimit()
