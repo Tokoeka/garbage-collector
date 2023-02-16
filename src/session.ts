@@ -139,6 +139,8 @@ const specialValueLookup = new Map<Item, () => number>([
 			),
 	],
 	[$item`fake hand`, () => 50000],
+	// eslint-disable-next-line libram/verify-constants
+	[$item`shadow brick`, () => 50000],
 ]);
 
 function printSession(session: Session): void {
