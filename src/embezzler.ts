@@ -49,11 +49,11 @@ import { globalOptions } from "./config";
 import { crateStrategy, doingExtrovermectin, equipOrbIfDesired } from "./extrovermectin";
 import {
 	averageEmbezzlerNet,
-	EMBEZZLER_MULTIPLIER,
 	HIGHLIGHT,
 	ltbRun,
 	setChoice,
 	userConfirmDialog,
+	VPE,
 	WISH_VALUE,
 } from "./lib";
 import { waterBreathingEquipment } from "./outfit";
@@ -181,9 +181,7 @@ export class EmbezzlerFight {
 
 	location(location?: Location): Location {
 		const taffyIsWorthIt = () =>
-			mallPrice($item`pulled green taffy`) <
-				EMBEZZLER_MULTIPLIER() * get("valueOfAdventure") &&
-			retrieveItem($item`pulled green taffy`);
+			mallPrice($item`pulled green taffy`) < VPE() && retrieveItem($item`pulled green taffy`);
 
 		const suggestion =
 			this.draggable && !location && checkUnderwater() && taffyIsWorthIt()

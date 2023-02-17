@@ -35,7 +35,7 @@ import {
 import { acquire } from "../acquire";
 import { globalOptions } from "../config";
 import { hasMonsterReplacers } from "../extrovermectin";
-import { EMBEZZLER_MULTIPLIER } from "../lib";
+import { VPE } from "../lib";
 import { Potion } from "../potions";
 import { garboValue } from "../session";
 import synthesize from "../synthesis";
@@ -557,7 +557,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 	const fishyCost = optimizeForFishy(yachtzeeTurns);
 	const extroPrice = mallPrice($item`Extrovermectin™`);
 	const VOA = get("valueOfAdventure");
-	const embezzlerDifferential = EMBEZZLER_MULTIPLIER() * VOA;
+	const MPE = VPE();
 	const slidersPrice = mallPrice($item`extra-greasy slider`);
 	const pickleJuicePrice = mallPrice($item`jar of fermented pickle juice`);
 	const colognePrice = mallPrice($item`beggin' cologne`);
@@ -687,7 +687,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 
 	// We assume that the embezzlers after yachtzee chaining would still benefit from our start-of-day buffs
 	// so the assumption is that all the gregged embezzlies can be approximated as marginal KGEs with profits of 3 * VOA
-	const extroValuePerSpleen = (embezzlerDifferential - extroPrice) / 2;
+	const extroValuePerSpleen = (4 * MPE - 4 * VOA - extroPrice) / 2;
 	const jellyValuePerSpleen =
 		(earlyMeatDropsEstimate * 2000) / 100 -
 		(jelliesBulkPrice +

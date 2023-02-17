@@ -43,7 +43,6 @@ import { computeDiet, consumeDiet } from "./diet";
 import { barfFamiliar, freeFightFamiliar, meatFamiliar } from "./familiar";
 import { deliverThesisIfAble } from "./fights";
 import {
-	EMBEZZLER_MULTIPLIER,
 	embezzlerLog,
 	kramcoGuaranteed,
 	questStep,
@@ -51,6 +50,7 @@ import {
 	safeRestore,
 	setChoice,
 	sober,
+	VPE,
 } from "./lib";
 import { meatMood } from "./mood";
 import {
@@ -110,7 +110,7 @@ function shouldGoUnderwater(): boolean {
 
 	if (have($item`envyfish egg`)) return false;
 	if (!canAdventure($location`The Briny Deeps`)) return false;
-	if (mallPrice($item`pulled green taffy`) < EMBEZZLER_MULTIPLIER() * get("valueOfAdventure")) {
+	if (mallPrice($item`pulled green taffy`) < VPE()) {
 		return false;
 	}
 	return have($effect`Fishy`) || (have($item`fishy pipe`) && use($item`fishy pipe`));

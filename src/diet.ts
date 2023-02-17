@@ -72,11 +72,11 @@ import { expectedGregs } from "./extrovermectin";
 import {
 	arrayEquals,
 	baseMeat,
-	EMBEZZLER_MULTIPLIER,
 	HIGHLIGHT,
 	maxBy,
 	realmAvailable,
 	userConfirmDialog,
+	VPE,
 } from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
@@ -471,7 +471,7 @@ function gregariousCount(): {
 }
 
 function copiers(): MenuItem<Note>[] {
-	const embezzlerDifferential = EMBEZZLER_MULTIPLIER() * MPA;
+	const embezzlerDifferential = VPE() - get("valueOfAdventure");
 	const { expectedGregariousFights, marginalGregariousFights } = gregariousCount();
 	const extros =
 		myInebriety() > inebrietyLimit()
