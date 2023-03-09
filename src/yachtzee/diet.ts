@@ -39,7 +39,7 @@ import { VPE } from "../lib";
 import { Potion } from "../potions";
 import { garboValue } from "../session";
 import synthesize from "../synthesis";
-import { estimatedTurns } from "../turns";
+import { estimatedGarboTurns } from "../turns";
 import { yachtzeePotionProfits, yachtzeePotionSetup } from "./buffs";
 import { optimizeForFishy } from "./fishy";
 import { freeNCs, pyecAvailable, shrugIrrelevantSongs, useSpikolodonSpikes } from "./lib";
@@ -484,7 +484,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 			? 0
 			: Math.max(
 					0,
-					Math.round((estimatedTurns() - haveEffect($effect`Synthesis: Greed`)) / 30)
+					Math.round((estimatedGarboTurns() - haveEffect($effect`Synthesis: Greed`)) / 30)
 			  );
 	const fullnessAvailable = fullnessLimit() - myFullness() + toInt(haveDistentionPill);
 	const inebrietyAvailable =

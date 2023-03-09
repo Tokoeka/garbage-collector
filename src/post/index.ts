@@ -6,6 +6,7 @@ import {
 	myAdventures,
 	myLevel,
 	myLocation,
+	putCloset,
 	reverseNumberology,
 	use,
 	useSkill,
@@ -42,8 +43,12 @@ import {
 } from "../lib";
 import { teleportEffects } from "../mood";
 import { garboAverageValue, garboValue, sessionSinceStart } from "../session";
-import { estimatedTurns } from "../turns";
+import { estimatedGarboTurns, remainingUserTurns } from "../turns";
 import handleWorkshed from "./workshed";
+
+function closetStuff(): void {
+	for (const i of $items`bowling ball, funky junk key`) putCloset(itemAmount(i), i);
+}
 
 function floristFriars(): void {
 	if (
@@ -168,6 +173,7 @@ function funguySpores() {
 }
 
 export default function postCombatActions(skipDiet = false): void {
+	closetStuff();
 	juneCleave();
 	numberology();
 	if (!skipDiet && !globalOptions.nodiet) {
@@ -181,7 +187,10 @@ export default function postCombatActions(skipDiet = false): void {
 	updateMallPrices();
 	stillsuit();
 	funguySpores();
-	if (globalOptions.ascend || AutumnAton.turnsForQuest() < estimatedTurns()) {
+	if (
+		globalOptions.ascend ||
+		AutumnAton.turnsForQuest() < estimatedGarboTurns() + remainingUserTurns()
+	) {
 		AutumnAton.sendTo(bestAutumnatonLocation);
 	}
 }

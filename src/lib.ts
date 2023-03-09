@@ -574,3 +574,6 @@ export function maxBy<S extends string | number | symbol, T extends { [x in S]: 
 }
 
 export type GarboItemLists = { Newark: string[]; "Feliz Navidad": string[]; trainset: string[] };
+
+export const asArray = <T>(singleOrArray: T | T[]): T[] =>
+	Array.isArray(singleOrArray) ? singleOrArray : [singleOrArray];

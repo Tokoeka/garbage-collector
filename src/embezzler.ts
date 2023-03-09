@@ -412,11 +412,19 @@ export const copySources = [
 				);
 			} else if (havePutty) {
 				if (puttyLocked) return 0;
-				return 5 - get("spookyPuttyCopiesMade") + itemAmount($item`Spooky Putty monster`);
+				return (
+					5 -
+					get("spookyPuttyCopiesMade") -
+					get("_raindohCopiesMade") +
+					itemAmount($item`Spooky Putty monster`)
+				);
 			} else if (haveRainDoh) {
 				if (rainDohLocked) return 0;
 				return (
-					5 - get("_raindohCopiesMade") + itemAmount($item`Rain-Doh box full of monster`)
+					5 -
+					get("spookyPuttyCopiesMade") -
+					get("_raindohCopiesMade") +
+					itemAmount($item`Rain-Doh box full of monster`)
 				);
 			}
 			return 0;

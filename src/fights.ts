@@ -112,6 +112,7 @@ import {
 	setBestLeprechaunAsMeatFamiliar,
 } from "./familiar";
 import {
+	asArray,
 	baseMeat,
 	burnLibrams,
 	dogOrHolidayWanderer,
@@ -1771,22 +1772,27 @@ const freeRunFightSources = [
 	// Fire Extinguisher on best available target.
 	new FreeRunFight(
 		() =>
-			have($item`industrial fire extinguisher`) &&
-			get("_fireExtinguisherCharge") >= 10 &&
-			have($skill`Comprehensive Cartography`) &&
-			get("_monstersMapped") < 3 &&
+			((have($item`industrial fire extinguisher`) && get("_fireExtinguisherCharge") >= 10) ||
+				(have($familiar`XO Skeleton`) && get("_xoHugsUsed") < 11)) &&
 			get("_VYKEACompanionLevel") === 0 && // don't attempt this in case you re-run garbo after making a vykea furniture
 			getBestItemStealZone(true) !== null,
 		(runSource: ActionSource) => {
 			setupItemStealZones();
 			const best = getBestItemStealZone(true);
 			if (!best) throw `Unable to find fire extinguisher zone?`;
+			const mappingMonster =
+				have($skill`Comprehensive Cartography`) &&
+				get("_monstersMapped") < 3 &&
+				best.location.wanderers &&
+				have($skill`Comprehensive Cartography`) &&
+				get("_monstersMapped") < 3;
+			const monsters = asArray(best.monster);
 			try {
 				if (best.preReq) best.preReq();
 				const vortex = $skill`Fire Extinguisher: Polar Vortex`;
 				const hasXO = myFamiliar() === $familiar`XO Skeleton`;
 				if (myThrall() !== $thrall.none) useSkill($skill`Dismiss Pasta Thrall`);
-				Macro.if_(`monsterid ${$monster`roller-skating Muse`.id}`, runSource.macro)
+				Macro.if_(monsters.map((m) => `!monsterid ${m.id}`).join(" && "), runSource.macro)
 					.externalIf(
 						hasXO && get("_xoHugsUsed") < 11,
 						Macro.skill($skill`Hugs and Kisses!`)
@@ -1798,7 +1804,11 @@ const freeRunFightSources = [
 					.while_(`hasskill ${toInt(vortex)}`, Macro.skill(vortex))
 					.step(runSource.macro)
 					.setAutoAttack();
-				mapMonster(best.location, best.monster);
+				if (mappingMonster) {
+					mapMonster(best.location, monsters[0]);
+				} else {
+					adv1(best.location, -1, "");
+				}
 			} finally {
 				setAutoAttack(0);
 			}
@@ -1812,46 +1822,13 @@ const freeRunFightSources = [
 				const zone = getBestItemStealZone();
 				return [
 					new Requirement(zone?.maximize ?? [], {
-						forceEquip: $items`industrial fire extinguisher`,
+						forceEquip:
+							have($item`industrial fire extinguisher`) &&
+							get("_fireExtinguisherCharge") >= 10
+								? $items`industrial fire extinguisher`
+								: [],
 					}),
 				];
-			},
-		}
-	),
-	// Use XO pockets on best available target.
-	new FreeRunFight(
-		() =>
-			have($familiar`XO Skeleton`) &&
-			get("_xoHugsUsed") < 11 &&
-			get("_VYKEACompanionLevel") === 0 && // don't attempt this in case you re-run garbo after making a vykea furniture
-			getBestItemStealZone() !== null,
-		(runSource: ActionSource) => {
-			setupItemStealZones();
-			const mappingMonster =
-				have($skill`Comprehensive Cartography`) && get("_monstersMapped") < 3;
-			const best = getBestItemStealZone();
-			if (!best) throw `Unable to find XO Skeleton zone?`;
-			try {
-				if (best.preReq) best.preReq();
-				Macro.if_(`!monsterid ${best.monster.id}`, runSource.macro)
-					.step(itemStealOlfact(best))
-					.skill($skill`Hugs and Kisses!`)
-					.step(runSource.macro)
-					.setAutoAttack();
-				if (mappingMonster) {
-					mapMonster(best.location, best.monster);
-				} else {
-					adv1(best.location, -1, "");
-				}
-			} finally {
-				setAutoAttack(0);
-			}
-		},
-		{
-			familiar: () => $familiar`XO Skeleton`,
-			requirements: () => {
-				const zone = getBestItemStealZone();
-				return [new Requirement(zone?.maximize ?? [], {})];
 			},
 		}
 	),
