@@ -191,7 +191,10 @@ export function meatOutfit(embezzlerUp: boolean, requirement?: Requirement, sea?
 			}
 
 			if (have($item`mafia pointer finger ring`)) {
-				if (myClass() === $class`Seal Clubber` && have($skill`Furious Wallop`)) {
+				if (
+					(myClass() === $class`Seal Clubber` && have($skill`Furious Wallop`)) ||
+					have($skill`Head in the Game`)
+				) {
 					forceEquip.push($item`mafia pointer finger ring`);
 				} else if (
 					have($item`Operation Patriot Shield`) &&
