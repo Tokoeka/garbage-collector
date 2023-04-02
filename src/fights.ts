@@ -34,6 +34,7 @@ import {
 	myPath,
 	myPrimestat,
 	myThrall,
+	myTurncount,
 	numericModifier,
 	outfit,
 	print,
@@ -50,6 +51,7 @@ import {
 	stashAmount,
 	takeCloset,
 	toInt,
+	toMonster,
 	totalTurnsPlayed,
 	use,
 	useFamiliar,
@@ -79,6 +81,7 @@ import {
 	AsdonMartin,
 	ChateauMantegna,
 	clamp,
+	ClosedCircuitPayphone,
 	CombatLoversLocket,
 	Counter,
 	CrystalBall,
@@ -114,6 +117,7 @@ import {
 import {
 	asArray,
 	baseMeat,
+	bestShadowRift,
 	burnLibrams,
 	dogOrHolidayWanderer,
 	embezzlerLog,
@@ -197,7 +201,7 @@ const secondChainMacro = () =>
 	).abort();
 
 function embezzlerSetup() {
-	setLocation($location`none`);
+	setLocation($location.none);
 	potionSetup(false);
 	maximize("MP", false);
 	meatMood(true, 750 + baseMeat).execute(embezzlerCount());
@@ -579,7 +583,9 @@ class FreeFight {
 					: undefined
 			);
 			safeRestore();
+			const curTurncount = myTurncount();
 			withMacro(Macro.basicCombat(), this.run);
+			if (myTurncount() > curTurncount) throw new Error("The last fight was not free!");
 			postCombatActions();
 			// Slot in our Professor Thesis if it's become available
 			if (!have($effect`Feeling Lost`)) deliverThesisIfAble();
@@ -632,7 +638,9 @@ class FreeRunFight extends FreeFight {
 			);
 			freeFightMood(...(this.options.effects?.() ?? []));
 			safeRestore();
+			const curTurncount = myTurncount();
 			withMacro(Macro.step(runSource.macro), () => this.freeRun(runSource));
+			if (myTurncount() > curTurncount) throw new Error("The last runaway was not free!");
 			postCombatActions();
 		}
 	}
@@ -675,7 +683,7 @@ function getStenchLocation() {
 	return (
 		$locations`Uncle Gator's Country Fun-Time Liquid Waste Sluice, The Hippy Camp (Bombed Back to the Stone Age), The Dark and Spooky Swamp`.find(
 			(l) => canAdventure(l)
-		) ?? $location`none`
+		) ?? $location.none
 	);
 }
 
@@ -1454,6 +1462,35 @@ const freeFightSources = [
 		}
 	),
 	new FreeFight(
+		() => {
+			if (!have($item`closed-circuit pay phone`)) return false;
+			if (have($effect`Shadow Affinity`)) return true;
+			if (get("_shadowAffinityToday")) return false;
+
+			if (!ClosedCircuitPayphone.rufusTarget()) return true;
+			if (get("rufusQuestType") === "items") {
+				return false; // We deemed it unprofitable to complete the quest in potionSetup
+			}
+			if (get("encountersUntilSRChoice", 0) === 0) {
+				// Target is either an artifact or a boss
+				return true; // Get the artifact or kill the boss immediately for free
+			}
+			return false; // We have to spend turns to get the artifact or kill the boss
+		},
+		() => {
+			propertyManager.set({ shadowLabyrinthGoal: "effects" });
+			if (!get("_shadowAffinityToday") && !ClosedCircuitPayphone.rufusTarget()) {
+				ClosedCircuitPayphone.chooseQuest(() => 2); // Choose an artifact (not supporting boss for now)
+			}
+			adv1(bestShadowRift(), -1, "");
+			if (get("encountersUntilSRChoice") === 0) adv1(bestShadowRift(), -1, ""); // grab the NC
+			if (!have($effect`Shadow Affinity`) && get("encountersUntilSRChoice") !== 0) {
+				setLocation($location.none); // Reset location to not affect mafia's item drop calculations
+			}
+		},
+		true
+	),
+	new FreeFight(
 		() =>
 			have($item`mayfly bait necklace`) &&
 			canAdventure($location`Cobb's Knob Menagerie, Level 1`) &&
@@ -1518,8 +1555,8 @@ const freeRunFightSources = [
 			questStep("questL11MacGuffin") > -1,
 		(runSource: ActionSource) => {
 			propertyManager.setChoices({
-				[923]: 1, // go to the blackberries in All Around the Map
-				[924]: 1, // fight a blackberry bush, so that we can freerun
+				923: 1, // go to the blackberries in All Around the Map
+				924: 1, // fight a blackberry bush, so that we can freerun
 			});
 			garboAdventure($location`The Black Forest`, runSource.macro);
 		},
@@ -1537,8 +1574,8 @@ const freeRunFightSources = [
 			questStep("questL02Larva") > -1,
 		(runSource: ActionSource) => {
 			propertyManager.setChoices({
-				[502]: 2, // go towards the stream in Arboreal Respite, so we can skip adventure
-				[505]: 2, // skip adventure
+				502: 2, // go towards the stream in Arboreal Respite, so we can skip adventure
+				505: 2, // skip adventure
 			});
 			garboAdventure($location`The Spooky Forest`, runSource.macro);
 		},
@@ -1569,7 +1606,7 @@ const freeRunFightSources = [
 		() =>
 			have($familiar`Space Jellyfish`) &&
 			get("_spaceJellyfishDrops") < 5 &&
-			getStenchLocation() !== $location`none`,
+			getStenchLocation() !== $location.none,
 		(runSource: ActionSource) => {
 			garboAdventure(
 				getStenchLocation(),
@@ -1586,7 +1623,7 @@ const freeRunFightSources = [
 			have($familiar`Space Jellyfish`) &&
 			have($skill`Meteor Lore`) &&
 			get("_macrometeoriteUses") < 10 &&
-			getStenchLocation() !== $location`none`,
+			getStenchLocation() !== $location.none,
 		(runSource: ActionSource) => {
 			garboAdventure(
 				getStenchLocation(),
@@ -1608,7 +1645,7 @@ const freeRunFightSources = [
 			have($familiar`Space Jellyfish`) &&
 			have($item`Powerful Glove`) &&
 			get("_powerfulGloveBatteryPowerUsed") < 91 &&
-			getStenchLocation() !== $location`none`,
+			getStenchLocation() !== $location.none,
 		(runSource: ActionSource) => {
 			garboAdventure(
 				getStenchLocation(),
@@ -1635,7 +1672,10 @@ const freeRunFightSources = [
 			propertyManager.setChoices({
 				1215: 1, // Gingerbread Civic Center advance clock
 			});
-			garboAdventure($location`Gingerbread Civic Center`, Macro.abort());
+			garboAdventure(
+				$location`Gingerbread Civic Center`,
+				Macro.abortWithMsg(`Expected "Setting the Clock" but ended up in combat.`)
+			);
 		},
 		false,
 		{
@@ -1680,7 +1720,10 @@ const freeRunFightSources = [
 			propertyManager.setChoices({
 				1204: 1, // Gingerbread Train Station Noon random candy
 			});
-			garboAdventure($location`Gingerbread Train Station`, Macro.abort());
+			garboAdventure(
+				$location`Gingerbread Train Station`,
+				Macro.abortWithMsg(`Expected "Noon at the Train Station" but ended up in combat.`)
+			);
 		},
 		false,
 		{
@@ -2275,14 +2318,20 @@ export function doSausage(): void {
 	}
 	useFamiliar(freeFightFamiliar());
 	freeFightOutfit(new Requirement([], { forceEquip: $items`Kramco Sausage-o-Matic™` }));
+	let currentTurncount;
 	do {
+		currentTurncount = myTurncount();
+		const goblin = $monster`sausage goblin`;
 		garboAdventureAuto(
 			wanderWhere("wanderer"),
-			Macro.if_($monster`sausage goblin`, Macro.basicCombat())
+			Macro.if_(goblin, Macro.basicCombat())
 				.ifHolidayWanderer(Macro.basicCombat())
-				.abort()
+				.abortWithMsg(`Expected ${goblin} but got something else.`)
 		);
-	} while (dogOrHolidayWanderer());
+	} while (
+		dogOrHolidayWanderer() ||
+		(toMonster(get("lastEncounter")) === $monster.none && currentTurncount === myTurncount())
+	); // Try again if we hit an NC that didn't take a turn
 	if (getAutoAttack() !== 0) setAutoAttack(0);
 	postCombatActions();
 }
@@ -2293,7 +2342,12 @@ function doGhost() {
 	if (!ghostLocation) return;
 	useFamiliar(freeFightFamiliar());
 	freeFightOutfit(new Requirement([], { forceEquip: $items`protonic accelerator pack` }));
-	garboAdventure(ghostLocation, Macro.ghostBustin());
+	let currentTurncount;
+	do {
+		currentTurncount = myTurncount();
+		garboAdventure(ghostLocation, Macro.ghostBustin());
+	} while (get("ghostLocation") !== $location.none && currentTurncount === myTurncount());
+	// Try again if we hit an NC that didn't take a turn
 	postCombatActions();
 }
 

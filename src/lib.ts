@@ -8,6 +8,7 @@ import {
 	fileToBuffer,
 	gametimeToInt,
 	getLocketMonsters,
+	getMonsters,
 	gitAtHead,
 	gitInfo,
 	handlingChoice,
@@ -16,6 +17,7 @@ import {
 	inebrietyLimit,
 	isDarkMode,
 	Item,
+	itemDropsArray,
 	Location,
 	meatDropModifier,
 	Monster,
@@ -28,12 +30,14 @@ import {
 	myMp,
 	mySoulsauce,
 	myTurncount,
+	numericModifier,
 	print,
 	printHtml,
 	restoreHp,
 	restoreMp,
 	runChoice,
 	runCombat,
+	setLocation,
 	soulsauceCost,
 	todayToString,
 	toSlot,
@@ -56,6 +60,8 @@ import {
 	ActionSource,
 	bestLibramToCast,
 	ChateauMantegna,
+	clamp,
+	ClosedCircuitPayphone,
 	CombatLoversLocket,
 	Counter,
 	ensureFreeRun,
@@ -410,7 +416,7 @@ export function realmAvailable(identifier: RealmType): boolean {
 	} else if (identifier === "pirate") {
 		return get(`_prToday`) || get(`prAlways`);
 	}
-	return get(`_${identifier}AirportToday`, false) || get(`${identifier}AirportAlways`, false);
+	return get(`_${identifier}AirportToday`) || get(`${identifier}AirportAlways`);
 }
 
 export function formatNumber(num: number): string {
@@ -513,7 +519,7 @@ export function valueJuneCleaverOption(result: Item | number): number {
 	return result instanceof Item ? garboValue(result) : result;
 }
 
-export function bestJuneCleaverOption(id: typeof JuneCleaver.choices[number]): 1 | 2 | 3 {
+export function bestJuneCleaverOption(id: (typeof JuneCleaver.choices)[number]): 1 | 2 | 3 {
 	const options = [1, 2, 3] as const;
 	return maxBy(options, (option) => valueJuneCleaverOption(juneCleaverChoiceValues[id][option]));
 }
@@ -577,3 +583,30 @@ export type GarboItemLists = { Newark: string[]; "Feliz Navidad": string[]; trai
 
 export const asArray = <T>(singleOrArray: T | T[]): T[] =>
 	Array.isArray(singleOrArray) ? singleOrArray : [singleOrArray];
+
+let _bestShadowRift: Location | null = null;
+export function bestShadowRift(): Location {
+	if (!_bestShadowRift) {
+		_bestShadowRift = ClosedCircuitPayphone.chooseRift({
+			canAdventure: true,
+			sortBy: (l: Location) => {
+				setLocation(l);
+				// We probably aren't capping item drops with the penalty
+				// so we don't really need to compute the actual outfit (or the dropModifier for that matter actually)
+				const dropModifier = 1 + numericModifier("Item Drop") / 100;
+				return sum(getMonsters(l), (m) => {
+					return sum(
+						itemDropsArray(m),
+						({ drop, rate }) =>
+							garboValue(drop) * clamp((rate * dropModifier) / 100, 0, 1)
+					);
+				});
+			},
+		});
+		if (!_bestShadowRift) {
+			throw new Error("Failed to find a suitable Shadow Rift to adventure in");
+		}
+	}
+	// Mafia bug disallows adv1($location`Shadow Rift (<exact location>)`, -1, "") when overdrunk
+	return myInebriety() > inebrietyLimit() ? $location`Shadow Rift` : _bestShadowRift;
+}
