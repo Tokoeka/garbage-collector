@@ -235,9 +235,11 @@ export function nonOrganAdventures(): void {
 	}
 
 	if (getProperty("_timesArrowUsed") !== "true" && mallPrice($item`time's arrow`) < 5 * MPA) {
-		acquire(1, $item`time's arrow`, 5 * MPA);
-		cliExecute("csend 1 time's arrow to botticelli");
-		setProperty("_timesArrowUsed", "true");
+		acquire(1, $item`time's arrow`, 5 * MPA, false);
+		if (itemAmount($item`time's arrow`) > 0) {
+			cliExecute("csend 1 time's arrow to botticelli");
+			setProperty("_timesArrowUsed", "true");
+		}
 	}
 
 	if (have($skill`Ancestral Recall`) && mallPrice($item`blue mana`) < 3 * MPA) {
