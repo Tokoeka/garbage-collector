@@ -25,6 +25,7 @@ import {
 	myLevel,
 	myMaxhp,
 	mySpleenUse,
+	npcPrice,
 	print,
 	retrievePrice,
 	sellsItem,
@@ -57,6 +58,7 @@ import {
 	getRemainingLiver,
 	have,
 	Kmail,
+	maxBy,
 	maximizeCached,
 	MayoClinic,
 	MenuItem,
@@ -69,15 +71,7 @@ import { withVIPClan } from "./clan";
 import { globalOptions } from "./config";
 import { embezzlerCount } from "./embezzler";
 import { expectedGregs } from "./extrovermectin";
-import {
-	arrayEquals,
-	baseMeat,
-	HIGHLIGHT,
-	maxBy,
-	realmAvailable,
-	userConfirmDialog,
-	VPE,
-} from "./lib";
+import { arrayEquals, baseMeat, HIGHLIGHT, realmAvailable, userConfirmDialog, VPE } from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
 import { garboValue } from "./session";
@@ -407,12 +401,9 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem($item`designer sweatpants`, {
 			size: -1,
 			organ: "booze",
-			maximum: Math.min(
-				3 - get("_sweatOutSomeBoozeUsed", 0),
-				Math.floor(get("sweat", 0) / 25)
-			),
+			maximum: Math.min(3 - get("_sweatOutSomeBoozeUsed"), Math.floor(get("sweat") / 25)),
 		}),
-	];
+	].filter((item) => item.price() < Infinity) as MenuItem<Note>[];
 }
 
 export function bestConsumable(
@@ -1084,8 +1075,13 @@ export function runDiet(): void {
 		}
 
 		MenuItem.defaultPriceFunction = (item: Item) => {
-			const itemRetrievePrice = retrievePrice(item);
-			return itemRetrievePrice > 0 ? itemRetrievePrice : item.tradeable ? mallPrice(item) : 0;
+			const prices = [retrievePrice(item), mallPrice(item), npcPrice(item)].filter(
+				(p) => p > 0 && p < Number.MAX_SAFE_INTEGER
+			);
+			if (prices.length > 0) {
+				return Math.min(...prices);
+			}
+			return !item.tradeable && have(item) ? 0 : Infinity;
 		};
 
 		const dietBuilder = computeDiet();

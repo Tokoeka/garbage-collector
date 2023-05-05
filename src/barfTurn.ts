@@ -7,6 +7,7 @@ import {
 	itemAmount,
 	Location,
 	mallPrice,
+	maximize,
 	myAdventures,
 	myInebriety,
 	myLevel,
@@ -114,7 +115,13 @@ function shouldGoUnderwater(): boolean {
 	if (mallPrice($item`pulled green taffy`) < VPE()) {
 		return false;
 	}
-	return have($effect`Fishy`) || (have($item`fishy pipe`) && use($item`fishy pipe`));
+
+	if (have($effect`Fishy`)) return true;
+	if (have($item`fishy pipe`) && !get("_fishyPipeUsed")) {
+		use($item`fishy pipe`);
+		return have($effect`Fishy`);
+	}
+	return false;
 }
 
 // Lights Out adventures require you to take several choices in a row
@@ -531,6 +538,7 @@ function generateTurnsAtEndOfDay(): void {
 			0,
 			itemAmount($item`magical sausage`) + itemAmount($item`magical sausage casing`)
 		);
+		maximize("MP", false);
 		eat(available, $item`magical sausage`);
 	}
 

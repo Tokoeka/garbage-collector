@@ -9,6 +9,7 @@ import {
 	myLevel,
 	myMeat,
 	print,
+	setLocation,
 	toInt,
 	use,
 	useSkill,
@@ -18,6 +19,7 @@ import {
 	$effect,
 	$item,
 	$items,
+	$location,
 	$skill,
 	clamp,
 	get,
@@ -25,6 +27,7 @@ import {
 	getActiveSongs,
 	have,
 	isSong,
+	maxBy,
 	Mood,
 	set,
 } from "libram";
@@ -72,8 +75,16 @@ export function yachtzeePotionProfits(potion: Potion, yachtzeeTurns: number): nu
 
 	return yachtzeeValue + embezzlerValue + barfValue - potion.price(true);
 }
+const doublingValue = (potion: Potion, yachtzeeTurns: number) =>
+	Math.min(
+		potion.price(false),
+		yachtzeePotionProfits(potion.doubleDuration(), yachtzeeTurns) -
+			Math.max(0, yachtzeePotionProfits(potion, yachtzeeTurns))
+	);
 
 export function yachtzeePotionSetup(yachtzeeTurns: number, simOnly?: boolean): number {
+	setLocation($location.none);
+
 	let totalProfits = 0;
 	const PYECOffset = pyecAvailable() ? 5 : 0;
 	const excludedEffects = new Set<Effect>();
@@ -126,6 +137,35 @@ export function yachtzeePotionSetup(yachtzeeTurns: number, simOnly?: boolean): n
 			} else excludedEffects.add(bestPotion.effect());
 		}
 	}
+	if (have($item`Eight Days a Week Pill Keeper`) && !get("_freePillKeeperUsed")) {
+		const doublingPotions = farmingPotions.filter(
+			(potion) =>
+				potion.canDouble &&
+				haveEffect(potion.effect()) + PYECOffset * (have(potion.effect()) ? 1 : 0) <
+					yachtzeeTurns &&
+				yachtzeePotionProfits(potion.doubleDuration(), yachtzeeTurns) > 0 &&
+				potion.price(true) < myMeat()
+		);
+		const bestPotion =
+			doublingPotions.length > 0
+				? maxBy(doublingPotions, (potion) => doublingValue(potion, yachtzeeTurns))
+				: undefined;
+		if (bestPotion) {
+			const profit = yachtzeePotionProfits(bestPotion.doubleDuration(), yachtzeeTurns);
+			const price = bestPotion.price(true);
+			totalProfits += profit;
+			print(`Determined that ${bestPotion.potion} was the best potion to double`, "blue");
+			print(
+				`Expected to profit ${profit} meat from doubling 1 ${bestPotion.potion} @ price ${price} meat`,
+				"blue"
+			);
+			if (!simOnly) {
+				cliExecute("pillkeeper extend");
+				acquire(1, bestPotion.potion, profit + price);
+				bestPotion.use(1);
+			} else excludedEffects.add(bestPotion.effect());
+		}
+	}
 
 	for (const effect of getActiveEffects()) {
 		for (const excluded of mutuallyExclusive.get(effect) ?? []) {
@@ -140,9 +180,8 @@ export function yachtzeePotionSetup(yachtzeeTurns: number, simOnly?: boolean): n
 					yachtzeeTurns && yachtzeePotionProfits(potion, yachtzeeTurns) > 0
 		)
 		.sort(
-			(left, right) =>
-				yachtzeePotionProfits(right, yachtzeeTurns) -
-				yachtzeePotionProfits(left, yachtzeeTurns)
+			(a, b) =>
+				yachtzeePotionProfits(b, yachtzeeTurns) - yachtzeePotionProfits(a, yachtzeeTurns)
 		);
 
 	for (const potion of testPotions) {

@@ -92,6 +92,7 @@ import {
 	getAverageAdventures,
 	getFoldGroup,
 	have,
+	maxBy,
 	maximizeCached,
 	property,
 	Requirement,
@@ -103,6 +104,7 @@ import {
 	TunnelOfLove,
 	uneffect,
 	Witchess,
+	withChoice,
 } from "libram";
 import { acquire } from "./acquire";
 import { withStash } from "./clan";
@@ -126,9 +128,9 @@ import {
 	HIGHLIGHT,
 	kramcoGuaranteed,
 	latteActionSourceFinderConstraints,
+	logMessage,
 	ltbRun,
 	mapMonster,
-	maxBy,
 	propertyManager,
 	questStep,
 	realmAvailable,
@@ -160,6 +162,8 @@ import { garboValue } from "./session";
 import { bestConsumable } from "./diet";
 import { wanderWhere } from "./wanderer";
 import { globalOptions } from "./config";
+import { MonsterProperty } from "libram/dist/propertyTypes";
+import { postFreeFightDailySetup } from "./dailies";
 
 const firstChainMacro = () =>
 	Macro.if_(
@@ -201,7 +205,7 @@ const secondChainMacro = () =>
 	).abort();
 
 function embezzlerSetup() {
-	setLocation($location.none);
+	setLocation($location`Friar Ceremony Location`);
 	potionSetup(false);
 	maximize("MP", false);
 	meatMood(true, 750 + baseMeat).execute(embezzlerCount());
@@ -533,6 +537,7 @@ type FreeFightOptions = {
 	macroAllowsFamiliarActions?: boolean;
 };
 
+let consecutiveNonFreeFights = 0;
 class FreeFight {
 	available: () => number | boolean;
 	run: () => void;
@@ -585,7 +590,10 @@ class FreeFight {
 			safeRestore();
 			const curTurncount = myTurncount();
 			withMacro(Macro.basicCombat(), this.run);
-			if (myTurncount() > curTurncount) throw new Error("The last fight was not free!");
+			if (myTurncount() > curTurncount) consecutiveNonFreeFights++;
+			else consecutiveNonFreeFights = 0;
+			if (consecutiveNonFreeFights >= 5)
+				throw new Error("The last 5 FreeRunFights were not free!");
 			postCombatActions();
 			// Slot in our Professor Thesis if it's become available
 			if (!have($effect`Feeling Lost`)) deliverThesisIfAble();
@@ -640,7 +648,10 @@ class FreeRunFight extends FreeFight {
 			safeRestore();
 			const curTurncount = myTurncount();
 			withMacro(Macro.step(runSource.macro), () => this.freeRun(runSource));
-			if (myTurncount() > curTurncount) throw new Error("The last runaway was not free!");
+			if (myTurncount() > curTurncount) consecutiveNonFreeFights++;
+			else consecutiveNonFreeFights = 0;
+			if (consecutiveNonFreeFights >= 5)
+				throw new Error("The last 5 FreeRunFights were not free!");
 			postCombatActions();
 		}
 	}
@@ -669,6 +680,16 @@ const pygmyBanishHandlers = [
 		item: $item`tennis ball`,
 	},
 ] as const;
+
+const sniffSources: MonsterProperty[] = [
+	"_gallapagosMonster",
+	"olfactedMonster",
+	"_latteMonster",
+	"motifMonster",
+	"longConMonster",
+];
+const pygmySniffed = () =>
+	sniffSources.some((source) => pygmyBanishHandlers.some(({ pygmy }) => pygmy === get(source)));
 
 const pygmyMacro = Macro.step(
 	...pygmyBanishHandlers.map(({ pygmy, skill, item }) =>
@@ -1027,7 +1048,7 @@ const freeFightSources = [
 	// Initial 9 Pygmy fights
 	new FreeFight(
 		() =>
-			get("questL11Worship") !== "unstarted" && bowlOfScorpionsAvailable()
+			get("questL11Worship") !== "unstarted" && bowlOfScorpionsAvailable() && !pygmySniffed()
 				? clamp(9 - get("_drunkPygmyBanishes"), 0, 9)
 				: 0,
 		() => {
@@ -1054,7 +1075,10 @@ const freeFightSources = [
 
 	// 10th Pygmy fight. If we have an orb, equip it for this fight, to save for later
 	new FreeFight(
-		() => get("questL11Worship") !== "unstarted" && get("_drunkPygmyBanishes") === 9,
+		() =>
+			get("questL11Worship") !== "unstarted" &&
+			get("_drunkPygmyBanishes") === 9 &&
+			!pygmySniffed(),
 		() => {
 			putCloset(itemAmount($item`bowling ball`), $item`bowling ball`);
 			retrieveItem($item`Bowl of Scorpions`);
@@ -1068,7 +1092,8 @@ const freeFightSources = [
 		() =>
 			get("questL11Worship") !== "unstarted" &&
 			get("_drunkPygmyBanishes") === 10 &&
-			(!have($item`Fourth of May Cosplay Saber`) || crateStrategy() === "Saber"),
+			(!have($item`Fourth of May Cosplay Saber`) || crateStrategy() === "Saber") &&
+			!pygmySniffed(),
 		() => {
 			putCloset(itemAmount($item`bowling ball`), $item`bowling ball`);
 			retrieveItem($item`Bowl of Scorpions`);
@@ -1096,7 +1121,8 @@ const freeFightSources = [
 				get("questL11Worship") !== "unstarted" &&
 				rightTime &&
 				!wrongPygmySabered &&
-				drunksCanAppear
+				drunksCanAppear &&
+				!pygmySniffed()
 			);
 		},
 		() => {
@@ -1128,7 +1154,8 @@ const freeFightSources = [
 			get("questL11Worship") !== "unstarted" &&
 			CrystalBall.ponder().get($location`The Hidden Bowling Alley`) ===
 				$monster`drunk pygmy` &&
-			get("_drunkPygmyBanishes") >= 11,
+			get("_drunkPygmyBanishes") >= 11 &&
+			!pygmySniffed(),
 		() => {
 			putCloset(itemAmount($item`bowling ball`), $item`bowling ball`);
 			retrieveItem(1, $item`Bowl of Scorpions`);
@@ -1471,21 +1498,32 @@ const freeFightSources = [
 			if (get("rufusQuestType") === "items") {
 				return false; // We deemed it unprofitable to complete the quest in potionSetup
 			}
-			if (get("encountersUntilSRChoice", 0) === 0) {
+			if (get("encountersUntilSRChoice") === 0) {
 				// Target is either an artifact or a boss
 				return true; // Get the artifact or kill the boss immediately for free
 			}
 			return false; // We have to spend turns to get the artifact or kill the boss
 		},
 		() => {
-			propertyManager.set({ shadowLabyrinthGoal: "effects" });
+			if (have($item`Rufus's shadow lodestone`)) setChoice(1500, 2);
 			if (!get("_shadowAffinityToday") && !ClosedCircuitPayphone.rufusTarget()) {
 				ClosedCircuitPayphone.chooseQuest(() => 2); // Choose an artifact (not supporting boss for now)
 			}
 			adv1(bestShadowRift(), -1, "");
-			if (get("encountersUntilSRChoice") === 0) adv1(bestShadowRift(), -1, ""); // grab the NC
-			if (!have($effect`Shadow Affinity`) && get("encountersUntilSRChoice") !== 0) {
-				setLocation($location.none); // Reset location to not affect mafia's item drop calculations
+
+			if (get("encountersUntilSRChoice", 0) === 0) {
+				if (ClosedCircuitPayphone.have() && !ClosedCircuitPayphone.rufusTarget()) {
+					ClosedCircuitPayphone.chooseQuest(() => 2);
+				}
+				adv1(bestShadowRift(), -1, ""); // grab the NC
+			}
+
+			if (questStep("questRufus") === 1) {
+				withChoice(1498, 1, () => use($item`closed-circuit pay phone`));
+			}
+
+			if (!have($effect`Shadow Affinity`) && get("encountersUntilSRChoice", 0) !== 0) {
+				setLocation($location`Friar Ceremony Location`); // Reset location to not affect mafia's item drop calculations
 			}
 		},
 		true
@@ -2224,6 +2262,7 @@ export function freeFights(): void {
 	}
 
 	tryFillLatte();
+	postFreeFightDailySetup();
 }
 
 function setNepQuestChoicesAndPrepItems() {
@@ -2424,7 +2463,7 @@ const itemStealZones = [
 	},
 	{
 		location: $location`Twin Peak`,
-		monster: $monster`bearpig topiary animal`,
+		monster: $monsters`bearpig topiary animal, elephant (meatcar?) topiary animal, spider (duck?) topiary animal`,
 		item: $item`rusty hedge trimmers`,
 		dropRate: 0.5,
 		maximize: ["99 monster level 11 max"], // Topiary animals need an extra 11 HP to survive polar vortices
@@ -2445,6 +2484,18 @@ const itemStealZones = [
 		openCost: () => 0,
 		preReq: null,
 	},
+	...$locations`Shadow Rift (The Ancient Buried Pyramid), Shadow Rift (The Hidden City), Shadow Rift (The Misspelled Cemetary)`.map(
+		(location) => ({
+			location,
+			monster: $monster`shadow slab`,
+			item: $item`shadow brick`,
+			requireMapTheMonsters: false,
+			dropRate: 1,
+			isOpen: () => canAdventure(location),
+			openCost: () => 0,
+			preReq: null,
+		})
+	),
 ] as ItemStealZone[];
 
 function getBestItemStealZone(mappingMonster = false): ItemStealZone | null {

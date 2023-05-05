@@ -1,6 +1,6 @@
 import { availableAmount, itemAmount, Location, print } from "kolmafia";
-import { $item, $location, get } from "libram";
-import { HIGHLIGHT, maxBy, propertyManager, sober } from "../lib";
+import { $item, $location, maxBy, get } from "libram";
+import { HIGHLIGHT, propertyManager, sober } from "../lib";
 import { guzzlrFactory } from "./guzzlr";
 import {
 	canAdventureOrUnlock,

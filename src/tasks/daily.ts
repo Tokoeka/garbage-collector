@@ -2,17 +2,21 @@ import { Task } from "grimoire-kolmafia";
 import {
 	adv1,
 	canadiaAvailable,
+	canAdventure,
+	canEquip,
 	changeMcd,
 	cliExecute,
 	currentMcd,
 	gamedayToInt,
 	getClanLounge,
 	gnomadsAvailable,
+	handlingChoice,
 	holiday,
 	inebrietyLimit,
 	Item,
 	itemAmount,
 	mallPrice,
+	myAscensions,
 	myClass,
 	myDaycount,
 	myHash,
@@ -43,6 +47,7 @@ import {
 	get,
 	getModifier,
 	have,
+	maxBy,
 	Pantogram,
 	set,
 	SongBoom,
@@ -54,7 +59,7 @@ import { globalOptions } from "../config";
 import { embezzlerCount } from "../embezzler";
 import { meatFamiliar } from "../familiar";
 import { estimatedTentacles } from "../fights";
-import { baseMeat, HIGHLIGHT, maxBy } from "../lib";
+import { baseMeat, HIGHLIGHT } from "../lib";
 import { garboValue } from "../session";
 import { digitizedMonstersRemaining, estimatedGarboTurns } from "../turns";
 
@@ -373,6 +378,23 @@ export const DailyTasks: Task[] = [
 		},
 	},
 	{
+		name: "Unlock Cemetery",
+		ready: () => get("lastGuildStoreOpen") >= myAscensions(),
+		completed: () => canAdventure($location`The Unquiet Garves`),
+		do: () => visitUrl("guild.php?place=scg"),
+		limit: { soft: 3 }, // Sometimes need to cycle through some dialogue
+	},
+	{
+		name: "Unlock Woods",
+		ready: () => have($item`bitchin' meatcar`),
+		completed: () => canAdventure($location`The Spooky Forest`),
+		do: (): void => {
+			visitUrl("guild.php?place=paco");
+			if (handlingChoice()) runChoice(1);
+		},
+		limit: { soft: 3 }, // Sometimes need to cycle through some dialogue
+	},
+	{
 		name: "Configure I Voted! Sticker",
 		ready: () => true,
 		completed: () => have($item`"I Voted!" sticker`),
@@ -438,14 +460,13 @@ export const DailyTasks: Task[] = [
 	{
 		name: "Beach Comb Buff",
 		ready: () => have($item`Beach Comb`) || have($item`driftwood beach comb`),
-		completed: () =>
-			get("_beachHeadsUsed").split(",").includes("10") || get("_freeBeachWalksUsed") >= 11,
+		completed: () => !BeachComb.headAvailable("FAMILIAR") || BeachComb.freeCombs() < 1,
 		do: () => BeachComb.tryHead($effect`Do I Know You From Somewhere?`),
 	},
 	{
 		name: "Beach Comb Free Walks",
 		ready: () => have($item`Beach Comb`) || have($item`driftwood beach comb`),
-		completed: () => get("_freeBeachWalksUsed") >= 11,
+		completed: () => BeachComb.freeCombs() < 1,
 		do: () => cliExecute(`combo ${11 - get("_freeBeachWalksUsed")}`),
 	},
 	{
@@ -529,7 +550,16 @@ export const DailyTasks: Task[] = [
 		completed: () => have($effect`Eldritch Attunement`),
 		do: () => adv1($location`Generic Summer Holiday Swimming!`),
 		acquire: [{ item: $item`water wings` }],
-		outfit: { acc1: $item`water wings` },
+		outfit: () =>
+			myInebriety() > inebrietyLimit() &&
+			have($item`Drunkula's wineglass`) &&
+			canEquip($item`Drunkula's wineglass`)
+				? {
+						offhand: $item`Drunkula's wineglass`,
+						acc1: $item`water wings`,
+						avoid: $items`June cleaver`,
+				  }
+				: { acc1: $item`water wings`, avoid: $items`June cleaver` },
 	},
 	{
 		name: "Check Neverending Party Quest",
@@ -538,6 +568,12 @@ export const DailyTasks: Task[] = [
 			get("_questPartyFair") === "unstarted",
 		completed: () => get("_questPartyFair") !== "unstarted",
 		do: () => nepQuest(),
+		outfit: () =>
+			myInebriety() > inebrietyLimit() &&
+			have($item`Drunkula's wineglass`) &&
+			canEquip($item`Drunkula's wineglass`)
+				? { offhand: $item`Drunkula's wineglass`, avoid: $items`June cleaver` }
+				: { avoid: $items`June cleaver` },
 	},
 	{
 		name: "Check Barf Mountain Quest",

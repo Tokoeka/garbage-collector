@@ -1,11 +1,14 @@
 import {
+	abort,
 	availableAmount,
 	buy,
 	canEquip,
 	cliExecute,
+	currentRound,
 	getCampground,
 	getClanName,
 	guildStoreAvailable,
+	handlingChoice,
 	inebrietyLimit,
 	Item,
 	logprint,
@@ -37,11 +40,13 @@ import {
 	$skill,
 	$slots,
 	Clan,
+	examine,
 	get,
 	getFoldGroup,
 	have,
 	haveInCampground,
 	JuneCleaver,
+	maxBy,
 	set,
 	setDefaultMaximizeOptions,
 	sinceKolmafiaRevision,
@@ -52,7 +57,6 @@ import {
 	bestJuneCleaverOption,
 	checkGithubVersion,
 	HIGHLIGHT,
-	maxBy,
 	printLog,
 	propertyManager,
 	questStep,
@@ -62,7 +66,7 @@ import {
 import { meatMood, useBuffExtenders } from "./mood";
 import postCombatActions from "./post";
 import { stashItems, withStash, withVIPClan } from "./clan";
-import { dailySetup, postFreeFightDailySetup } from "./dailies";
+import { dailySetup } from "./dailies";
 import { potionSetup } from "./potions";
 import { endSession, garboAverageValue, startSession } from "./session";
 import { yachtzeeChain } from "./yachtzee";
@@ -98,8 +102,19 @@ export function canContinue(): boolean {
 }
 
 export function main(argString = ""): void {
-	sinceKolmafiaRevision(27149);
+	sinceKolmafiaRevision(27321);
 	checkGithubVersion();
+
+	// Hit up main.php to get out of easily escapable choices
+	visitUrl("main.php");
+	if (currentRound() > 0) {
+		abort("It seems like you're a bit busy right now. Don't run garbo when you're in combat!");
+	}
+	if (handlingChoice()) {
+		abort(
+			"It seems like you're a bit busy right now. Don't run garbo when you're in the middle of a choice adventure."
+		);
+	}
 
 	Args.fill(globalOptions, argString);
 	if (globalOptions.version) return; // Since we always print the version, all done!
@@ -241,6 +256,9 @@ export function main(argString = ""): void {
 	const completedProperty = "_garboCompleted";
 	set(completedProperty, "");
 
+	// re-align sweat (useful for diet and outfit)
+	examine($item`designer sweatpants`);
+
 	startSession();
 	if (!globalOptions.nobarf && !globalOptions.simdiet) {
 		ensureBarfAccess();
@@ -258,6 +276,7 @@ export function main(argString = ""): void {
 			autoGarish: true,
 			valueOfInventory: 2,
 			suppressMallPriceCacheMessages: true,
+			shadowLabyrinthGoal: "effects",
 		});
 		runDiet();
 		propertyManager.resetAll();
@@ -392,6 +411,7 @@ export function main(argString = ""): void {
 				)
 			);
 		}
+		propertyManager.set({ shadowLabyrinthGoal: "effects" }); // Automate Shadow Labyrinth Quest
 
 		safeRestore();
 
@@ -466,9 +486,7 @@ export function main(argString = ""): void {
 				});
 
 				// 2. do some embezzler stuff
-				potionSetup(globalOptions.nobarf);
 				freeFights();
-				postFreeFightDailySetup(); // setup stuff that can interfere with free fights (VYKEA)
 				yachtzeeChain();
 				dailyFights();
 

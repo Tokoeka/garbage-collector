@@ -139,8 +139,27 @@ const specialValueLookup = new Map<Item, () => number>([
 			),
 	],
 	[$item`fake hand`, () => 50000],
-	// eslint-disable-next-line libram/verify-constants
 	[$item`shadow brick`, () => 50000],
+	[
+		$item`psychoanalytic jar`,
+		() =>
+			// Exclude jick because he's rate-limited
+			Math.max(
+				...$items`jar of psychoses (The Meatsmith), jar of psychoses (The Captain of the Gourd), jar of psychoses (The Crackpot Mystic), jar of psychoses (The Pretentious Artist), jar of psychoses (The Old Man), jar of psychoses (The Suspicious-Looking Guy)`.map(
+					(jar) => garboValue(jar)
+				)
+			),
+	],
+	// Exclude tradeable worksheds
+	[$item`Little Geneticist DNA-Splicing Lab`, () => 0],
+	[$item`portable Mayo Clinic`, () => 0],
+	[$item`snow machine`, () => 0],
+	[$item`warbear auto-anvil`, () => 0],
+	[$item`warbear chemistry lab`, () => 0],
+	[$item`warbear high-efficiency still`, () => 0],
+	[$item`warbear induction oven`, () => 0],
+	[$item`warbear jackhammer drill press`, () => 0],
+	[$item`warbear LP-ROM burner`, () => 0],
 ]);
 
 function printSession(session: Session): void {
