@@ -128,7 +128,6 @@ import {
 	HIGHLIGHT,
 	kramcoGuaranteed,
 	latteActionSourceFinderConstraints,
-	logMessage,
 	ltbRun,
 	mapMonster,
 	propertyManager,
@@ -592,8 +591,9 @@ class FreeFight {
 			withMacro(Macro.basicCombat(), this.run);
 			if (myTurncount() > curTurncount) consecutiveNonFreeFights++;
 			else consecutiveNonFreeFights = 0;
-			if (consecutiveNonFreeFights >= 5)
+			if (consecutiveNonFreeFights >= 5) {
 				throw new Error("The last 5 FreeRunFights were not free!");
+			}
 			postCombatActions();
 			// Slot in our Professor Thesis if it's become available
 			if (!have($effect`Feeling Lost`)) deliverThesisIfAble();
@@ -650,8 +650,9 @@ class FreeRunFight extends FreeFight {
 			withMacro(Macro.step(runSource.macro), () => this.freeRun(runSource));
 			if (myTurncount() > curTurncount) consecutiveNonFreeFights++;
 			else consecutiveNonFreeFights = 0;
-			if (consecutiveNonFreeFights >= 5)
+			if (consecutiveNonFreeFights >= 5) {
 				throw new Error("The last 5 FreeRunFights were not free!");
+			}
 			postCombatActions();
 		}
 	}
@@ -2463,7 +2464,7 @@ const itemStealZones = [
 	},
 	{
 		location: $location`Twin Peak`,
-		monster: $monsters`bearpig topiary animal, elephant (meatcar?) topiary animal, spider (duck?) topiary animal`,
+		monster: $monster`bearpig topiary animal`,
 		item: $item`rusty hedge trimmers`,
 		dropRate: 0.5,
 		maximize: ["99 monster level 11 max"], // Topiary animals need an extra 11 HP to survive polar vortices
