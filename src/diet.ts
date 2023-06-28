@@ -289,6 +289,32 @@ const stomachLiverCleaners = new Map([
 	// [$item`Mr. Burnsger`, [0, -2]],
 ]);
 
+function legendaryPizzaToMenu(
+	pizzas: { item: Item; pref: string }[],
+	maker: (out: { item: Item; price: number }) => MenuItem<Note> | MenuItem<Note>[]
+) {
+	const canCookLegendaryPizza = (pizza: Item): boolean => {
+		const recipes = [
+			pizza,
+			...$items`roasted vegetable of Jarlsberg, Pete's rich ricotta, Boris's bread`,
+		].map((i) => toInt(i));
+		return !recipes.some((id) => get(`unknownRecipe${id}`, true));
+	};
+	return pizzas
+		.filter(({ item, pref }) => !get(pref, true) && canCookLegendaryPizza(item))
+		.map(({ item }) =>
+			maker({
+				item,
+				price:
+					2 *
+					sum(
+						$items`Vegetable of Jarlsberg, St. Sneaky Pete's Whey, Yeast of Boris`,
+						ingredientCost
+					),
+			})
+		);
+}
+
 export const mallMin: (items: Item[]) => Item = (items: Item[]) => maxBy(items, mallPrice, true);
 
 /**
@@ -330,9 +356,17 @@ function menu(): MenuItem<Note>[] {
 	const boxingDayCareItems = $items`glass of raw eggs, punch-drunk punch`.filter((item) =>
 		have(item)
 	);
-	const pilsners = $items`astral pilsner`.filter((item) => globalOptions.ascend && have(item));
+	const pilsners = $items`astral pilsner`.filter((item) => have(item));
 	const limitedItems = [...boxingDayCareItems, ...pilsners].map(
 		(item) => new MenuItem<Note>(item, { maximum: availableAmount(item) })
+	);
+
+	const legendaryPizzas = legendaryPizzaToMenu(
+		[
+			{ item: $item`Calzone of Legend`, pref: "calzoneOfLegendEaten" },
+			{ item: $item`Pizza of Legend`, pref: "pizzaOfLegendEaten" },
+		],
+		(out) => new MenuItem<Note>(out.item, { maximum: 1, priceOverride: out.price })
 	);
 
 	return [
@@ -351,6 +385,7 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem(mallMin(smallEpics)),
 		new MenuItem($item`green hamhock`),
 		new MenuItem($item`Mr. Burnsger`, { priceOverride: 100000 }),
+		...legendaryPizzas.flat(),
 
 		// BOOZE
 		new MenuItem($item`elemental caipiroska`),
@@ -370,6 +405,7 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem(mallMin(perfectDrinks)),
 		new MenuItem($item`green eggnog`),
 		new MenuItem($item`Doc Clock's thyme cocktail`, { priceOverride: 100000 }),
+		new MenuItem($item`The Mad Liquor`),
 
 		// SPLEEN
 		new MenuItem($item`octolus oculus`),
@@ -658,7 +694,6 @@ export function potionMenu(
 		...potion($item`Feliz Navidad`),
 		...potion($item`broberry brogurt`),
 		...potion($item`haunted martini`),
-		...potion($item`bottle of Greedy Dog`, { price: 15000 }),
 		...potion($item`twice-haunted screwdriver`, { price: twiceHauntedPrice }),
 		...limitedPotion($item`high-end ginger wine`, availableAmount($item`high-end ginger wine`)),
 		...limitedPotion($item`Hot Socks`, hasSpeakeasy ? 3 : 0, { price: 5000 }),

@@ -10,7 +10,7 @@ import {
 } from "kolmafia";
 import { $effect, $familiar, $item, $skill, clamp, get, have } from "libram";
 import { globalOptions } from "../config";
-import { ESTIMATED_OVERDRUNK_TURNS, turnsToNC } from "../lib";
+import { baseMeat, ESTIMATED_OVERDRUNK_TURNS, turnsToNC } from "../lib";
 import { digitizedMonstersRemaining, estimatedGarboTurns } from "../turns";
 
 export type GeneralFamiliar = {

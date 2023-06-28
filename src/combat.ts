@@ -53,6 +53,7 @@ import {
 	Counter,
 	get,
 	have,
+	SongBoom,
 	SourceTerminal,
 	StrictMacro,
 } from "libram";
@@ -186,6 +187,15 @@ export class Macro extends StrictMacro {
 		return new Macro().tryHaveItem(item);
 	}
 
+	trySingAlong(): Macro {
+		if (!SongBoom.have() || SongBoom.song() !== "Total Eclipse of Your Meat") return this;
+		return this.tryHaveSkill($skill`Sing Along`);
+	}
+
+	static trySingAlong(): Macro {
+		return new Macro().trySingAlong();
+	}
+
 	familiarActions(): Macro {
 		return this.externalIf(
 			myFamiliar() === $familiar`Grey Goose` && timeToMeatify(),
@@ -289,7 +299,7 @@ export class Macro extends StrictMacro {
 			shouldRedigitize(),
 			Macro.if_($monster`Knob Goblin Embezzler`, Macro.trySkill($skill`Digitize`))
 		)
-			.tryHaveSkill($skill`Sing Along`)
+			.trySingAlong()
 			.familiarActions()
 			.externalIf(
 				digitizedMonstersRemaining() <= 5 - get("_meteorShowerUses") &&
@@ -323,7 +333,9 @@ export class Macro extends StrictMacro {
 				Macro.if_($monster`garbage tourist`, Macro.trySkill($skill`Long Con`))
 			)
 			.externalIf(
-				have($skill`Motif`) && !have($effect`Everything Looks Blue`),
+				get("motifMonster") !== $monster`garbage tourist` &&
+					have($skill`Motif`) &&
+					!have($effect`Everything Looks Blue`),
 				Macro.if_($monster`garbage tourist`, Macro.trySkill($skill`Motif`))
 			)
 			.externalIf(
@@ -475,7 +487,7 @@ export class Macro extends StrictMacro {
 	}
 
 	startCombat(): Macro {
-		return this.tryHaveSkill($skill`Sing Along`)
+		return this.trySingAlong()
 			.tryHaveSkill($skill`Curse of Weaksauce`)
 			.familiarActions()
 			.externalIf(
@@ -646,7 +658,7 @@ export class Macro extends StrictMacro {
 			return this.basicCombat();
 		}
 
-		return this.tryHaveSkill($skill`Sing Along`)
+		return this.trySingAlong()
 			.familiarActions()
 			.tryHaveItem($item`Rain-Doh blue balls`)
 			.externalIf(get("lovebugsUnlocked"), Macro.trySkill($skill`Summon Love Gnats`))
