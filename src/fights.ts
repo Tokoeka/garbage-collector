@@ -54,7 +54,6 @@ import {
 	stashAmount,
 	takeCloset,
 	toInt,
-	toItem,
 	toJson,
 	toMonster,
 	totalTurnsPlayed,
@@ -137,7 +136,6 @@ import {
 	HIGHLIGHT,
 	kramcoGuaranteed,
 	latteActionSourceFinderConstraints,
-	logMessage,
 	ltbRun,
 	mapMonster,
 	propertyManager,
@@ -325,10 +323,12 @@ function startWandererCounter() {
 		Counter.get("Romantic Monster window begin") === Infinity &&
 		Counter.get("Romantic Monster window end") === Infinity;
 	if (digitizeNeedsStarting || romanceNeedsStarting) {
-		if (digitizeNeedsStarting)
+		if (digitizeNeedsStarting) {
 			print("Starting digitize counter by visiting the Haunted Kitchen!");
-		if (romanceNeedsStarting)
+		}
+		if (romanceNeedsStarting) {
 			print("Starting romance counter by visiting the Haunted Kitchen!");
+		}
 		do {
 			let run: ActionSource;
 			if (get("beGregariousFightsLeft") > 0) {
@@ -583,8 +583,9 @@ class FreeFight {
 			withMacro(Macro.basicCombat(), this.run);
 			if (myTurncount() > curTurncount) consecutiveNonFreeFights++;
 			else consecutiveNonFreeFights = 0;
-			if (consecutiveNonFreeFights >= 5)
+			if (consecutiveNonFreeFights >= 5) {
 				throw new Error("The last 5 FreeRunFights were not free!");
+			}
 			postCombatActions();
 			// Slot in our Professor Thesis if it's become available
 			if (!have($effect`Feeling Lost`)) deliverThesisIfAble();
@@ -1025,8 +1026,9 @@ const freeFightSources = [
 					modifier: ["1000 Pickpocket Chance"],
 					equip: $items`Fourth of May Cosplay Saber`,
 				};
-				if (have($familiar`Red-Nosed Snapper`))
+				if (have($familiar`Red-Nosed Snapper`)) {
 					spec.familiar = $familiar`Red-Nosed Snapper`;
+				}
 				if (!canPickPocket && bestPickpocketItem) spec.equip?.push(bestPickpocketItem);
 
 				return spec;
@@ -1968,8 +1970,9 @@ function sandwormSpec(spec: OutfitSpec = {}): OutfitSpec {
 	}
 	const familiar = bestFairy();
 	copy.familiar = familiar;
-	if (familiar === $familiar`Reagnimated Gnome`)
+	if (familiar === $familiar`Reagnimated Gnome`) {
 		copy.equip?.push($item`gnomish housemaid's kgnee`);
+	}
 	copy.equip = [...new Set(copy.equip)]; // Prune doubled-up stuff
 	return copy;
 }
