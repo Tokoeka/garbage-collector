@@ -35,7 +35,7 @@ import {
 	myLevel,
 	myMaxhp,
 	myPath,
-	myPrimestat,
+	mySoulsauce,
 	myThrall,
 	myTurncount,
 	numericModifier,
@@ -115,7 +115,14 @@ import {
 } from "libram";
 import { acquire } from "./acquire";
 import { withStash } from "./clan";
-import { garboAdventure, garboAdventureAuto, Macro, withMacro } from "./combat";
+import {
+	garboAdventure,
+	garboAdventureAuto,
+	Macro,
+	maxPassiveDamage,
+	monsterManuelAvailable,
+	withMacro,
+} from "./combat";
 import {
 	bestFairy,
 	freeFightFamiliar,
@@ -715,6 +722,33 @@ function molemanReady() {
 	return have($item`molehill mountain`) && !get("_molehillMountainUsed");
 }
 
+const stunDurations = new Map<Skill | Item, Delayed<number>>([
+	[$skill`Blood Bubble`, 1],
+	[
+		$skill`Entangling Noodles`,
+		() => (myClass() === $class`Pastamancer` && !have($skill`Shadow Noodles`) ? 1 : 0),
+	],
+	[$skill`Frost Bite`, 1],
+	[$skill`Shadow Noodles`, 2],
+	[
+		$skill`Shell Up`,
+		() => {
+			if (myClass() !== $class`Turtle Tamer`) return 0;
+			for (const [effect, duration] of new Map([
+				[$effect`Glorious Blessing of the Storm Tortoise`, 4],
+				[$effect`Grand Blessing of the Storm Tortoise`, 3],
+				[$effect`Blessing of the Storm Tortoise`, 2],
+			])) {
+				if (have(effect)) return duration;
+			}
+			return 0;
+		},
+	],
+	[$skill`Soul Bubble`, () => (mySoulsauce() >= 5 ? 2 : 0)],
+	[$skill`Summon Love Gnats`, 1],
+	[$item`Rain-Doh blue balls`, 1],
+]);
+
 const freeFightSources = [
 	new FreeFight(
 		() =>
@@ -840,6 +874,45 @@ const freeFightSources = [
 	new FreeFight(
 		() =>
 			have($item`[glitch season reward name]`) &&
+			have($item`unwrapped knock-off retro superhero cape`) &&
+			!get("_glitchMonsterFights") &&
+			get("garbo_fightGlitch", false) &&
+			sum([...stunDurations], ([thing, duration]) => (have(thing) ? undelay(duration) : 0)) >=
+				5,
+		() =>
+			withMacro(
+				Macro.trySkill($skill`Curse of Marinara`)
+					.trySkill($skill`Shell Up`)
+					.trySkill($skill`Shadow Noodles`)
+					.trySkill($skill`Entangling Noodles`)
+					.trySkill($skill`Summon Love Gnats`)
+					.trySkill($skill`Frost Bite`)
+					.trySkill($skill`Soul Bubble`)
+					.tryItem($item`Rain-Doh blue balls`)
+					.skill($skill`Blow a Robo-Kiss`)
+					.repeat(),
+				() => {
+					restoreHp(myMaxhp());
+					if (have($skill`Blood Bubble`)) ensureEffect($effect`Blood Bubble`);
+					retrieveItem($item`[glitch season reward name]`);
+					visitUrl("inv_eat.php?pwd&whichitem=10207");
+					runCombat();
+				}
+			),
+		true,
+		{
+			spec: {
+				back: $items`unwrapped knock-off retro superhero cape`,
+				modes: { retrocape: ["robot", "kiss"] },
+				equip: $items`June cleaver`,
+			},
+			macroAllowsFamiliarActions: false,
+		}
+	),
+
+	new FreeFight(
+		() =>
+			have($item`[glitch season reward name]`) &&
 			!get("_glitchMonsterFights") &&
 			get("garbo_fightGlitch", false),
 		() =>
@@ -873,18 +946,16 @@ const freeFightSources = [
 					.kill(),
 				() => {
 					restoreHp(myMaxhp());
-					if (have($skill`Ruthless Efficiency`)) {
+					if (have($skill`Ruthless Efficiency`))
 						ensureEffect($effect`Ruthlessly Efficient`);
-					}
-					if (have($skill`Mathematical Precision`)) {
+					if (have($skill`Mathematical Precision`))
 						ensureEffect($effect`Mathematically Precise`);
-					}
 					if (have($skill`Blood Bubble`)) ensureEffect($effect`Blood Bubble`);
 					retrieveItem($item`[glitch season reward name]`);
 					if (
 						get("glitchItemImplementationCount") *
 							itemAmount($item`[glitch season reward name]`) >=
-						2000
+						400
 					) {
 						retrieveItem($item`gas can`, 2);
 						retrieveItem($item`jam band bootleg`, 2);
@@ -1017,7 +1088,8 @@ const freeFightSources = [
 		false,
 		{
 			spec: () => {
-				const canPickPocket = myPrimestat() === $stat`Moxie`;
+				const canPickPocket =
+					myClass() === $class`Accordion Thief` || myClass() === $class`Disco Bandit`;
 				const bestPickpocketItem =
 					$items`tiny black hole, mime army infiltration glove`.find(
 						(item) => have(item) && canEquip(item)
@@ -1533,50 +1605,30 @@ const freeFightSources = [
 		},
 		true
 	),
-	new FreeFight(
+];
+
+const priorityFreeRunFightSources = [
+	new FreeRunFight(
 		() =>
-			have($item`mayfly bait necklace`) &&
-			canAdventure($location`Cobb's Knob Menagerie, Level 1`) &&
-			get("_mayflySummons") < 30 &&
-			retrieveItem(1, $item`Louder Than Bomb`) &&
-			retrieveItem(1, $item`tennis ball`),
-		() => {
+			have($familiar`Patriotic Eagle`) &&
+			!have($effect`Citizen of a Zone`) &&
+			$locations`Barf Mountain, The Fun-Guy Mansion`.some((l) => canAdventure(l)),
+		(runSource: ActionSource) => {
+			const location = canAdventure($location`Barf Mountain`)
+				? $location`Barf Mountain`
+				: $location`The Fun-Guy Mansion`;
 			garboAdventure(
-				$location`Cobb's Knob Menagerie, Level 1`,
-				Macro.step("pickpocket")
-					.if_(
-						$monster`QuickBASIC elemental`,
-						Macro.trySkill($skill`Emit Matter Duplicating Drones`).basicCombat()
-					)
-					.if_(
-						$monster`BASIC Elemental`,
-						Macro.trySkill($skill`Extract`)
-							.trySkill($skill`Pocket Crumbs`)
-							.trySkill($skill`Summon Mayfly Swarm`)
-					)
-					.if_($monster`Fruit Golem`, Macro.tryItem($item`Louder Than Bomb`))
-					.if_($monster`Knob Goblin Mutant`, Macro.tryItem($item`tennis ball`))
+				location,
+				Macro.skill($skill`%fn, let's pledge allegiance to a Zone`).step(runSource.macro)
 			);
 		},
-		true,
 		{
-			spec: () => {
-				const canPickPocket = myPrimestat() === $stat`Moxie`;
-				const bestPickpocketItem =
-					$items`tiny black hole, mime army infiltration glove`.find(
-						(item) => have(item) && canEquip(item)
-					);
-				const spec: OutfitSpec = {
-					modifier: ["100 init, Pickpocket Chance"],
-					equip: $items`mayfly bait necklace, Pantsgiving, tiny stillsuit`,
-					bonuses: new Map([[$item`carnivorous potted plant`, 100]]),
-				};
-				if (have($familiar`Grey Goose`)) spec.familiar = $familiar`Grey Goose`;
-				if (!canPickPocket && bestPickpocketItem) spec.equip?.push(bestPickpocketItem);
-
-				return spec;
+			spec: {
+				familiar: $familiar`Patriotic Eagle`,
+				famequip: $items`little bitty bathysphere, das boot`,
+				modifier: ["ML 100 Max", "-Familiar Weight"],
+				avoid: $items`Drunkula's wineglass`,
 			},
-			macroAllowsFamiliarActions: false,
 		}
 	),
 ];
@@ -1892,6 +1944,67 @@ const freeRunFightSources = [
 			},
 		}
 	),
+	// Try for an ultra-rare with mayfly runs and pickpocket if we have a manuel to detect monster hp ;)
+	new FreeRunFight(
+		() =>
+			monsterManuelAvailable() &&
+			have($item`mayfly bait necklace`) &&
+			canAdventure($location`Cobb's Knob Menagerie, Level 1`) &&
+			get("_mayflySummons") < 30,
+		(runSource: ActionSource) => {
+			const willSurvivePassive = `monsterhpabove ${maxPassiveDamage()}`;
+			garboAdventure(
+				$location`Cobb's Knob Menagerie, Level 1`,
+				Macro.if_($monster`QuickBASIC elemental`, Macro.basicCombat())
+					.if_(
+						$monster`BASIC Elemental`,
+						Macro.if_(willSurvivePassive, Macro.step("pickpocket"))
+							.externalIf(
+								have($skill`Transcendent Olfaction`) && get("_olfactionsUsed") < 1,
+								Macro.if_(
+									willSurvivePassive,
+									Macro.trySkill($skill`Transcendent Olfaction`)
+								)
+							)
+							.externalIf(
+								have($skill`Gallapagosian Mating Call`) &&
+									get("_gallapagosMonster") !== $monster`BASIC Elemental`,
+								Macro.if_(
+									willSurvivePassive,
+									Macro.skill($skill`Gallapagosian Mating Call`)
+								)
+							)
+							.trySkill($skill`Summon Mayfly Swarm`)
+					)
+					.if_($monster`Fruit Golem`, Macro.trySkill($skill`Feel Hatred`))
+					.if_($monster`Knob Goblin Mutant`, Macro.trySkill($skill`Snokebomb`))
+					.step(runSource.macro)
+			);
+		},
+		{
+			spec: () => {
+				const canPickPocket =
+					myClass() === $class`Accordion Thief` || myClass() === $class`Disco Bandit`;
+				const bestPickpocketItem =
+					$items`tiny black hole, mime army infiltration glove`.find(
+						(item) => have(item) && canEquip(item)
+					);
+				// Base drop is 30%, so 1% pickpocket gives .003
+				const pickPocketValue = 0.003 * garboValue($item`GOTO`);
+				const spec: OutfitSpec = {
+					equip: $items`mayfly bait necklace`,
+					bonuses: new Map([[$item`carnivorous potted plant`, 100]]),
+					familiar: freeFightFamiliar({ allowAttackFamiliars: false }),
+				};
+				if (!canPickPocket && bestPickpocketItem) spec.equip?.push(bestPickpocketItem);
+				if (canPickPocket || bestPickpocketItem) {
+					spec.modifier = [`${pickPocketValue} Pickpocket Chance`];
+				}
+
+				return spec;
+			},
+		}
+	),
 	// Try for mini-hipster\goth kid free fights with any remaining non-familiar free runs
 	new FreeRunFight(
 		() =>
@@ -1936,7 +2049,7 @@ const freeRunFightSources = [
 			get("encountersUntilSRChoice") > 0,
 		(runSource: ActionSource) => garboAdventure(bestShadowRift(), runSource.macro)
 	),
-	// Try for an ultra-rare with mayfly runs ;)
+	// Try for an ultra-rare with mayfly runs if we didn't have a manuel ;)
 	new FreeRunFight(
 		() =>
 			have($item`mayfly bait necklace`) &&
@@ -2132,19 +2245,20 @@ const freeKillSources = [
 
 export function freeRunFights(): void {
 	if (myInebriety() > inebrietyLimit()) return;
-	if (globalOptions.prefs.yachtzeechain && !get("_garboYachtzeeChainCompleted", false)) return;
 	if (
 		get("beGregariousFightsLeft") > 0 &&
 		get("beGregariousMonster") === $monster`Knob Goblin Embezzler`
 	) {
 		return;
 	}
-	visitUrl("place.php?whichplace=town_wrong");
 
 	propertyManager.setChoices({
 		1387: 2, // "You will go find two friends and meet me here."
 		1324: 5, // Fight a random partier
 	});
+
+	const onlyPriorityRuns =
+		globalOptions.prefs.yachtzeechain && !get("_garboYachtzeeChainCompleted", false);
 
 	const stashRun = stashAmount($item`navel ring of navel gazing`)
 		? $items`navel ring of navel gazing`
@@ -2152,7 +2266,12 @@ export function freeRunFights(): void {
 		? $items`Greatest American Pants`
 		: [];
 	refreshStash();
+
 	withStash(stashRun, () => {
+		for (const priorityRunFight of priorityFreeRunFightSources) {
+			priorityRunFight.runAll();
+		}
+		if (onlyPriorityRuns) return;
 		for (const freeRunFightSource of freeRunFightSources) {
 			freeRunFightSource.runAll();
 		}
@@ -2664,7 +2783,9 @@ function killRobortCreaturesForFree() {
 
 const isFree = (monster: Monster) => monster.attributes.includes("FREE");
 const valueDrops = (monster: Monster) =>
-	sum(itemDropsArray(monster), ({ drop, rate }) => (garboValue(drop, true) * rate) / 100);
+	sum(itemDropsArray(monster), ({ drop, rate, type }) =>
+		!["c", "0", "p"].includes(type) ? (garboValue(drop, true) * rate) / 100 : 0
+	);
 const locketMonster = () => CombatLoversLocket.findMonster(isFree, valueDrops);
 
 export function estimatedFreeFights(): number {
