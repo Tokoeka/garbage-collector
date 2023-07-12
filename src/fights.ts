@@ -35,7 +35,6 @@ import {
 	myLevel,
 	myMaxhp,
 	myPath,
-	mySoulsauce,
 	myThrall,
 	myTurncount,
 	numericModifier,
@@ -722,7 +721,7 @@ function molemanReady() {
 	return have($item`molehill mountain`) && !get("_molehillMountainUsed");
 }
 
-const stunDurations = new Map<Skill | Item, Delayed<number>>([
+/* const stunDurations = new Map<Skill | Item, Delayed<number>>([
 	[$skill`Blood Bubble`, 1],
 	[
 		$skill`Entangling Noodles`,
@@ -747,7 +746,7 @@ const stunDurations = new Map<Skill | Item, Delayed<number>>([
 	[$skill`Soul Bubble`, () => (mySoulsauce() >= 5 ? 2 : 0)],
 	[$skill`Summon Love Gnats`, 1],
 	[$item`Rain-Doh blue balls`, 1],
-]);
+]); */
 
 const freeFightSources = [
 	new FreeFight(
@@ -871,7 +870,7 @@ const freeFightSources = [
 		}
 	),
 
-	new FreeFight(
+	/* new FreeFight(
 		() =>
 			have($item`[glitch season reward name]`) &&
 			have($item`unwrapped knock-off retro superhero cape`) &&
@@ -908,7 +907,7 @@ const freeFightSources = [
 			},
 			macroAllowsFamiliarActions: false,
 		}
-	),
+	), */
 
 	new FreeFight(
 		() =>
@@ -946,10 +945,12 @@ const freeFightSources = [
 					.kill(),
 				() => {
 					restoreHp(myMaxhp());
-					if (have($skill`Ruthless Efficiency`))
+					if (have($skill`Ruthless Efficiency`)) {
 						ensureEffect($effect`Ruthlessly Efficient`);
-					if (have($skill`Mathematical Precision`))
+					}
+					if (have($skill`Mathematical Precision`)) {
 						ensureEffect($effect`Mathematically Precise`);
+					}
 					if (have($skill`Blood Bubble`)) ensureEffect($effect`Blood Bubble`);
 					retrieveItem($item`[glitch season reward name]`);
 					if (
@@ -1880,6 +1881,53 @@ const freeRunFightSources = [
 		false,
 		{
 			noncombat: () => true,
+		}
+	),
+	new FreeFight(
+		() =>
+			have($item`mayfly bait necklace`) &&
+			canAdventure($location`Cobb's Knob Menagerie, Level 1`) &&
+			get("_mayflySummons") < 30 &&
+			retrieveItem(1, $item`Louder Than Bomb`) &&
+			retrieveItem(1, $item`tennis ball`),
+		() => {
+			garboAdventure(
+				$location`Cobb's Knob Menagerie, Level 1`,
+				Macro.step("pickpocket")
+					.if_(
+						$monster`QuickBASIC elemental`,
+						Macro.trySkill($skill`Emit Matter Duplicating Drones`).basicCombat()
+					)
+					.if_(
+						$monster`BASIC Elemental`,
+						Macro.trySkill($skill`Extract`)
+							.trySkill($skill`Pocket Crumbs`)
+							.trySkill($skill`Summon Mayfly Swarm`)
+					)
+					.if_($monster`Fruit Golem`, Macro.tryItem($item`Louder Than Bomb`))
+					.if_($monster`Knob Goblin Mutant`, Macro.tryItem($item`tennis ball`))
+			);
+		},
+		true,
+		{
+			spec: () => {
+				const canPickPocket =
+					myClass() === $class`Accordion Thief` || myClass() === $class`Disco Bandit`;
+				const bestPickpocketItem =
+					$items`tiny black hole, mime army infiltration glove`.find(
+						(item) => have(item) && canEquip(item)
+					);
+				const spec: OutfitSpec = {
+					modifier: ["100 init, Pickpocket Chance"],
+					equip: $items`mayfly bait necklace, Pantsgiving, tiny stillsuit`,
+					bonuses: new Map([[$item`carnivorous potted plant`, 100]]),
+				};
+				if (have($familiar`Grey Goose`)) spec.familiar = $familiar`Grey Goose`;
+				if (!canPickPocket && bestPickpocketItem) spec.equip?.push(bestPickpocketItem);
+
+				return spec;
+			},
+			macroAllowsFamiliarActions: false,
 		}
 	),
 	// Fire Extinguisher on best available target.
