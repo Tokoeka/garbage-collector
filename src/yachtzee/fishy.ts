@@ -11,15 +11,15 @@ import {
 	use,
 } from "kolmafia";
 import {
-  $effect,
-  $item,
-  $location,
-  get,
-  getActiveEffects,
-  have,
-  maxBy,
-  sum,
-  uneffect,
+	$effect,
+	$item,
+	$location,
+	get,
+	getActiveEffects,
+	have,
+	maxBy,
+	sum,
+	uneffect,
 } from "libram";
 import { acquire } from "../acquire";
 import { garboAdventure, Macro } from "../combat";

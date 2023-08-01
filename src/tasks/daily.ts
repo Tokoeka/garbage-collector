@@ -1,4 +1,3 @@
-import { Task } from "grimoire-kolmafia";
 import {
 	adv1,
 	canadiaAvailable,
@@ -10,13 +9,13 @@ import {
 	gamedayToInt,
 	getClanLounge,
 	gnomadsAvailable,
+	guildStoreAvailable,
 	handlingChoice,
 	holiday,
 	inebrietyLimit,
 	Item,
 	itemAmount,
 	mallPrice,
-	myAscensions,
 	myClass,
 	myDaycount,
 	myHash,
@@ -49,9 +48,11 @@ import {
 	have,
 	maxBy,
 	Pantogram,
+	questStep,
 	set,
 	SongBoom,
 	SourceTerminal,
+	Witchess,
 } from "libram";
 import { acquire } from "../acquire";
 import { withStash } from "../clan";
@@ -60,14 +61,15 @@ import { embezzlerCount } from "../embezzler";
 import { meatFamiliar } from "../familiar";
 import { estimatedTentacles } from "../fights";
 import { baseMeat, HIGHLIGHT } from "../lib";
-import { garboValue } from "../session";
+import { garboValue } from "../value";
 import { digitizedMonstersRemaining, estimatedGarboTurns } from "../turns";
+import { GarboTask } from "./engine";
+import { Quest } from "grimoire-kolmafia";
 
 const closetItems = $items`4-d camera, sand dollar, unfinished ice sculpture`;
 const retrieveItems = $items`Half a Purse, seal tooth, The Jokester's gun`;
 
 let latteRefreshed = false;
-let horseryRefreshed = false;
 let attemptCompletingBarfQuest = true;
 let snojoConfigured = false;
 
@@ -367,13 +369,12 @@ export function configureSnojo(): void {
 	}
 }
 
-export const DailyTasks: Task[] = [
+const DailyTasks: GarboTask[] = [
 	{
 		name: "Chibi Buddy",
 		ready: () => have($item`ChibiBuddy™ (on)`) || have($item`ChibiBuddy™ (off)`),
 		completed: () => get("_chibiChanged", true),
 		do: () => cliExecute("chibi chat"),
-		limit: { soft: 1 },
 	},
 	{
 		name: "Refresh Latte",
@@ -386,24 +387,23 @@ export const DailyTasks: Task[] = [
 	},
 	{
 		name: "Unlock Cemetery",
-		ready: () => get("lastGuildStoreOpen") >= myAscensions(),
+		ready: () => guildStoreAvailable(),
 		completed: () => canAdventure($location`The Unquiet Garves`),
 		do: () => visitUrl("guild.php?place=scg"),
-		limit: { soft: 3 }, // Sometimes need to cycle through some dialogue
+		limit: { skip: 3 }, // Sometimes need to cycle through some dialogue
 	},
 	{
 		name: "Unlock Woods",
-		ready: () => have($item`bitchin' meatcar`),
+		ready: () => guildStoreAvailable() && have($item`bitchin' meatcar`),
 		completed: () => canAdventure($location`The Spooky Forest`),
 		do: (): void => {
 			visitUrl("guild.php?place=paco");
 			if (handlingChoice()) runChoice(1);
 		},
-		limit: { soft: 3 }, // Sometimes need to cycle through some dialogue
+		limit: { skip: 3 }, // Sometimes need to cycle through some dialogue
 	},
 	{
 		name: "Configure I Voted! Sticker",
-		ready: () => true,
 		completed: () => have($item`"I Voted!" sticker`),
 		do: voterSetup,
 	},
@@ -440,15 +440,13 @@ export const DailyTasks: Task[] = [
 		ready: () => get("getawayCampsiteUnlocked"),
 		completed: () => get("_campAwayCloudBuffs") + get("_campAwaySmileBuffs") === 4,
 		do: () => visitUrl("place.php?whichplace=campaway&action=campaway_sky"),
-		limit: { soft: 4 },
+		limit: { skip: 4 },
 	},
 	{
 		name: "Verify Horsery",
-		ready: () => true,
-		completed: () => horseryRefreshed || get("horseryAvailable"),
+		completed: () => get("horseryAvailable"),
 		do: (): void => {
 			visitUrl("place.php?whichplace=town_right");
-			horseryRefreshed = true;
 		},
 	},
 	{
@@ -484,6 +482,63 @@ export const DailyTasks: Task[] = [
 		do: () => cliExecute("fortune buff meat"),
 	},
 	{
+		name: $item`defective Game Grid token`.name,
+		completed: () => get("_defectiveTokenUsed"),
+		do: () =>
+			withStash([$item`defective Game Grid token`], () =>
+				use(1, $item`defective Game Grid token`)
+			),
+	},
+	{
+		name: $item`Glenn's golden dice`.name,
+		ready: () => have($item`Glenn's golden dice`),
+		completed: () => get("_glennGoldenDiceUsed"),
+		do: () => use($item`Glenn's golden dice`),
+	},
+	{
+		name: "Clan pool table",
+		ready: () => getClanLounge()["Clan pool table"] !== undefined,
+		completed: () => get("_poolGames") >= 3,
+		do: () => cliExecute("pool aggressive"),
+		limit: { skip: 3 },
+	},
+	{
+		name: "Daycare",
+		ready: () => get("daycareOpen") || get("_daycareToday"),
+		completed: () => get("_daycareSpa"),
+		do: () => cliExecute("daycare mysticality"),
+	},
+	{
+		name: $item`redwood rain stick`.name,
+		ready: () => have($item`redwood rain stick`),
+		completed: () => get("_redwoodRainStickUsed"),
+		do: () => use($item`redwood rain stick`),
+	},
+	{
+		name: "Witchess Puzzle Champ",
+		ready: () => Witchess.have(),
+		completed: () => get("_witchessBuff"),
+		do: () => cliExecute("up Puzzle Champ"),
+	},
+	{
+		name: "Friar's Blessing",
+		ready: () => questStep("questL06Friar") === 999,
+		completed: () => get("friarsBlessingReceived"),
+		do: () => cliExecute("friars familiar"),
+	},
+	{
+		name: $item`The Legendary Beat`.name,
+		ready: () => have($item`The Legendary Beat`),
+		completed: () => get("_legendaryBeat"),
+		do: () => use($item`The Legendary Beat`),
+	},
+	{
+		name: $item`portable steam unit`.name,
+		ready: () => have($item`portable steam unit`),
+		completed: () => get("_portableSteamUnitUsed"),
+		do: () => use($item`portable steam unit`),
+	},
+	{
 		name: "Summon Demon",
 		ready: () => !!get("demonName2") && get("questL11Manor") === "finished",
 		completed: () => get("demonSummoned"),
@@ -494,7 +549,7 @@ export const DailyTasks: Task[] = [
 		ready: () => SourceTerminal.have(),
 		completed: () => SourceTerminal.enhanceUsesRemaining() === 0,
 		do: () => SourceTerminal.enhance($effect`meat.enh`),
-		limit: { soft: 3 },
+		limit: { skip: 3 },
 	},
 	{
 		name: "Source Terminal Enquire",
@@ -614,3 +669,8 @@ export const DailyTasks: Task[] = [
 		do: () => retrieveItems.forEach((item) => retrieveItem(item)),
 	},
 ];
+
+export const DailyQuest: Quest<GarboTask> = {
+	name: "Daily",
+	tasks: DailyTasks,
+};

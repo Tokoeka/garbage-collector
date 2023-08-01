@@ -1,3 +1,4 @@
+import { Outfit, OutfitSpec } from "grimoire-kolmafia";
 import {
 	adv1,
 	availableAmount,
@@ -94,6 +95,7 @@ import {
 	ensureEffect,
 	FindActionSourceConstraints,
 	findLeprechaunMultiplier,
+	FloristFriar,
 	get,
 	getAverageAdventures,
 	getFoldGroup,
@@ -112,6 +114,7 @@ import {
 	Witchess,
 	withChoice,
 } from "libram";
+import { MonsterProperty } from "libram/dist/propertyTypes";
 import { acquire } from "./acquire";
 import { withStash } from "./clan";
 import {
@@ -122,6 +125,16 @@ import {
 	monsterManuelAvailable,
 	withMacro,
 } from "./combat";
+import { globalOptions } from "./config";
+import { postFreeFightDailySetup } from "./dailiespost";
+import { bestConsumable } from "./diet";
+import { embezzlerCount, embezzlerSources, getNextEmbezzlerFight } from "./embezzler";
+import {
+	crateStrategy,
+	doingExtrovermectin,
+	initializeExtrovermectinZones,
+	saberCrateIfSafe,
+} from "./extrovermectin";
 import {
 	bestFairy,
 	freeFightFamiliar,
@@ -158,32 +171,15 @@ import { freeFightMood, meatMood, useBuffExtenders } from "./mood";
 import {
 	embezzlerOutfit,
 	freeFightOutfit,
+	magnifyingGlass,
 	toSpec,
 	tryFillLatte,
 	waterBreathingEquipment,
 } from "./outfit";
-import { bathroomFinance, potionSetup } from "./potions";
-import {
-	embezzlerCount,
-	embezzlerMacro,
-	embezzlerSources,
-	getNextEmbezzlerFight,
-} from "./embezzler";
 import postCombatActions from "./post";
-import {
-	crateStrategy,
-	doingExtrovermectin,
-	initializeExtrovermectinZones,
-	saberCrateIfSafe,
-} from "./extrovermectin";
-import { magnifyingGlass } from "./outfit";
-import { garboValue } from "./session";
-import { bestConsumable } from "./diet";
-import { wanderWhere } from "./wanderer";
-import { globalOptions } from "./config";
-import { MonsterProperty } from "libram/dist/propertyTypes";
-import { postFreeFightDailySetup } from "./dailies";
-import { Outfit, OutfitSpec } from "grimoire-kolmafia";
+import { bathroomFinance, potionSetup } from "./potions";
+import { garboValue } from "./value";
+import wanderer from "./wanderer";
 
 const firstChainMacro = () =>
 	Macro.if_(
@@ -350,7 +346,7 @@ function startWandererCounter() {
 			}
 			garboAdventure(
 				$location`The Haunted Kitchen`,
-				Macro.if_($monster`Knob Goblin Embezzler`, embezzlerMacro()).step(run.macro)
+				Macro.if_($monster`Knob Goblin Embezzler`, Macro.embezzler()).step(run.macro)
 			);
 		} while (
 			get("lastCopyableMonster") === $monster`Government agent` ||
@@ -896,7 +892,7 @@ const freeFightSources = [
 					retrieveItem($item`[glitch season reward name]`);
 					visitUrl("inv_eat.php?pwd&whichitem=10207");
 					runCombat();
-				}
+				},
 			),
 		true,
 		{
@@ -906,7 +902,7 @@ const freeFightSources = [
 				equip: $items`June cleaver`,
 			},
 			macroAllowsFamiliarActions: false,
-		}
+		},
 	), */
 
 	new FreeFight(
@@ -1255,7 +1251,10 @@ const freeFightSources = [
 
 	new FreeFight(
 		() => get("_sausageFights") === 0 && have($item`Kramco Sausage-o-Matic™`),
-		() => adv1(wanderWhere("wanderer"), -1, ""),
+		() => {
+			propertyManager.setChoices(wanderer.getChoices("wanderer"));
+			adv1(wanderer.getTarget("wanderer"), -1, "");
+		},
 		true,
 		{
 			spec: { offhand: $item`Kramco Sausage-o-Matic™` },
@@ -2061,7 +2060,8 @@ const freeRunFightSources = [
 			get("_hipsterAdv") < 7 &&
 			(have($familiar`Mini-Hipster`) || have($familiar`Artistic Goth Kid`)),
 		(runSource: ActionSource) => {
-			const targetLocation = wanderWhere("backup");
+			propertyManager.setChoices(wanderer.getChoices("backup"));
+			const targetLocation = wanderer.getTarget("backup");
 			garboAdventure(
 				targetLocation,
 				Macro.if_(
@@ -2124,7 +2124,9 @@ const freeRunFightSources = [
 
 function sandwormSpec(spec: OutfitSpec = {}): OutfitSpec {
 	const copy = { ...spec, equip: [...(spec.equip ?? [])] };
-	copy.modifier = ["100 Item Drop"];
+	// Effective drop rate of spice melange is 0.1, each 1% item drop increases the chance by 0.1/10000
+	const itemDropBonus = (0.1 / 10000) * garboValue($item`spice melange`);
+	copy.modifier = [`${itemDropBonus.toFixed(2)} Item Drop 10000 max`];
 	if (have($item`January's Garbage Tote`) && get("garbageChampagneCharge") > 0) {
 		copy.equip?.push($item`broken champagne bottle`);
 	}
@@ -2497,9 +2499,10 @@ export function doSausage(): void {
 	let currentTurncount;
 	do {
 		currentTurncount = myTurncount();
+		propertyManager.setChoices(wanderer.getChoices("wanderer"));
 		const goblin = $monster`sausage goblin`;
 		garboAdventureAuto(
-			wanderWhere("wanderer"),
+			wanderer.getTarget("wanderer"),
 			Macro.if_(goblin, Macro.basicCombat())
 				.ifHolidayWanderer(Macro.basicCombat())
 				.abortWithMsg(`Expected ${goblin} but got something else.`)
@@ -2639,9 +2642,12 @@ function getBestItemStealZone(mappingMonster = false): ItemStealZone | null {
 		(zone) =>
 			zone.isOpen() &&
 			(mappingMonster || !zone.requireMapTheMonsters) &&
-			(!isBanished(zone.monster) ||
-				get("olfactedMonster") === zone.monster ||
-				get("_gallapagosMonster") === zone.monster)
+			asArray(zone.monster).some(
+				(m) =>
+					!isBanished(m) ||
+					get("olfactedMonster") === m ||
+					get("_gallapagosMonster") === m
+			)
 	);
 	const vorticesAvail = have($item`industrial fire extinguisher`)
 		? Math.floor(get("_fireExtinguisherCharge") / 10)
@@ -2674,7 +2680,9 @@ function itemStealOlfact(best: ItemStealZone) {
 	return Macro.externalIf(
 		have($skill`Transcendent Olfaction`) &&
 			get("_olfactionsUsed") < 1 &&
-			itemStealZones.every((zone) => get("olfactedMonster") !== zone.monster),
+			itemStealZones.every(
+				(zone) => !asArray(zone.monster).includes(get("olfactedMonster") as Monster)
+			),
 		Macro.skill($skill`Transcendent Olfaction`)
 	).externalIf(
 		have($skill`Gallapagosian Mating Call`) && get("_gallapagosMonster") !== best.monster,
@@ -2704,7 +2712,8 @@ function voidMonster(): void {
 	}
 
 	freeFightOutfit({ equip: $items`cursed magnifying glass` }).dress();
-	garboAdventure(wanderWhere("wanderer"), Macro.basicCombat());
+	propertyManager.setChoices(wanderer.getChoices("wanderer"));
+	garboAdventure(wanderer.getTarget("wanderer"), Macro.basicCombat());
 	postCombatActions();
 }
 
@@ -2905,11 +2914,8 @@ function yachtzee(): void {
 			setChoice(918, getUMD ? 1 : 2);
 
 			garboAdventureAuto($location`The Sunken Party Yacht`, Macro.abort());
-			if (
-				visitUrl("forestvillage.php").includes("friarcottage.gif") &&
-				!get("_floristPlantsUsed").split(",").includes("Crookweed")
-			) {
-				cliExecute("florist plant Crookweed");
+			if (FloristFriar.have() && FloristFriar.Crookweed.available()) {
+				FloristFriar.Crookweed.plant();
 			}
 			if (get("lastEncounter") === "Yacht, See?") {
 				garboAdventureAuto($location`The Sunken Party Yacht`, Macro.abort());

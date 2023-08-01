@@ -1,11 +1,11 @@
 import { Familiar, inebrietyLimit, myInebriety } from "kolmafia";
 import {
-  $familiar,
-  $item,
-  findFairyMultiplier,
-  findLeprechaunMultiplier,
-  have,
-  maxBy,
+	$familiar,
+	$item,
+	findFairyMultiplier,
+	findLeprechaunMultiplier,
+	have,
+	maxBy,
 } from "libram";
 
 let fam: Familiar;

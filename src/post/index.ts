@@ -29,7 +29,6 @@ import {
 	withProperty,
 } from "libram";
 import { acquire } from "../acquire";
-import bestAutumnatonLocation from "./autumnaton";
 import { garboAdventure, Macro } from "../combat";
 import { globalOptions } from "../config";
 import { computeDiet, consumeDiet } from "../diet";
@@ -42,9 +41,12 @@ import {
 	valueJuneCleaverOption,
 } from "../lib";
 import { teleportEffects } from "../mood";
-import { garboAverageValue, garboValue, sessionSinceStart } from "../session";
+import { sessionSinceStart } from "../session";
 import { estimatedGarboTurns, remainingUserTurns } from "../turns";
+import { garboAverageValue, garboValue } from "../value";
+import bestAutumnatonLocation from "./autumnaton";
 import handleWorkshed from "./workshed";
+import wanderer from "../wanderer";
 
 function closetStuff(): void {
 	for (const i of $items`bowling ball, funky junk key`) putCloset(itemAmount(i), i);
@@ -190,6 +192,7 @@ export default function postCombatActions(skipDiet = false): void {
 	updateMallPrices();
 	stillsuit();
 	funguySpores();
+	wanderer.clear();
 	if (
 		globalOptions.ascend ||
 		AutumnAton.turnsForQuest() < estimatedGarboTurns() + remainingUserTurns()

@@ -41,7 +41,7 @@ import {
 	Potion,
 	variableMeatPotionsSetup,
 } from "../potions";
-import { garboValue } from "../session";
+import { garboValue } from "../value";
 import { executeNextDietStep } from "./diet";
 import { expectedEmbezzlers, pyecAvailable, shrugIrrelevantSongs } from "./lib";
 
@@ -91,52 +91,6 @@ export function yachtzeePotionSetup(yachtzeeTurns: number, simOnly?: boolean): n
 
 	shrugIrrelevantSongs();
 
-	const canRecord =
-		getWorkshed() === $item`warbear LP-ROM burner` ||
-		have($item`warbear LP-ROM burner` || get("questG04Nemesis") === "finished");
-
-	if (myClass() === $class`Accordion Thief` && myLevel() >= 15 && !canRecord) {
-		if (have($skill`The Ballad of Richie Thingfinder`)) {
-			useSkill($skill`The Ballad of Richie Thingfinder`, 10 - get("_thingfinderCasts"));
-		}
-		if (have($skill`Chorale of Companionship`)) {
-			useSkill($skill`Chorale of Companionship`, 10 - get("_companionshipCasts"));
-		}
-	}
-
-	if (have($item`Eight Days a Week Pill Keeper`) && !get("_freePillKeeperUsed")) {
-		const doublingPotions = farmingPotions
-			.filter(
-				(potion) =>
-					potion.canDouble &&
-					haveEffect(potion.effect()) + PYECOffset * (have(potion.effect()) ? 1 : 0) <
-						yachtzeeTurns &&
-					yachtzeePotionProfits(potion.doubleDuration(), yachtzeeTurns) > 0 &&
-					potion.price(true) < myMeat()
-			)
-			.sort(
-				(left, right) =>
-					yachtzeePotionProfits(right.doubleDuration(), yachtzeeTurns) -
-					yachtzeePotionProfits(left.doubleDuration(), yachtzeeTurns)
-			);
-		const bestPotion =
-			doublingPotions.length > 0 ? doublingPotions[0].doubleDuration() : undefined;
-		if (bestPotion) {
-			const profit = yachtzeePotionProfits(bestPotion, yachtzeeTurns);
-			const price = bestPotion.price(true);
-			totalProfits += profit;
-			print(`Determined that ${bestPotion.potion} was the best potion to double`, "blue");
-			print(
-				`Expected to profit ${profit} meat from doubling 1 ${bestPotion.potion} @ price ${price} meat`,
-				"blue"
-			);
-			if (!simOnly) {
-				cliExecute("pillkeeper extend");
-				acquire(1, bestPotion.potion, profit + price);
-				bestPotion.use(1);
-			} else excludedEffects.add(bestPotion.effect());
-		}
-	}
 	if (have($item`Eight Days a Week Pill Keeper`) && !get("_freePillKeeperUsed")) {
 		const doublingPotions = farmingPotions.filter(
 			(potion) =>

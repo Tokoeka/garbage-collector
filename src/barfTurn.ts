@@ -43,6 +43,7 @@ import { deliverThesisIfAble } from "./fights";
 import {
 	embezzlerLog,
 	kramcoGuaranteed,
+	propertyManager,
 	questStep,
 	romanticMonsterImpossible,
 	safeRestore,
@@ -62,7 +63,7 @@ import {
 import postCombatActions from "./post";
 import { completeBarfQuest } from "./tasks/daily";
 import { digitizedMonstersRemaining, estimatedGarboTurns } from "./turns";
-import { drunkSafeWander, wanderWhere } from "./wanderer";
+import wanderer from "./wanderer";
 
 const embezzler = $monster`Knob Goblin Embezzler`;
 
@@ -215,10 +216,8 @@ const turns: AdventureAction[] = [
 						: []),
 				],
 			}).dress();
-			garboAdventureAuto(
-				isGhost ? drunkSafeWander("wanderer") : wanderWhere("wanderer"),
-				Macro.basicCombat()
-			);
+			propertyManager.setChoices(wanderer.getChoices("wanderer", !isGhost));
+			garboAdventureAuto(wanderer.getTarget("wanderer", !isGhost), Macro.basicCombat());
 			return get("lastVoteMonsterTurn") === totalTurnsPlayed();
 		},
 		spendsTurn: false,
@@ -236,9 +235,10 @@ const turns: AdventureAction[] = [
 
 			const targetLocation = underwater
 				? $location`The Briny Deeps`
-				: drunkSafeWander("wanderer");
+				: wanderer.getTarget("wanderer");
 
 			if (underwater) retrieveItem($item`pulled green taffy`);
+			else propertyManager.setChoices(wanderer.getChoices("wanderer"));
 
 			isEmbezzler ? embezzlerOutfit({}, targetLocation).dress() : freeFightOutfit().dress();
 			garboAdventureAuto(
@@ -264,7 +264,8 @@ const turns: AdventureAction[] = [
 		available: () => kramcoGuaranteed() && romanticMonsterImpossible(),
 		execute: () => {
 			freeFightOutfit({ offhand: $item`Kramco Sausage-o-Matic™` }).dress();
-			garboAdventureAuto(drunkSafeWander("wanderer"), Macro.basicCombat());
+			propertyManager.setChoices(wanderer.getChoices("wanderer"));
+			garboAdventureAuto(wanderer.getTarget("wanderer"), Macro.basicCombat());
 			return !kramcoGuaranteed();
 		},
 		spendsTurn: false,
@@ -278,7 +279,8 @@ const turns: AdventureAction[] = [
 			get("_voidFreeFights") < 5,
 		execute: () => {
 			freeFightOutfit({ offhand: $item`cursed magnifying glass` }).dress();
-			garboAdventureAuto(drunkSafeWander("wanderer"), Macro.basicCombat());
+			propertyManager.setChoices(wanderer.getChoices("wanderer"));
+			garboAdventureAuto(wanderer.getTarget("wanderer"), Macro.basicCombat());
 			return get("cursedMagnifyingGlassCount") === 0;
 		},
 		spendsTurn: false,
@@ -308,7 +310,8 @@ const turns: AdventureAction[] = [
 			const usingDuplicate =
 				SourceTerminal.have() && SourceTerminal.duplicateUsesRemaining() > 0;
 
-			const location = wanderWhere("yellow ray");
+			propertyManager.setChoices(wanderer.getChoices("yellow ray"));
+			const location = wanderer.getTarget("yellow ray");
 			freeFightOutfit({}, { location, allowAttackFamiliars: !usingDuplicate }).dress();
 			if (usingDuplicate) {
 				SourceTerminal.educate([$skill`Extract`, $skill`Duplicate`]);
@@ -336,7 +339,8 @@ const turns: AdventureAction[] = [
 			const usingDuplicate =
 				SourceTerminal.have() && SourceTerminal.duplicateUsesRemaining() > 0;
 
-			const location = wanderWhere("yellow ray");
+			propertyManager.setChoices(wanderer.getChoices("yellow ray"));
+			const location = wanderer.getTarget("yellow ray");
 			freeFightOutfit(
 				{ shirt: $items`Jurassic Parka` },
 				{ location, allowAttackFamiliars: !usingDuplicate }
@@ -365,7 +369,8 @@ const turns: AdventureAction[] = [
 			!have($effect`Everything Looks Red`) &&
 			romanticMonsterImpossible(),
 		execute: () => {
-			const location = wanderWhere("backup");
+			propertyManager.setChoices(wanderer.getChoices("backup"));
+			const location = wanderer.getTarget("backup");
 			freeFightOutfit({}, { location }).dress();
 			const macro = Macro.if_(embezzler, Macro.meatKill())
 				.familiarActions()
@@ -387,7 +392,8 @@ const turns: AdventureAction[] = [
 			const usingDuplicate =
 				SourceTerminal.have() && SourceTerminal.duplicateUsesRemaining() > 0;
 
-			const location = wanderWhere("yellow ray");
+			propertyManager.setChoices(wanderer.getChoices("yellow ray"));
+			const location = wanderer.getTarget("yellow ray");
 			if (usingDuplicate) {
 				SourceTerminal.educate([$skill`Extract`, $skill`Duplicate`]);
 			}

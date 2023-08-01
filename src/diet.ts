@@ -74,9 +74,9 @@ import { expectedGregs } from "./extrovermectin";
 import { arrayEquals, baseMeat, HIGHLIGHT, realmAvailable, userConfirmDialog, VPE } from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
-import { garboValue } from "./session";
 import synthesize from "./synthesis";
 import { estimatedGarboTurns } from "./turns";
+import { garboValue } from "./value";
 
 const MPA = get("valueOfAdventure");
 print(`Using adventure value ${MPA}.`, HIGHLIGHT);
@@ -242,7 +242,7 @@ export function nonOrganAdventures(): void {
 		useSkill(casts, $skill`Ancestral Recall`);
 	}
 
-	if (globalOptions.ascend) useIfUnused($item`borrowed time`, "_borrowedTimeUsed", 5 * MPA);
+	if (globalOptions.ascend) useIfUnused($item`borrowed time`, "_borrowedTimeUsed", 20 * MPA);
 }
 
 function pillCheck(): void {
@@ -405,7 +405,7 @@ function menu(): MenuItem<Note>[] {
 		new MenuItem(mallMin(perfectDrinks)),
 		new MenuItem($item`green eggnog`),
 		new MenuItem($item`Doc Clock's thyme cocktail`, { priceOverride: 100000 }),
-		new MenuItem($item`The Mad Liquor`),
+		new MenuItem($item`The Mad Liquor`, { priceOverride: 100000 }),
 
 		// SPLEEN
 		new MenuItem($item`octolus oculus`),
@@ -634,34 +634,10 @@ export function potionMenu(
 		? potion($item`Boris's bread`, { price: 2 * ingredientCost($item`Yeast of Boris`) })
 		: [];
 
-	// Replace string with BooleanProperty later
-	const ofLegendPotion = (item: Item, prefName: string) => {
-		if (get(prefName, true)) return [];
-
-		const recipes = [
-			item,
-			...$items`roasted vegetable of Jarlsberg, Pete's rich ricotta, Boris's bread`,
-		].map((i) => toInt(i));
-
-		if (recipes.some((id) => get(`unknownRecipe${id}`, true))) return [];
-
-		return limitedPotion(item, 1, {
-			price:
-				2 *
-				sum(
-					$items`Vegetable of Jarlsberg, St. Sneaky Pete's Whey, Yeast of Boris`,
-					ingredientCost
-				),
-		});
-	};
-
-	const ofLegendMenuItems = globalOptions.ascend
-		? [
-				...ofLegendPotion($item`Calzone of Legend`, "calzoneOfLegendEaten"),
-				...ofLegendPotion($item`Pizza of Legend`, "pizzaOfLegendEaten"),
-				...ofLegendPotion($item`Deep Dish of Legend`, "deepDishOfLegendEaten"),
-		  ]
-		: [];
+	const deepDish = legendaryPizzaToMenu(
+		[{ item: $item`Deep Dish of Legend`, pref: "deepDishOfLegendEaten" }],
+		(out: { item: Item; price: number }) => limitedPotion(out.item, 1, { price: out.price })
+	);
 
 	return [
 		...baseMenu,

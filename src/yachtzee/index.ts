@@ -10,13 +10,13 @@ import {
 	myTurncount,
 	print,
 	useSkill,
-	visitUrl,
 } from "kolmafia";
 import {
 	$effect,
 	$item,
 	$location,
 	$skill,
+	FloristFriar,
 	get,
 	getActiveSongs,
 	have,
@@ -25,7 +25,7 @@ import {
 } from "libram";
 import { garboAdventure, Macro } from "../combat";
 import { globalOptions } from "../config";
-import { postFreeFightDailySetup } from "../dailies";
+import { postFreeFightDailySetup } from "../dailiespost";
 import { runDiet } from "../diet";
 import { embezzlerCount } from "../embezzler";
 import { doSausage, freeRunFights } from "../fights";
@@ -99,9 +99,8 @@ function _yachtzeeChain(): void {
 			const bestWaterBreathingEquipment = getBestWaterBreathingEquipment(
 				Math.min(jellyTurns, fishyTurns)
 			);
-			if (bestWaterBreathingEquipment.item !== $item.none) {
+			if (bestWaterBreathingEquipment.item !== $item.none)
 				equip(bestWaterBreathingEquipment.item);
-			}
 			if (
 				haveEquipped($item`The Crown of Ed the Undying`) &&
 				!booleanModifier("Adventure Underwater")
@@ -127,12 +126,8 @@ function _yachtzeeChain(): void {
 			set("_stenchJellyChargeTarget", get("_stenchJellyChargeTarget", 0) - 1);
 			set("_stenchJellyUsed", false);
 		}
-		if (
-			plantCrookweed &&
-			visitUrl("forestvillage.php").includes("friarcottage.gif") &&
-			!get("_floristPlantsUsed").split(",").includes("Crookweed")
-		) {
-			cliExecute("florist plant Crookweed");
+		if (plantCrookweed && FloristFriar.have() && FloristFriar.Crookweed.available()) {
+			FloristFriar.Crookweed.plant();
 		}
 		plantCrookweed = false;
 

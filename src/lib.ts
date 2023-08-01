@@ -82,9 +82,9 @@ import {
 	sum,
 	uneffect,
 } from "libram";
-import { globalOptions } from "./config";
-import { garboValue } from "./session";
 import { acquire } from "./acquire";
+import { globalOptions } from "./config";
+import { garboValue } from "./value";
 
 export const embezzlerLog: {
 	initialEmbezzlersFought: number;
@@ -96,7 +96,28 @@ export const embezzlerLog: {
 	sources: [],
 };
 
-export type BonusEquipMode = "free" | "embezzler" | "dmt" | "barf";
+export enum BonusEquipMode {
+	FREE,
+	EMBEZZLER,
+	DMT,
+	BARF,
+}
+
+export function modeIsFree(mode: BonusEquipMode): boolean {
+	return [BonusEquipMode.FREE, BonusEquipMode.DMT].includes(mode);
+}
+
+export function modeUseLimitedDrops(mode: BonusEquipMode): boolean {
+	return [BonusEquipMode.BARF, BonusEquipMode.FREE].includes(mode);
+}
+
+export function modeValueOfMeat(mode: BonusEquipMode): number {
+	return modeIsFree(mode) ? 0 : (baseMeat + (mode === BonusEquipMode.EMBEZZLER ? 750 : 0)) / 100;
+}
+
+export function modeValueOfItem(mode: BonusEquipMode): number {
+	return mode === BonusEquipMode.BARF ? 0.72 : 0;
+}
 
 export const WISH_VALUE = 50000;
 export const HIGHLIGHT = isDarkMode() ? "yellow" : "blue";
@@ -393,7 +414,10 @@ export function checkGithubVersion(): void {
 	if (process.env.GITHUB_REPOSITORY === "CustomBuild") {
 		print("Skipping version check for custom build");
 	} else {
-		if (gitAtHead("Loathing-Associates-Scripting-Society-garbage-collector-release")) {
+		if (
+			gitAtHead("loathers-garbage-collector-release") ||
+			gitAtHead("Loathing-Associates-Scripting-Society-garbage-collector-release")
+		) {
 			print("Garbo is up to date!", HIGHLIGHT);
 		} else {
 			const gitBranches: { name: string; commit: { sha: string } }[] = JSON.parse(
@@ -405,6 +429,7 @@ export function checkGithubVersion(): void {
 			print("Garbo is out of date. Please run 'git update!'", "red");
 			print(
 				`Local Version: ${
+					gitInfo("loathers-garbage-collector-release").commit ||
 					gitInfo("Loathing-Associates-Scripting-Society-garbage-collector-release")
 						.commit
 				}.`

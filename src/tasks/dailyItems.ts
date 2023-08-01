@@ -1,4 +1,4 @@
-import { AcquireItem, Task } from "grimoire-kolmafia";
+import { AcquireItem, Quest } from "grimoire-kolmafia";
 import {
 	abort,
 	buy,
@@ -42,10 +42,11 @@ import {
 import { acquire } from "../acquire";
 import { globalOptions } from "../config";
 import { embezzlerCount } from "../embezzler";
-import { rufusPotion } from "../potions";
 import { doingExtrovermectin } from "../extrovermectin";
 import { coinmasterPrice } from "../lib";
-import { garboAverageValue, garboValue } from "../session";
+import { rufusPotion } from "../potions";
+import { garboAverageValue, garboValue } from "../value";
+import { GarboTask } from "./engine";
 
 const SummonTomes = $skills`Summon Snowcones, Summon Stickers, Summon Sugar Sheets, Summon Rad Libs, Summon Smithsness`;
 const Wads = $items`twinkly wad, cold wad, stench wad, hot wad, sleaze wad, spooky wad`;
@@ -121,10 +122,10 @@ function pickCargoPocket(): void {
 }
 
 let triedForest = false;
-export const DailyItemTasks: Task[] = [
+const DailyItemTasks: GarboTask[] = [
 	...SummonTomes.map(
 		(skill) =>
-			<Task>{
+			<GarboTask>{
 				name: `{skill}`,
 				ready: () => have(skill),
 				completed: () => skill.dailylimit === 0,
@@ -194,7 +195,7 @@ export const DailyItemTasks: Task[] = [
 			name: "Cheat Deck of Every Card",
 			ready: () => have($item`Deck of Every Card`),
 			completed: () => Math.floor(3 - get("_deckCardsDrawn") / 5) === 0,
-			do: () => drawBestCards(),
+			do: drawBestCards,
 		},
 		{
 			name: "Source Terminal Extrude",
@@ -204,7 +205,7 @@ export const DailyItemTasks: Task[] = [
 				garboValue(bestExtrude()) < garboValue($item`Source essence`) * 10,
 			do: () => SourceTerminal.extrude(bestExtrude()),
 			acquire: [{ item: $item`Source essence`, num: 10 }],
-			limit: { soft: 3 },
+			limit: { skip: 3 },
 		},
 		{
 			name: "Internet Meme Shop viral video",
@@ -266,7 +267,7 @@ export const DailyItemTasks: Task[] = [
 			ready: () => have($skill`Request Sandwich`),
 			completed: () => get("_requestSandwichSucceeded"),
 			do: () => useSkill($skill`Request Sandwich`),
-			limit: { soft: 10 },
+			limit: { skip: 10 },
 		},
 		{
 			name: "Demand Sandwich",
@@ -302,7 +303,7 @@ export const DailyItemTasks: Task[] = [
 			name: "Cargo Shorts Pocket",
 			ready: () => have($item`Cargo Cultist Shorts`),
 			completed: () => get("_cargoPocketEmptied"),
-			do: () => pickCargoPocket(),
+			do: pickCargoPocket,
 		},
 		{
 			name: "Time-Spinner Gin",
@@ -433,3 +434,8 @@ export const DailyItemTasks: Task[] = [
 		},
 	],
 ];
+
+export const DailyItemsQuest: Quest<GarboTask> = {
+	name: "Daily Items",
+	tasks: DailyItemTasks,
+};
