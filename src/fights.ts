@@ -1898,14 +1898,16 @@ const freeRunFightSources = [
 						$monster`QuickBASIC elemental`,
 						Macro.trySkill($skill`Emit Matter Duplicating Drones`).basicCombat()
 					)
-					.if_(
-						$monster`BASIC Elemental`,
-						Macro.trySkill($skill`Extract`)
-							.trySkill($skill`Pocket Crumbs`)
-							.trySkill($skill`Summon Mayfly Swarm`)
-					)
 					.if_($monster`Fruit Golem`, Macro.tryItem($item`Louder Than Bomb`))
 					.if_($monster`Knob Goblin Mutant`, Macro.tryItem($item`tennis ball`))
+					.ifHolidayWanderer(Macro.basicCombat())
+					.externalIf(
+						get("_VYKEACompanionLevel") > 0,
+						Macro.trySkill($skill`Summon Mayfly Swarm`)
+					)
+					.trySkill($skill`Extract`)
+					.trySkill($skill`Pocket Crumbs`)
+					.trySkill($skill`Summon Mayfly Swarm`)
 			);
 		},
 		true,
