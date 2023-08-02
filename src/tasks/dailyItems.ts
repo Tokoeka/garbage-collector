@@ -96,7 +96,7 @@ function pickCargoPocket(): void {
 		if (pocket in items) {
 			value += sum(
 				Object.entries(pocketItems(pocket)),
-				([item, count]) => garboValue(toItem(item), true) * count
+				([item, count]) => garboValue(toItem(item), true) * count,
 			);
 		}
 		if (pocket in meats) {
@@ -130,7 +130,7 @@ const DailyItemTasks: GarboTask[] = [
 				ready: () => have(skill),
 				completed: () => skill.dailylimit === 0,
 				do: () => useSkill(skill, skill.dailylimit),
-			}
+			},
 	),
 	...[
 		{
@@ -159,7 +159,7 @@ const DailyItemTasks: GarboTask[] = [
 			do: (): void => {
 				const bestItem = maxBy(
 					Item.all().filter((i) => sellsItem($coinmaster`Mr. Store 2002`, i)),
-					garboValue
+					garboValue,
 				);
 				buy($coinmaster`Mr. Store 2002`, get("availableMrStore2002Credits", 0), bestItem);
 			},
@@ -353,7 +353,7 @@ const DailyItemTasks: GarboTask[] = [
 				_shouldClearRufusQuest = value.some(
 					(value) =>
 						(!globalOptions.nobarf || value.name === "embezzler") &&
-						value.value - price > 0
+						value.value - price > 0,
 				);
 				if (_shouldClearRufusQuest) {
 					const target = ClosedCircuitPayphone.rufusTarget() as Item;
@@ -362,8 +362,9 @@ const DailyItemTasks: GarboTask[] = [
 							withChoice(1498, 1, () => use($item`closed-circuit pay phone`));
 						}
 					} else if (get("rufusQuestType") === "artifact") {
-						if (have(target))
+						if (have(target)) {
 							withChoice(1498, 1, () => use($item`closed-circuit pay phone`));
+						}
 					}
 				}
 			},
@@ -389,21 +390,21 @@ const DailyItemTasks: GarboTask[] = [
 					canAdventure: true,
 					sortBy: (l) =>
 						sum(getMonsters(l), (m) =>
-							sum(itemDropsArray(m), ({ drop }) => garboValue(drop))
+							sum(itemDropsArray(m), ({ drop }) => garboValue(drop)),
 						),
 				});
 				if (!bestRift) abort("Failed to choose rift for Shadow Forest");
 				const value =
 					(((6 + 9) / 2) *
 						sum(getMonsters(bestRift), (m) =>
-							sum(itemDropsArray(m), ({ drop }) => garboValue(drop))
+							sum(itemDropsArray(m), ({ drop }) => garboValue(drop)),
 						)) /
 					3;
 				if (target instanceof Item && target.tradeable) {
 					if (acquire(3, target, value, false) < 3) {
 						print(
 							`Our Rufus quest is ${target}, which costs too much to do the Forest!`,
-							"red"
+							"red",
 						);
 					}
 					triedForest = true;
@@ -425,7 +426,7 @@ const DailyItemTasks: GarboTask[] = [
 					canAdventure: true,
 					sortBy: (l) =>
 						sum(getMonsters(l), (m) =>
-							sum(itemDropsArray(m), ({ drop }) => garboValue(drop))
+							sum(itemDropsArray(m), ({ drop }) => garboValue(drop)),
 						),
 				}) ?? abort("Failed to find appropriate rift for Shadow Forest"),
 			choices: {

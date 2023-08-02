@@ -100,9 +100,9 @@ const invalidWishStrings = wishableEffectData
 	.filter(({ name, splitName }) =>
 		splitName.every((s) =>
 			wishableEffectData.some(
-				(n) => n.name !== name && n.splitName.some((x) => x.includes(s))
-			)
-		)
+				(n) => n.name !== name && n.splitName.some((x) => x.includes(s)),
+			),
+		),
 	)
 	.map(({ name }) => name);
 
@@ -114,10 +114,10 @@ const availableItems = [
 				getMonsters(l)
 					.filter((m) => m.copyable)
 					.map((m) => itemDropsArray(m).filter(({ rate }) => rate > 1))
-					.flat()
+					.flat(),
 			)
 			.flat()
-			.map(({ drop }) => drop)
+			.map(({ drop }) => drop),
 	),
 ].map((i) => i.name);
 
@@ -126,7 +126,7 @@ const validPawWishes: Map<Effect, string> = new Map(
 		.filter(
 			({ e, name }) =>
 				!invalidWishStrings.includes(name) &&
-				(globalOptions.prefs.yachtzeechain ? e !== $effect`Eau d' Clochard` : true) // hardcoded heuristics
+				(globalOptions.prefs.yachtzeechain ? e !== $effect`Eau d' Clochard` : true), // hardcoded heuristics
 		)
 		.map(({ e, name, splitName }) => {
 			if (!name.match(INVALID_CHARS_REGEX)) return [e, name];
@@ -137,11 +137,11 @@ const validPawWishes: Map<Effect, string> = new Map(
 					(s) =>
 						!availableItems.includes(s) &&
 						!wishableEffectData.some(
-							(n) => n.name !== name && n.splitName.some((x) => x.includes(s))
-						)
+							(n) => n.name !== name && n.splitName.some((x) => x.includes(s)),
+						),
 				)[0],
 			];
-		})
+		}),
 );
 
 function retrieveUntradeablePrice(it: Item) {
@@ -161,7 +161,7 @@ export interface PotionOptions {
 		maxPrice?: number | undefined,
 		throwOnFail?: boolean,
 		maxAggregateCost?: number | undefined,
-		tryRetrievingUntradeable?: boolean
+		tryRetrievingUntradeable?: boolean,
 	) => number;
 }
 
@@ -179,7 +179,7 @@ export class Potion {
 		maxPrice?: number | undefined,
 		throwOnFail?: boolean,
 		maxAggregateCost?: number | undefined,
-		tryRetrievingUntradeable?: boolean
+		tryRetrievingUntradeable?: boolean,
 	) => number;
 
 	constructor(potion: Item, options: PotionOptions = {}) {
@@ -257,7 +257,7 @@ export class Potion {
 		// Number of embezzlers this will actually be in effect for.
 		const embezzlersApplied = Math.max(
 			Math.min(duration, embezzlers - haveEffect(this.effect())),
-			0
+			0,
 		);
 
 		return (bonusMeat / 100) * (baseMeat * duration + 750 * embezzlersApplied);
@@ -290,7 +290,7 @@ export class Potion {
 		return Math.min(
 			Math.max(this.doubleDuration().net(embezzlers, historical), 0) -
 				Math.max(this.net(embezzlers, historical), 0),
-			this.price(true)
+			this.price(true),
 		);
 	}
 
@@ -342,7 +342,7 @@ export class Potion {
 	value(
 		embezzlers: number,
 		turns?: number,
-		limit?: number
+		limit?: number,
 	): { name: PotionTier; quantity: number; value: number }[] {
 		const startingTurns = haveEffect(this.effect());
 		const ascending = globalOptions.ascend;
@@ -377,7 +377,7 @@ export class Potion {
 				quantity: limitFunction(1),
 				value: this.gross(
 					overlapEmbezzlers,
-					globalOptions.nobarf ? overlapEmbezzlers : undefined
+					globalOptions.nobarf ? overlapEmbezzlers : undefined,
 				),
 			});
 		}
@@ -400,7 +400,7 @@ export class Potion {
 			if (ascending && this.overage(remainingTurns, barfQuantity) < 0) {
 				const ascendingTurns = Math.max(
 					0,
-					remainingTurns - barfQuantity * this.effectDuration()
+					remainingTurns - barfQuantity * this.effectDuration(),
 				);
 				values.push({
 					name: "ascending",
@@ -441,7 +441,7 @@ function useAsValuable(potion: Potion, embezzlers: number, embezzlersOnly: boole
 	const amountsAcquired = value.map((value) =>
 		(!embezzlersOnly || value.name === "embezzler") && value.value - price > 0
 			? potion.acquire(value.quantity, potion.potion, value.value, false, undefined, true)
-			: 0
+			: 0,
 	);
 
 	const total = sumNumbers(amountsAcquired);
@@ -491,7 +491,7 @@ export const rufusPotion = new Potion($item`closed-circuit pay phone`, {
 		const shadowItems = $items`shadow brick, shadow ice, shadow sinew, shadow glass, shadow stick, shadow skin, shadow flame, shadow fluid, shadow sausage, shadow bread, shadow venom, shadow nectar`;
 		const averagePrice =
 			sum(shadowItems, (it) =>
-				historical && historicalAge(it) < 14 ? historicalPrice(it) : mallPrice(it)
+				historical && historicalAge(it) < 14 ? historicalPrice(it) : mallPrice(it),
 			) / shadowItems.length;
 
 		return 3 * averagePrice;
@@ -514,9 +514,9 @@ export const rufusPotion = new Potion($item`closed-circuit pay phone`, {
 						withChoice(1498, 1, () => use($item`closed-circuit pay phone`));
 					} else break;
 				} else if (get("rufusQuestType") === "artifact") {
-					if (have(target))
+					if (have(target)) {
 						withChoice(1498, 1, () => use($item`closed-circuit pay phone`));
-					else break;
+					} else break;
 				}
 			}
 
@@ -550,7 +550,7 @@ export const wishPotions = wishableEffects.map(
 				}
 				return true;
 			},
-		})
+		}),
 );
 
 export const pawPotions = Array.from(validPawWishes.keys())
@@ -585,7 +585,7 @@ export const pawPotions = Array.from(validPawWishes.keys())
 					}
 					return true;
 				},
-			})
+			}),
 	);
 
 export const farmingPotions = [
@@ -642,13 +642,13 @@ export function potionSetup(embezzlersOnly: boolean): void {
 			) {
 				print(
 					`Determined that ${bestPotion.potion} was the best potion to double`,
-					HIGHLIGHT
+					HIGHLIGHT,
 				);
 				cliExecute("pillkeeper extend");
 				bestPotion.acquire(
 					1,
 					bestPotion.potion,
-					bestPotion.doubleDuration().gross(embezzlers)
+					bestPotion.doubleDuration().gross(embezzlers),
 				);
 				bestPotion.use(1);
 			}
@@ -656,10 +656,10 @@ export function potionSetup(embezzlersOnly: boolean): void {
 
 		// Only test potions which are reasonably close to being profitable using historical price.
 		const testPotions = farmingPotions.filter(
-			(potion) => potion.gross(embezzlers) / potion.price(true) > 0.5
+			(potion) => potion.gross(embezzlers) / potion.price(true) > 0.5,
 		);
 		const nonWishTestPotions = testPotions.filter(
-			(potion) => potion.potion !== $item`pocket wish`
+			(potion) => potion.potion !== $item`pocket wish`,
 		);
 		nonWishTestPotions.sort((a, b) => b.net(embezzlers) - a.net(embezzlers));
 
@@ -690,7 +690,7 @@ export function potionSetup(embezzlersOnly: boolean): void {
 		});
 
 		const wishTestPotions = testPotions.filter(
-			(potion) => potion.potion === $item`pocket wish`
+			(potion) => potion.potion === $item`pocket wish`,
 		);
 		wishTestPotions.sort((a, b) => b.net(embezzlers) - a.net(embezzlers));
 
@@ -755,7 +755,7 @@ class VariableMeatPotion {
 		softcap: number,
 		meatBonusPerTurn: number,
 		duration?: number,
-		effect?: Effect
+		effect?: Effect,
 	) {
 		this.potion = potion;
 		this.effect = effect ?? effectModifier(potion, "Effect");
@@ -774,7 +774,7 @@ class VariableMeatPotion {
 			(1.2 * retrievePrice(this.potion, quantity)) / quantity,
 
 			false,
-			2000000
+			2000000,
 		);
 		if (availableAmount(this.potion) < quantity) return false;
 		return use(quantity, this.potion);
@@ -822,7 +822,7 @@ class VariableMeatPotion {
 				`Expected to profit ${bestOption.value.toFixed(2)} from ${bestOption.quantity} ${
 					this.potion.plural
 				}`,
-				"blue"
+				"blue",
 			);
 			const ascendingOverlap =
 				globalOptions.ascend || globalOptions.nobarf ? 0 : this.softcap / this.duration;

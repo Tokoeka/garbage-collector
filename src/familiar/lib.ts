@@ -10,7 +10,7 @@ import {
 } from "kolmafia";
 import { $effect, $familiar, $item, $skill, clamp, get, have } from "libram";
 import { globalOptions } from "../config";
-import { baseMeat, ESTIMATED_OVERDRUNK_TURNS, turnsToNC } from "../lib";
+import { ESTIMATED_OVERDRUNK_TURNS, turnsToNC } from "../lib";
 import { digitizedMonstersRemaining, estimatedGarboTurns } from "../turns";
 
 export type GeneralFamiliar = {
@@ -60,7 +60,7 @@ export function timeToMeatify(): boolean {
 	const delay = Math.min(
 		nextProtonicGhost,
 		nextVoteMonster === 0 ? (get("_voteFreeFights") < 2 ? 11 : Infinity) : nextVoteMonster,
-		nextVoidMonster === 0 ? 13 : nextVoidMonster
+		nextVoidMonster === 0 ? 13 : nextVoidMonster,
 	);
 
 	if (delay < myAdventures()) return false;
@@ -97,7 +97,7 @@ export function turnsAvailable(): number {
 		? clamp(
 				availableAmount($item`Map to Safety Shelter Grimace Prime`),
 				0,
-				ESTIMATED_OVERDRUNK_TURNS
+				ESTIMATED_OVERDRUNK_TURNS,
 		  )
 		: 0;
 

@@ -67,7 +67,7 @@ export function canAdventureOrUnlock(loc: Location): boolean {
 		skiplist.push($location`The Icy Peak`);
 	}
 	const canUnlock = UnlockableZones.some(
-		(z) => loc.zone === z.zone && (z.available() || !z.noInv)
+		(z) => loc.zone === z.zone && (z.available() || !z.noInv),
 	);
 	return !underwater(loc) && !skiplist.includes(loc) && (canAdventure(loc) || canUnlock);
 }
@@ -137,7 +137,7 @@ export class WandererTarget {
 		name: string,
 		location: Location,
 		value: number,
-		prepareTurn: () => boolean = () => true
+		prepareTurn: () => boolean = () => true,
 	) {
 		this.name = name;
 		this.value = value;
@@ -147,7 +147,7 @@ export class WandererTarget {
 }
 export type WandererFactory = (
 	type: DraggableFight,
-	locationSkiplist: Location[]
+	locationSkiplist: Location[],
 ) => WandererTarget[];
 export type WandererLocation = { location: Location; targets: WandererTarget[]; value: number };
 
@@ -212,7 +212,7 @@ export function wandererTurnsAvailableToday(location: Location): number {
 	const wanderers = sum(WanderingSources, (source) =>
 		canWanderCache[source.type] && have(source.item)
 			? clamp(get(source.property), 0, source.max)
-			: 0
+			: 0,
 	);
 
 	return digitize + pigSkinnerRay + yellowRay + wanderers;

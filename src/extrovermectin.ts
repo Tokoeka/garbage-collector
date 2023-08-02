@@ -124,7 +124,7 @@ export function saberCrateIfSafe(): void {
 			Macro.if_($monster`crate`, Macro.skill($skill`Use the Force`))
 				.if_($monster`sausage goblin`, Macro.kill())
 				.ifHolidayWanderer(run.macro)
-				.abort()
+				.abort(),
 		);
 	} while (
 		[
@@ -181,7 +181,7 @@ function initializeCrates(): void {
 				.externalIf(
 					get("_gallapagosMonster") !== $monster`crate` &&
 						have($skill`Gallapagosian Mating Call`),
-					Macro.trySkill($skill`Gallapagosian Mating Call`)
+					Macro.trySkill($skill`Gallapagosian Mating Call`),
 				)
 				.trySkill($skill`Use the Force`)
 				.step(run.macro);
@@ -189,12 +189,12 @@ function initializeCrates(): void {
 			// equip latte and saber for lattesniff and saberfriends, if we want to
 			// Crank up ML to make sure the crate survives several rounds; we may have some passive damage
 			useFamiliar(
-				run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false })
+				run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false }),
 			);
 			run.constraints.preparation?.();
 			new Requirement(["100 Monster Level"], {
 				forceEquip: $items`latte lovers member's mug, Fourth of May Cosplay Saber`.filter(
-					(item) => have(item)
+					(item) => have(item),
 				),
 				preventEquip: $items`carnivorous potted plant`,
 			})
@@ -204,7 +204,7 @@ function initializeCrates(): void {
 				$location`Noob Cave`,
 				Macro.if_($monster`crate`, macro)
 					.ifHolidayWanderer(run.macro)
-					.abort()
+					.abort(),
 			);
 			visitUrl(`desc_effect.php?whicheffect=${$effect`On the Trail`.descid}`);
 		} else if (
@@ -245,7 +245,7 @@ function initializeDireWarren(): void {
 					canEquip(i) &&
 					weaponHands(i) === 2 &&
 					(itemType(i) === "club" ||
-						(have($effect`Iron Palms`) && itemType(i) === "sword"))
+						(have($effect`Iron Palms`) && itemType(i) === "sword")),
 			) ?? $item`amok putter`;
 		retrieveItem(availableClub);
 		new Requirement(["100 Monster Level"], {
@@ -256,7 +256,7 @@ function initializeDireWarren(): void {
 		do {
 			garboAdventure(
 				$location`The Dire Warren`,
-				Macro.if_($monster`fluffy bunny`, Macro.skill($skill`Batter Up!`)).embezzler()
+				Macro.if_($monster`fluffy bunny`, Macro.skill($skill`Batter Up!`)).embezzler(),
 			);
 		} while (
 			myFury() >= 5 &&
@@ -268,7 +268,7 @@ function initializeDireWarren(): void {
 		do {
 			garboAdventure(
 				$location`The Dire Warren`,
-				Macro.if_($monster`fluffy bunny`, Macro.item(banish)).embezzler()
+				Macro.if_($monster`fluffy bunny`, Macro.item(banish)).embezzler(),
 			);
 		} while (
 			"fluffy bunny" !== get("lastEncounter") &&

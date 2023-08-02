@@ -97,10 +97,11 @@ function _yachtzeeChain(): void {
 		prepareOutfitAndFamiliar();
 		if (!have($effect`Really Deep Breath`)) {
 			const bestWaterBreathingEquipment = getBestWaterBreathingEquipment(
-				Math.min(jellyTurns, fishyTurns)
+				Math.min(jellyTurns, fishyTurns),
 			);
-			if (bestWaterBreathingEquipment.item !== $item.none)
+			if (bestWaterBreathingEquipment.item !== $item.none) {
 				equip(bestWaterBreathingEquipment.item);
+			}
 			if (
 				haveEquipped($item`The Crown of Ed the Undying`) &&
 				!booleanModifier("Adventure Underwater")

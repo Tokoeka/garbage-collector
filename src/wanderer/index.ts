@@ -6,7 +6,7 @@ import {
 	print,
 	totalTurnsPlayed,
 } from "kolmafia";
-import { $item, $location, get, maxBy, get } from "libram";
+import { $item, $location, get, maxBy } from "libram";
 import { HIGHLIGHT, sober } from "../lib";
 import { guzzlrFactory } from "./guzzlr";
 import {
@@ -33,7 +33,7 @@ const wanderFactories: WandererFactory[] = [
 function bestWander(
 	type: DraggableFight,
 	locationSkiplist: Location[],
-	nameSkiplist: string[]
+	nameSkiplist: string[],
 ): WandererLocation {
 	const possibleLocations = new Map<Location, WandererLocation>();
 
@@ -50,7 +50,7 @@ function bestWander(
 					itemAmount($item`Armory keycard`) === 1)
 			) {
 				const wandererLocation: WandererLocation = possibleLocations.get(
-					wanderTarget.location
+					wanderTarget.location,
 				) ?? {
 					location: wanderTarget.location,
 					targets: [],
@@ -80,7 +80,7 @@ function bestWander(
 function wanderWhere(
 	type: DraggableFight,
 	nameSkiplist: string[] = [],
-	locationSkiplist: Location[] = []
+	locationSkiplist: Location[] = [],
 ): Location {
 	const candidate = bestWander(type, locationSkiplist, nameSkiplist);
 	const failed = candidate.targets.filter((target) => !target.prepareTurn());
@@ -96,14 +96,14 @@ function wanderWhere(
 		return wanderWhere(
 			type,
 			[...nameSkiplist, ...failed.map((target) => target.name)],
-			[...locationSkiplist, ...badLocation]
+			[...locationSkiplist, ...badLocation],
 		);
 	} else {
 		const targets = candidate.targets.map((t) => t.name).join("; ");
 		const value = candidate.value.toFixed(2);
 		print(
 			`Wandering at ${candidate.location} for expected value ${value} (${targets})`,
-			HIGHLIGHT
+			HIGHLIGHT,
 		);
 
 		return candidate.location;
@@ -189,7 +189,7 @@ class WandererManager {
 
 	getChoices(
 		draggableFight: DraggableFight,
-		drunkSafe = true
+		drunkSafe = true,
 	): { [choice: number]: string | number } {
 		return this.unsupportedChoices.get(this.getTarget(draggableFight, drunkSafe)) ?? {};
 	}

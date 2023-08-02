@@ -94,8 +94,9 @@ function shouldGoUnderwater(): boolean {
 		return false;
 	}
 
-	if (have($item`envyfish egg`) || (globalOptions.ascend && get("_envyfishEggUsed")))
+	if (have($item`envyfish egg`) || (globalOptions.ascend && get("_envyfishEggUsed"))) {
 		return false;
+	}
 	if (!canAdventure($location`The Briny Deeps`)) return false;
 	if (mallPrice($item`pulled green taffy`) < VPE()) {
 		return false;
@@ -166,7 +167,7 @@ const turns: AdventureAction[] = [
 							}
 							if (fightingSteve || currentRound()) runCombat();
 						},
-						true
+						true,
 					);
 				}
 				return totalTurnsPlayed() === get("lastLightsOutTurn");
@@ -249,10 +250,10 @@ const turns: AdventureAction[] = [
 				// Macro autoattacks fail when you lose the jump to special monsters
 				Macro.if_(
 					`(monsterid ${embezzler.id}) && !gotjump && !(pastround 2)`,
-					Macro.externalIf(underwater, Macro.item($item`pulled green taffy`)).meatKill()
+					Macro.externalIf(underwater, Macro.item($item`pulled green taffy`)).meatKill(),
 				).abortWithMsg(
-					`Expected a digitized ${SourceTerminal.getDigitizeMonster()}, but encountered something else.`
-				)
+					`Expected a digitized ${SourceTerminal.getDigitizeMonster()}, but encountered something else.`,
+				),
 			);
 			return get("_sourceTerminalDigitizeMonsterCount") !== start;
 		},
@@ -343,7 +344,7 @@ const turns: AdventureAction[] = [
 			const location = wanderer.getTarget("yellow ray");
 			freeFightOutfit(
 				{ shirt: $items`Jurassic Parka` },
-				{ location, allowAttackFamiliars: !usingDuplicate }
+				{ location, allowAttackFamiliars: !usingDuplicate },
 			).dress();
 			cliExecute("parka dilophosaur");
 			if (usingDuplicate) {
@@ -446,8 +447,8 @@ const turns: AdventureAction[] = [
 					`(monsterid ${
 						$monster`Knob Goblin Embezzler`.id
 					}) && !gotjump && !(pastround 2)`,
-					Macro.meatKill()
-				).abort()
+					Macro.meatKill(),
+				).abort(),
 			);
 			completeBarfQuest();
 			return true;
@@ -511,7 +512,7 @@ function generateTurnsAtEndOfDay(): void {
 		const available = clamp(
 			23 - get("_sausagesEaten"),
 			0,
-			itemAmount($item`magical sausage`) + itemAmount($item`magical sausage casing`)
+			itemAmount($item`magical sausage`) + itemAmount($item`magical sausage casing`),
 		);
 		maximize("MP", false);
 		eat(available, $item`magical sausage`);

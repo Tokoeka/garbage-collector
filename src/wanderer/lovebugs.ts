@@ -18,8 +18,8 @@ export function lovebugsFactory(): WandererTarget[] {
 				new WandererTarget(
 					`Lovebugs ${t.location}`,
 					t.location,
-					garboValue(t.currency) * 0.05
-				)
+					garboValue(t.currency) * 0.05,
+				),
 		);
 	}
 	return [];

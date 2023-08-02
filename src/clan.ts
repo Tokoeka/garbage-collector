@@ -51,7 +51,7 @@ export function withVIPClan<T>(action: () => T): T {
 			userConfirmDialog(
 				"The preference 'garbo_vipClan' is not set. Use the current clan as a VIP clan? (Defaults to yes in 15 seconds)",
 				true,
-				15000
+				15000,
 			)
 		) {
 			clanIdOrName = getClanId();
@@ -92,7 +92,7 @@ export class StashManager {
 				`Stash access is disabled. Ignoring request to borrow "${items
 					.map((value) => value.name)
 					.join(", ")}" from clan stash.`,
-				HIGHLIGHT
+				HIGHLIGHT,
 			);
 			return;
 		}
@@ -112,7 +112,7 @@ export class StashManager {
 							if (takeStash(1, fold)) {
 								print(
 									`Took ${fold.name} from stash in ${getClanName()}.`,
-									HIGHLIGHT
+									HIGHLIGHT,
 								);
 								if (fold !== item) cliExecute(`fold ${item.name}`);
 								this.taken.set(item, (this.taken.get(item) ?? 0) + 1);
@@ -123,7 +123,7 @@ export class StashManager {
 									`Failed to take ${
 										fold.name
 									} from the stash. Do you have stash access in ${getClanName()}?`,
-									"red"
+									"red",
 								);
 							}
 						}
@@ -158,7 +158,7 @@ export class StashManager {
 			if (handlingChoice()) {
 				print(
 					`I'm stuck in a choice, unfortunately, but were I not, I'd like to return the following items to your clan stash:`,
-					"red"
+					"red",
 				);
 				items.forEach((item) => print(`${item.name},`, "red"));
 			}

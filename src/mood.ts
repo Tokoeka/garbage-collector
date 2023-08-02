@@ -204,6 +204,6 @@ export function shrugBadEffects(...exclude: Effect[]): void {
 			if (have(effect) && !exclude.includes(effect)) {
 				uneffect(effect);
 			}
-		}
+		},
 	);
 }

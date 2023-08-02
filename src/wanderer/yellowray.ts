@@ -15,7 +15,7 @@ function averageYrValue(location: Location) {
 	const badAttributes = ["LUCKY", "ULTRARARE", "BOSS"];
 	const rates = appearanceRates(location);
 	const monsters = getMonsters(location).filter(
-		(m) => !badAttributes.some((s) => m.attributes.includes(s)) && rates[m.name] > 0
+		(m) => !badAttributes.some((s) => m.attributes.includes(s)) && rates[m.name] > 0,
 	);
 
 	const canDuplicate = SourceTerminal.have() && SourceTerminal.duplicateUsesRemaining() > 0;
@@ -41,11 +41,11 @@ function averageYrValue(location: Location) {
 function yrValues(): Map<Location, number> {
 	const values = new Map<Location, number>();
 	for (const location of Location.all().filter(
-		(l) => canAdventureOrUnlock(l) && !underwater(l)
+		(l) => canAdventureOrUnlock(l) && !underwater(l),
 	)) {
 		values.set(
 			location,
-			averageYrValue(location) + freeFightFamiliarData({ location }).expectedValue
+			averageYrValue(location) + freeFightFamiliarData({ location }).expectedValue,
 		);
 	}
 	return values;
@@ -54,11 +54,11 @@ function yrValues(): Map<Location, number> {
 // Doing a free fight + yellow ray combination against a random enemy
 export function yellowRayFactory(
 	type: DraggableFight,
-	locationSkiplist: Location[]
+	locationSkiplist: Location[],
 ): WandererTarget[] {
 	if (type === "yellow ray") {
 		const validLocations = Location.all().filter(
-			(location) => canWander(location, "yellow ray") && canAdventureOrUnlock(location)
+			(location) => canWander(location, "yellow ray") && canAdventureOrUnlock(location),
 		);
 		const locationValues = yrValues();
 
@@ -67,14 +67,14 @@ export function yellowRayFactory(
 		]);
 		for (const unlockableZone of UnlockableZones) {
 			const extraLocations = Location.all().filter(
-				(l) => l.zone === unlockableZone.zone && !locationSkiplist.includes(l)
+				(l) => l.zone === unlockableZone.zone && !locationSkiplist.includes(l),
 			);
 			bestZones.add(maxBy(extraLocations, (l: Location) => locationValues.get(l) ?? 0));
 		}
 		if (bestZones.size > 0) {
 			return [...bestZones].map(
 				(l: Location) =>
-					new WandererTarget(`Yellow Ray ${l}`, l, locationValues.get(l) ?? 0)
+					new WandererTarget(`Yellow Ray ${l}`, l, locationValues.get(l) ?? 0),
 			);
 		}
 	}
