@@ -1842,37 +1842,56 @@ const freeRunFightSources = [
 				1215: 1, // Gingerbread Civic Center advance clock
 				1209: 2, // enter the gallery at Upscale Midnight
 				1214: 1, // get High-End ginger wine
+				1207: 1, // enter the seedy bar at Industrial Midnight
+				1212: 3, // get the ginger beer
 			});
 			const best = bestConsumable(
 				"booze",
 				true,
-				$items`high-end ginger wine, astral pilsner`,
+				$items`high-end ginger wine, astral pilsner, ginger beer`,
 			);
+
+			const gingerBeerValue =
+				(getAverageAdventures($item`ginger beer`) * get("valueOfAdventure")) / 2;
+
 			const gingerWineValue =
 				(0.5 * 30 * (baseMeat + 750) +
 					getAverageAdventures($item`high-end ginger wine`) * get("valueOfAdventure")) /
 				2;
-			const valueDif = gingerWineValue - best.value;
+			const wineValueDif = gingerWineValue - best.value;
 			const cigValue = garboValue($item`gingerbread cigarette`);
-			const getGingerwine: boolean = valueDif * 2 > cigValue * 5;
-			print(
-				`Compared High-End Ginger Wine @ ${gingerWineValue} to ${best.edible} @ ${best.value}. Difference of ${valueDif} per liver`,
-			);
-			print(
-				`As ${valueDif * 2} is ${getGingerwine ? "greater" : "less"} than ${
-					cigValue * 5
-				}, going to get ${
-					getGingerwine ? "High-End Ginger Wine" : "gingerbread cigarettes"
-				}`,
-			);
-			if (
-				haveOutfit("gingerbread best") &&
+			const gingerBest: boolean = haveOutfit("gingerbread best");
+			const getGingerWine: boolean =
+				gingerBest &&
 				(availableAmount($item`sprinkles`) < 5 ||
-					(valueDif * 2 > garboValue($item`gingerbread cigarette`) * 5 &&
-						itemAmount($item`high-end ginger wine`) < 11))
-			) {
+					(wineValueDif * 2 > cigValue * 5 &&
+						itemAmount($item`high-end ginger wine`) < 11));
+
+			const beerValueDif = gingerBeerValue - best.value;
+			const getGingerBeer: boolean =
+				have($item`gingerbread mug`) &&
+				(availableAmount($item`sprinkles`) < 5 ||
+					(beerValueDif * 2 > cigValue * 5 && itemAmount($item`ginger beer`) < 11));
+			const getCigs = !(getGingerBeer || getGingerWine);
+
+			print(
+				`Compared ${gingerBest ? "High-End Ginger Wine" : "Ginger Beer"} @ ${
+					gingerBest ? gingerWineValue : gingerBeerValue
+				} to ${best.edible} @ ${best.value}. Difference of ${
+					gingerBest ? wineValueDif : beerValueDif
+				} per liver`,
+			);
+			print(
+				`As ${gingerBest ? wineValueDif * 2 : beerValueDif * 2} is ${
+					getCigs ? "less" : "greater"
+				} than ${cigValue * 5}, going to get ${gingerBest ? "High-End Ginger Wine" : "Ginger Beer"}`,
+			);
+
+			if (getGingerWine) {
 				outfit("gingerbread best");
 				garboAdventure($location`Gingerbread Upscale Retail District`, Macro.abort());
+			} else if (getGingerBeer) {
+				garboAdventure($location`Gingerbread Industrial Zone`, Macro.abort());
 			} else {
 				garboAdventure($location`Gingerbread Civic Center`, Macro.abort());
 			}
