@@ -541,9 +541,13 @@ export class Macro extends StrictMacro {
 		const riftId = toInt($location`Shadow Rift`);
 		return (
 			this.externalIf(
-				myClass() === $class`Sauceror` && have($skill`Curse of Weaksauce`),
-				Macro.trySkill($skill`Curse of Weaksauce`),
+				!(have($familiar`RoboGoose`) || have($item`deactivated RoboGoose`)),
+				Macro.tryHaveItem($item`robotronic egg`),
 			)
+				.externalIf(
+					myClass() === $class`Sauceror` && have($skill`Curse of Weaksauce`),
+					Macro.trySkill($skill`Curse of Weaksauce`),
+				)
 				.tryHaveSkill($skill`Become a Wolf`)
 				.externalIf(
 					!(myClass() === $class`Sauceror` && have($skill`Curse of Weaksauce`)),
