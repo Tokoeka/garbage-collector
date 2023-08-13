@@ -1884,7 +1884,9 @@ const freeRunFightSources = [
 			print(
 				`As ${gingerBest ? wineValueDif * 2 : beerValueDif * 2} is ${
 					getCigs ? "less" : "greater"
-				} than ${cigValue * 5}, going to get ${gingerBest ? "High-End Ginger Wine" : "Ginger Beer"}`,
+				} than ${cigValue * 5}, going to get ${
+					gingerBest ? "High-End Ginger Wine" : "Ginger Beer"
+				}`,
 			);
 
 			if (getGingerWine) {
@@ -1954,7 +1956,8 @@ const freeRunFightSources = [
 	new FreeRunFight(
 		() =>
 			((have($item`industrial fire extinguisher`) && get("_fireExtinguisherCharge") >= 10) ||
-				(have($familiar`XO Skeleton`) && get("_xoHugsUsed") < 11)) &&
+				(have($familiar`XO Skeleton`) && get("_xoHugsUsed") < 11) ||
+				(have($skill`Perpetrate Mild Evil`) && get("_mildEvilPerpetrated") < 3)) &&
 			get("_VYKEACompanionLevel") === 0 && // don't attempt this in case you re-run garbo after making a vykea furniture
 			getBestItemStealZone(true) !== null,
 		(runSource: ActionSource) => {
@@ -1971,6 +1974,7 @@ const freeRunFightSources = [
 			try {
 				if (best.preReq) best.preReq();
 				const vortex = $skill`Fire Extinguisher: Polar Vortex`;
+				const evil = $skill`Perpetrate Mild Evil`;
 				const hasXO = myFamiliar() === $familiar`XO Skeleton`;
 				if (myThrall() !== $thrall.none) useSkill($skill`Dismiss Pasta Thrall`);
 				Macro.if_(monsters.map((m) => `!monsterid ${m.id}`).join(" && "), runSource.macro)
@@ -1983,6 +1987,7 @@ const freeRunFightSources = [
 						Macro.step(itemStealOlfact(best)),
 					)
 					.while_(`hasskill ${toInt(vortex)}`, Macro.skill(vortex))
+					.while_(`hasskill ${toInt(evil)}`, Macro.skill(evil))
 					.step(runSource.macro)
 					.setAutoAttack();
 				if (mappingMonster) {
