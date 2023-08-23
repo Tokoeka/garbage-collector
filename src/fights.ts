@@ -2919,7 +2919,9 @@ function yachtzee(): void {
 				: $familiar.none;
 			useFamiliar(familiarChoice);
 
-			const underwaterBreathingGear = waterBreathingEquipment.find((item) => have(item));
+			const underwaterBreathingGear = waterBreathingEquipment.find(
+				(item) => have(item) && canEquip(item),
+			);
 			if (!underwaterBreathingGear) return;
 			const equippedOutfit = new Requirement(["meat", "-tie"], {
 				forceEquip: [underwaterBreathingGear],
