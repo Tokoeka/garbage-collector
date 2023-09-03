@@ -8,7 +8,6 @@ import {
 	haveEquipped,
 	mallPrice,
 	print,
-	toInt,
 	use,
 	useSkill,
 } from "kolmafia";
@@ -28,8 +27,9 @@ import {
 import { acquire } from "../acquire";
 import { garboAdventure, Macro } from "../combat";
 import { safeRestore } from "../lib";
-import { acquiringOffhandRemarkable, pyecAvailable, yachtzeeBuffValue } from "./lib";
+import { pyecAvailable, yachtzeeBuffValue } from "./lib";
 import { getBestWaterBreathingEquipment } from "./outfit";
+import { shouldAugustCast } from "../resources";
 
 function fishyCloverAdventureOpportunityCost(pipe: boolean) {
 	const willBeFishy = pipe || have($effect`Fishy`);
@@ -83,9 +83,8 @@ export function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number
 			cost: mallPrice($item`fish juice box`),
 			action: () => {
 				acquire(1, $item`fish juice box`, 1.2 * mallPrice($item`fish juice box`));
-				if (!have($item`fish juice box`)) {
+				if (!have($item`fish juice box`))
 					throw new Error("Unable to obtain fish juice box");
-				}
 				use(1, $item`fish juice box`);
 				if (
 					haveFishyPipe &&
@@ -119,9 +118,8 @@ export function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number
 			cost: mallPrice($item`cuppa Gill tea`) + bestWaterBreathingEquipment.cost,
 			action: () => {
 				acquire(1, $item`cuppa Gill tea`, 1.2 * mallPrice($item`cuppa Gill tea`));
-				if (!have($item`cuppa Gill tea`)) {
+				if (!have($item`cuppa Gill tea`))
 					throw new Error("Unable to obtain cuppa Gill tea");
-				}
 				use(1, $item`cuppa Gill tea`);
 				if (
 					haveFishyPipe &&
@@ -235,12 +233,7 @@ export function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number
 			cost: canAdventure($location`The Brinier Deepers`)
 				? (have($effect`Lucky!`)
 						? 0
-						: have($skill`Aug. 2nd: Find an Eleven-Leaf Clover Day`) &&
-						  !get("_aug2Cast") &&
-						  get("_augSkillsCast") <=
-								2 +
-									toInt(get("_aug16Cast")) + // No need to save a charge for stomache cleansing if we've already used the skill
-									toInt(!acquiringOffhandRemarkable) // No need to save a charge if we aren't acquiring Offhand Remarkable
+						: shouldAugustCast($skill`Aug. 2nd: Find an Eleven-Leaf Clover Day`)
 						? 0
 						: Infinity) +
 				  get("valueOfAdventure") +
@@ -317,9 +310,8 @@ export function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number
 			turns: 10,
 			cost: haveFishyPipe ? bestWaterBreathingEquipment.cost : Infinity,
 			action: () => {
-				if (haveFishyPipe && haveEffect($effect`Fishy`) < yachtzeeTurns) {
+				if (haveFishyPipe && haveEffect($effect`Fishy`) < yachtzeeTurns)
 					use(1, $item`fishy pipe`);
-				}
 			},
 		},
 	];

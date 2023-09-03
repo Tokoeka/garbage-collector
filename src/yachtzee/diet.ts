@@ -46,15 +46,9 @@ import synthesize from "../synthesis";
 import { estimatedGarboTurns } from "../turns";
 import { yachtzeePotionProfits, yachtzeePotionSetup } from "./buffs";
 import { optimizeForFishy } from "./fishy";
-import {
-	acquiringOffhandRemarkable,
-	cinchNCs,
-	freeNCs,
-	pyecAvailable,
-	shrugIrrelevantSongs,
-	useSpikolodonSpikes,
-} from "./lib";
+import { cinchNCs, freeNCs, pyecAvailable, shrugIrrelevantSongs, useSpikolodonSpikes } from "./lib";
 import { freeRest } from "../lib";
+import { shouldAugustCast } from "../resources";
 
 class YachtzeeDietEntry<T> {
 	name: string;
@@ -276,8 +270,7 @@ export function executeNextDietStep(stopBeforeJellies?: boolean): void {
 				if (entry) {
 					if (entry.fullness > 0) {
 						if (
-							have($skill`Aug. 16th: Roller Coaster Day!`) &&
-							!get("_aug16Cast") &&
+							shouldAugustCast($skill`Aug. 16th: Roller Coaster Day!`) &&
 							myFullness() > 0
 						) {
 							useSkill($skill`Aug. 16th: Roller Coaster Day!`);
@@ -403,7 +396,8 @@ function yachtzeeDietScheduler(
 			let spleenUse = mySpleenUse();
 			while (
 				idx < dietSchedule.length &&
-				(dietSchedule[idx].spleen >= 0 || // We only insert if there's a cleanser immediately after where we want to insert
+				((dietSchedule[idx].spleen >= 0 && // We only insert if there's a cleanser immediately after where we want to insert
+					(entry.spleen >= 0 || spleenUse + dietSchedule[idx].spleen <= spleenLimit())) ||
 					spleenUse + entry.spleen > spleenLimit() || // But don't insert if we will overshoot our spleen limit
 					(idx > 0 &&
 						dietSchedule[idx - 1].spleen < 0 &&
@@ -518,20 +512,16 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 	);
 	const syntheticPillsAvailable =
 		!get("_syntheticDogHairPillUsed") && have($item`synthetic dog hair pill`) ? 1 : 0;
-	const lostStomachAvailable =
-		have($skill`Aug. 16th: Roller Coaster Day!`) &&
-		!get("_aug16Cast") &&
-		get("_augSkillsCast") <= 3 + toInt(!acquiringOffhandRemarkable) // No need to save a charge if we aren't acquiring Offhand Remarkable
-			? 1
-			: 0;
+	const lostStomachAvailable = shouldAugustCast($skill`Aug. 16th: Roller Coaster Day!`) ? 1 : 0;
 
 	const currentSpleenLeft = spleenLimit() - mySpleenUse();
 	let filters = 3 - get("currentMojoFilters");
 	// save some spleen for the first three extros, which are worth a lot
 	// due to macrometeor and cheat code: replace enemy
-	const extroSpleenSpace = hasMonsterReplacers()
-		? 6 - Math.min(6, 2 * get("beGregariousCharges"))
-		: 0;
+	const extroSpleenSpace =
+		hasMonsterReplacers() && !have($skill`Recall Facts: Monster Habitats`)
+			? 6 - Math.min(6, 2 * get("beGregariousCharges"))
+			: 0;
 	const synthCastsToCoverRun =
 		globalOptions.nobarf || !have($skill`Sweet Synthesis`)
 			? 0

@@ -77,6 +77,7 @@ import { Potion, PotionTier } from "./potions";
 import synthesize from "./synthesis";
 import { estimatedGarboTurns } from "./turns";
 import { garboValue } from "./value";
+import { shouldAugustCast } from "./resources";
 
 const MPA = get("valueOfAdventure");
 print(`Using adventure value ${MPA}.`, HIGHLIGHT);
@@ -229,11 +230,9 @@ export function nonOrganAdventures(): void {
 	}
 
 	if (getProperty("_timesArrowUsed") !== "true" && mallPrice($item`time's arrow`) < 5 * MPA) {
-		acquire(1, $item`time's arrow`, 5 * MPA, false);
-		if (itemAmount($item`time's arrow`) > 0) {
-			cliExecute("csend 1 time's arrow to botticelli");
-			setProperty("_timesArrowUsed", "true");
-		}
+		acquire(1, $item`time's arrow`, 5 * MPA);
+		cliExecute("csend 1 time's arrow to botticelli");
+		setProperty("_timesArrowUsed", "true");
 	}
 
 	if (have($skill`Ancestral Recall`) && mallPrice($item`blue mana`) < 3 * MPA) {
@@ -285,6 +284,7 @@ const stomachLiverCleaners = new Map([
 	[$item`synthetic dog hair pill`, [0, -1]],
 	[$item`cuppa Sobrie tea`, [0, -1]],
 	[$item`designer sweatpants`, [0, -1]],
+	[$item`august scepter`, [-1, 0]],
 	// [$item`Doc Clock's thyme cocktail`, [-2, 0]],
 	// [$item`Mr. Burnsger`, [0, -2]],
 ]);
@@ -439,6 +439,11 @@ function menu(): MenuItem<Note>[] {
 			organ: "booze",
 			maximum: Math.min(3 - get("_sweatOutSomeBoozeUsed"), Math.floor(get("sweat") / 25)),
 		}),
+		new MenuItem($item`august scepter`, {
+			size: -1,
+			organ: "food",
+			maximum: shouldAugustCast($skill`Aug. 16th: Roller Coaster Day!`) ? 1 : 0,
+		}),
 	].filter((item) => item.price() < Infinity) as MenuItem<Note>[];
 }
 
@@ -492,7 +497,7 @@ function gregariousCount(): {
 		get("beGregariousMonster") === $monster`Knob Goblin Embezzler`
 			? 1
 			: 0);
-	const gregariousFightsPerCharge = expectedGregs();
+	const gregariousFightsPerCharge = expectedGregs("extro");
 	// remove and preserve the last index - that is the marginal count of gregarious fights
 	const marginalGregariousFights = gregariousFightsPerCharge.splice(
 		gregariousFightsPerCharge.length - 1,
@@ -655,7 +660,7 @@ export function potionMenu(
 		...campfireHotdog,
 		...foodCone,
 		...borisBread,
-		...deepDish,
+		...deepDish.flat(),
 
 		// BOOZE POTIONS
 		...potion($item`dirt julep`),
@@ -670,6 +675,7 @@ export function potionMenu(
 		...potion($item`Feliz Navidad`),
 		...potion($item`broberry brogurt`),
 		...potion($item`haunted martini`),
+		...potion($item`bottle of Greedy Dog`),
 		...potion($item`twice-haunted screwdriver`, { price: twiceHauntedPrice }),
 		...limitedPotion($item`high-end ginger wine`, availableAmount($item`high-end ginger wine`)),
 		...limitedPotion($item`Hot Socks`, hasSpeakeasy ? 3 : 0, { price: 5000 }),
@@ -1057,6 +1063,7 @@ export function consumeDiet(diet: Diet<Note>, name: DietName): void {
 						}
 					},
 				],
+				[$item`august scepter`, () => useSkill($skill`Aug. 16th: Roller Coaster Day!`)],
 			]);
 
 			for (const menuItem of menuItems) {
