@@ -99,9 +99,8 @@ function _yachtzeeChain(): void {
 			const bestWaterBreathingEquipment = getBestWaterBreathingEquipment(
 				Math.min(jellyTurns, fishyTurns),
 			);
-			if (bestWaterBreathingEquipment.item !== $item.none) {
+			if (bestWaterBreathingEquipment.item !== $item.none)
 				equip(bestWaterBreathingEquipment.item);
-			}
 			if (
 				haveEquipped($item`The Crown of Ed the Undying`) &&
 				!booleanModifier("Adventure Underwater")
@@ -119,7 +118,6 @@ function _yachtzeeChain(): void {
 			}
 		}
 		garboAdventure($location`The Sunken Party Yacht`, Macro.abort());
-		postCombatActions();
 		if (myTurncount() > turncount || haveEffect($effect`Fishy`) < fishyTurns) {
 			fishyTurns -= 1;
 			jellyTurns -= 1;
@@ -131,6 +129,7 @@ function _yachtzeeChain(): void {
 			FloristFriar.Crookweed.plant();
 		}
 		plantCrookweed = false;
+		postCombatActions();
 
 		doSausage();
 	}
