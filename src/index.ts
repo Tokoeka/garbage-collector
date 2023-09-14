@@ -57,11 +57,12 @@ import { stashItems, withStash, withVIPClan } from "./clan";
 import { globalOptions } from "./config";
 import { dailySetup } from "./dailies";
 import { nonOrganAdventures, runDiet } from "./diet";
-import { dailyFights, freeFights, printEmbezzlerLog } from "./fights";
+import { dailyFights, freeFights } from "./fights";
 import {
 	bestJuneCleaverOption,
 	checkGithubVersion,
 	HIGHLIGHT,
+	printEventLog,
 	printLog,
 	propertyManager,
 	questStep,
@@ -103,7 +104,7 @@ export function canContinue(): boolean {
 }
 
 export function main(argString = ""): void {
-	sinceKolmafiaRevision(27567);
+	sinceKolmafiaRevision(27593);
 	checkGithubVersion();
 
 	// Hit up main.php to get out of easily escapable choices
@@ -551,7 +552,7 @@ export function main(argString = ""): void {
 			true,
 		);
 		if (startingGarden && have(startingGarden)) use(startingGarden);
-		printEmbezzlerLog();
+		printEventLog();
 		endSession();
 		printLog(HIGHLIGHT);
 	}

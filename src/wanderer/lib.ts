@@ -4,7 +4,7 @@ import { NumericProperty } from "libram/dist/propertyTypes";
 import { realmAvailable } from "../lib";
 import { digitizedMonstersRemaining, estimatedGarboTurns } from "../turns";
 
-export const draggableFights = ["backup", "wanderer", "yellow ray"] as const;
+export const draggableFights = ["backup", "wanderer", "yellow ray", "freefight"] as const;
 export type DraggableFight = (typeof draggableFights)[number];
 
 interface UnlockableZone {
@@ -93,7 +93,7 @@ function canWanderTypeBackup(location: Location): boolean {
 	);
 }
 
-function canWanderTypeYellowRay(location: Location): boolean {
+function canWanderTypeFreeFight(location: Location): boolean {
 	if (location === $location`The Fun-Guy Mansion` && get("funGuyMansionKills", 0) >= 100) {
 		return false;
 	}
@@ -113,8 +113,9 @@ export function canWander(location: Location, type: DraggableFight): boolean {
 	switch (type) {
 		case "backup":
 			return canWanderTypeBackup(location);
+		case "freefight":
 		case "yellow ray":
-			return canWanderTypeYellowRay(location);
+			return canWanderTypeFreeFight(location);
 		case "wanderer":
 			return canWanderTypeWander(location);
 	}
@@ -198,6 +199,7 @@ export function wandererTurnsAvailableToday(location: Location): number {
 		backup: canWander(location, "backup"),
 		wanderer: canWander(location, "wanderer"),
 		"yellow ray": canWander(location, "yellow ray"),
+		freefight: canWander(location, "freefight"),
 	};
 
 	const digitize = canWanderCache["backup"] ? digitizedMonstersRemaining() : 0;

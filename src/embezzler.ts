@@ -1,5 +1,6 @@
 import { OutfitSpec } from "grimoire-kolmafia";
 import {
+	abort,
 	booleanModifier,
 	canAdventure,
 	canEquip,
@@ -37,6 +38,7 @@ import {
 	Counter,
 	CrystalBall,
 	get,
+	getBanishedMonsters,
 	have,
 	property,
 	questStep,
@@ -590,6 +592,25 @@ export const gregFights = (
 	fightsProp: NumericProperty,
 	totalCharges: () => number,
 ) => {
+	function runGregFight(options: EmbezzlerFightRunOptions) {
+		const run = ltbRun();
+		run.constraints.preparation?.();
+		const bunnyBanish = [...getBanishedMonsters().entries()].find(
+			([, monster]) => monster === $monster`fluffy bunny`,
+		)?.[0];
+		const adventureFunction = options.useAuto ? garboAdventureAuto : garboAdventure;
+		adventureFunction(
+			$location`The Dire Warren`,
+			Macro.if_($monster`fluffy bunny`, run.macro).step(options.macro),
+			Macro.if_($monster`fluffy bunny`, run.macro).step(options.macro),
+		);
+
+		if (get("lastEncounter") === $monster`fluffy bunny`.name && bunnyBanish) {
+			abort(
+				`Fluffy bunny is supposedly banished by ${bunnyBanish}, but this appears not to be the case; the most likely issue is that your ${monsterProp} preference is nonzero and should probably be zero.`,
+			);
+		}
+	}
 	return [
 		new EmbezzlerFight(
 			name,
@@ -599,14 +620,7 @@ export const gregFights = (
 				get(fightsProp) > (have($item`miniature crystal ball`) ? 1 : 0),
 			() => (get(monsterProp) === embezzler ? totalCharges() : 0),
 			(options: EmbezzlerFightRunOptions) => {
-				const run = ltbRun();
-				run.constraints.preparation?.();
-				const adventureFunction = options.useAuto ? garboAdventureAuto : garboAdventure;
-				adventureFunction(
-					$location`The Dire Warren`,
-					Macro.if_($monster`fluffy bunny`, run.macro).step(options.macro),
-					Macro.if_($monster`fluffy bunny`, run.macro).step(options.macro),
-				);
+				runGregFight(options);
 				// reset the crystal ball prediction by staring longingly at toast
 				if (get(fightsProp) === 1 && have($item`miniature crystal ball`)) {
 					const warrenPrediction = CrystalBall.ponder().get($location`The Dire Warren`);
@@ -628,14 +642,7 @@ export const gregFights = (
 				(get(monsterProp) === embezzler && get(fightsProp) > 0) || totalCharges() > 0
 					? 1
 					: 0,
-			(options: EmbezzlerFightRunOptions) => {
-				const run = ltbRun();
-				run.constraints.preparation?.();
-				garboAdventure(
-					$location`The Dire Warren`,
-					Macro.if_($monster`fluffy bunny`, run.macro).step(options.macro),
-				);
-			},
+			runGregFight,
 			{
 				spec: {
 					equip: $items`miniature crystal ball`.filter((item) => have(item)),
@@ -773,11 +780,11 @@ export const conditionalSources = [
 	...gregFights(
 		"Habitats Monster",
 		() => have($skill`Just the Facts`),
-		"monsterHabitatsMonster",
-		"monsterHabitatsFightsLeft",
+		"_monsterHabitatsMonster",
+		"_monsterHabitatsFightsLeft",
 		() =>
 			have($skill`Just the Facts`)
-				? (3 - get("_monsterHabitatsRecalled")) * 5 + get("monsterHabitatsFightsLeft")
+				? (3 - get("_monsterHabitatsRecalled")) * 5 + get("_monsterHabitatsFightsLeft")
 				: 0,
 	),
 	new EmbezzlerFight(

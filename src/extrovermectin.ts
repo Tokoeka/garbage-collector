@@ -44,14 +44,14 @@ import { globalOptions } from "./config";
 const embezzler = $monster`Knob Goblin Embezzler`;
 const crate = $monster`crate`;
 
-export function expectedGregs(skillSource: "habitat" | "extro"): number[] {
-	interface GregSource {
-		copies: number;
-		skillSource: "habitat" | "extro";
-		replaces: number;
-		extra: number;
-	}
+type GregSource = {
+	copies: number;
+	skillSource: "habitat" | "extro";
+	replaces: number;
+	extra: number;
+};
 
+export function expectedGregs(skillSource: "habitat" | "extro"): number[] {
 	const habitatCharges = have($skill`Just the Facts`)
 		? 3 - get("_monsterHabitatsRecalled", 0)
 		: 0;
@@ -128,7 +128,7 @@ export function doingGregFight(): boolean {
 	const extrovermectin = get("beGregariousCharges") > 0 || get("beGregariousFightsLeft") > 0;
 	const habitat =
 		have($skill`Just the Facts`) &&
-		(get("_monsterHabitatsRecalled") < 3 || get("monsterHabitatsFightsLeft") > 0);
+		(get("_monsterHabitatsRecalled") < 3 || get("_monsterHabitatsFightsLeft") > 0);
 
 	return (
 		extrovermectin ||
@@ -312,7 +312,7 @@ const longBanishes: Banish[] = [
 	combatItem($item`Daily Affirmation: Be a Mind Master`),
 	{
 		name: "Batter Up!",
-		available: () => myFury() > 5 && have($skill`Batter Up!`),
+		available: () => myFury() >= 5 && have($skill`Batter Up!`),
 		macro: () => Macro.skill($skill`Batter Up!`),
 		prepare: () => {
 			const club = getClub();
@@ -395,13 +395,13 @@ export function initializeExtrovermectinZones(): void {
 export function gregReady(): boolean {
 	return (
 		(get("beGregariousMonster") === embezzler && get("beGregariousFightsLeft") > 0) ||
-		(get("monsterHabitatsMonster") === embezzler && get("monsterHabitatsFightsLeft") > 0)
+		(get("_monsterHabitatsMonster") === embezzler && get("_monsterHabitatsFightsLeft") > 0)
 	);
 }
 
 export function totalGregCharges(countPartial: boolean): number {
 	const extroPartial = get("beGregariousFightsLeft") > 0 ? 1 : 0;
-	const habitatPartial = get("monsterHabitatsFightsLeft") > 0 ? 1 : 0;
+	const habitatPartial = get("_monsterHabitatsFightsLeft") > 0 ? 1 : 0;
 
 	return (
 		get("beGregariousCharges") +
