@@ -55,7 +55,6 @@ import {
 	takeCloset,
 	toInt,
 	toJson,
-	toMonster,
 	totalTurnsPlayed,
 	use,
 	useFamiliar,
@@ -152,10 +151,8 @@ import {
 	eventLog,
 	expectedEmbezzlerProfit,
 	freeRest,
-	HIGHLIGHT,
 	kramcoGuaranteed,
 	latteActionSourceFinderConstraints,
-	logMessage,
 	ltbRun,
 	mapMonster,
 	propertyManager,
@@ -2520,9 +2517,8 @@ export function doSausage(): void {
 		return;
 	}
 	freeFightOutfit({ equip: $items`Kramco Sausage-o-Matic™` }).dress();
-	let currentTurncount;
+	const currentSausages = get("_sausageFights");
 	do {
-		currentTurncount = myTurncount();
 		propertyManager.setChoices(wanderer.getChoices("wanderer"));
 		const goblin = $monster`sausage goblin`;
 		garboAdventureAuto(
@@ -2531,10 +2527,7 @@ export function doSausage(): void {
 				.ifHolidayWanderer(Macro.basicCombat())
 				.abortWithMsg(`Expected ${goblin} but got something else.`),
 		);
-	} while (
-		dogOrHolidayWanderer() ||
-		(toMonster(get("lastEncounter")) === $monster.none && currentTurncount === myTurncount())
-	); // Try again if we hit an NC that didn't take a turn
+	} while (get("_sausageFights") === currentSausages); // Try again if we hit an NC that didn't take a turn
 	if (getAutoAttack() !== 0) setAutoAttack(0);
 	postCombatActions();
 }

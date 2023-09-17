@@ -5,7 +5,6 @@ import {
 	cliExecute,
 	currentRound,
 	eat,
-	itemAmount,
 	Location,
 	mallPrice,
 	maximize,
@@ -43,6 +42,7 @@ import { computeDiet, consumeDiet } from "./diet";
 import { deliverThesisIfAble } from "./fights";
 import {
 	eventLog,
+	howManySausagesCouldIEat,
 	kramcoGuaranteed,
 	propertyManager,
 	questStep,
@@ -507,18 +507,10 @@ export default function barfTurn(): void {
 function generateTurnsAtEndOfDay(): void {
 	deliverThesisIfAble();
 
-	if (
-		have($item`Kramco Sausage-o-Matic™`) &&
-		(have($item`magical sausage`) || have($item`magical sausage casing`)) &&
-		get("_sausagesEaten") < 23
-	) {
-		const available = clamp(
-			23 - get("_sausagesEaten"),
-			0,
-			itemAmount($item`magical sausage`) + itemAmount($item`magical sausage casing`),
-		);
+	const sausages = howManySausagesCouldIEat();
+	if (sausages > 0) {
 		maximize("MP", false);
-		eat(available, $item`magical sausage`);
+		eat(sausages, $item`magical sausage`);
 	}
 
 	if (

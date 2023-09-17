@@ -82,7 +82,7 @@ function ensureConsumable(
 	inebriety: number,
 	spleenUse: number,
 ): void {
-	if (myFullness() + n * fullness > fullnessLimit()) {
+	if (myFullness() + n * fullness > Math.max(fullnessLimit(), myFullness())) {
 		throw new Error(`Eating ${n} ${name} exceeds our stomach capacity!`);
 	} else if (myInebriety() + n * inebriety > inebrietyLimit()) {
 		throw new Error(`Drinking ${n} ${name} exceeds our liver capacity!`);
@@ -309,7 +309,7 @@ export function executeNextDietStep(stopBeforeJellies?: boolean): void {
 					}
 					if (
 						myFullness() + entry.fullness >
-						fullnessLimit() +
+						Math.max(fullnessLimit(), myFullness()) +
 							(!get("_distentionPillUsed") && have($item`distention pill`) ? 1 : 0)
 					) {
 						throw new Error(`consuming ${entry.name} will exceed our fullness limit`);
@@ -750,7 +750,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 
 	// We assume that the embezzlers after yachtzee chaining would still benefit from our start-of-day buffs
 	// so the assumption is that all the gregged embezzlies can be approximated as marginal KGEs with profits of 3 * VOA
-	const extroValuePerSpleen = 6 * VOA - extroPrice / 2;
+	const extroValuePerSpleen = MPE - extroPrice / 2;
 	const jellyValuePerSpleen =
 		(earlyMeatDropsEstimate * 2000) / 100 -
 		fishyCost / yachtzeeTurns -
