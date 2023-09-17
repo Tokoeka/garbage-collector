@@ -620,6 +620,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 	const extroPrice = mallPrice($item`Extrovermectin™`);
 	const VOA = get("valueOfAdventure");
 	const MPE = VPE();
+	const AVPE = MPE - VOA;
 	const slidersPrice = mallPrice($item`extra-greasy slider`);
 	const pickleJuicePrice = mallPrice($item`jar of fermented pickle juice`);
 	const colognePrice = mallPrice($item`beggin' cologne`);
@@ -750,7 +751,7 @@ export function yachtzeeChainDiet(simOnly?: boolean): boolean {
 
 	// We assume that the embezzlers after yachtzee chaining would still benefit from our start-of-day buffs
 	// so the assumption is that all the gregged embezzlies can be approximated as marginal KGEs with profits of 3 * VOA
-	const extroValuePerSpleen = MPE - extroPrice / 2;
+	const extroValuePerSpleen = (3 * AVPE - extroPrice) / 2;
 	const jellyValuePerSpleen =
 		(earlyMeatDropsEstimate * 2000) / 100 -
 		fishyCost / yachtzeeTurns -
