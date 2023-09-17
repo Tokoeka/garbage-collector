@@ -5,18 +5,16 @@ import {
 	$items,
 	$location,
 	$skill,
-	$slot,
 	AugustScepter,
 	clamp,
 	get,
-	getModifier,
 	have,
 } from "libram";
 import { globalOptions } from "../config";
 import { embezzlerCount } from "../embezzler";
 import { Potion } from "../potions";
 import { garboAverageValue, garboValue } from "../value";
-import { canAdventure, canEquip, Item, myLevel, myMeat, Skill, toSlot, useSkill } from "kolmafia";
+import { canAdventure, myLevel, myMeat, Skill, useSkill } from "kolmafia";
 import { VPE } from "../lib";
 
 type ScepterSkill = {
@@ -108,7 +106,7 @@ const SKILL_OPTIONS: ScepterSkill[] = [
 		value: () => 3 * garboValue($item`Mrs. Rush`),
 		type: "summon",
 	},
-	{
+	/* {
 		skill: $skill`Aug. 30th: Beach Day!`,
 		value: () =>
 			100 +
@@ -132,7 +130,7 @@ const SKILL_OPTIONS: ScepterSkill[] = [
 						7,
 				  ) * get("valueOfAdventure")),
 		type: "summon",
-	},
+	}, */
 	{
 		skill: $skill`Aug. 31st: Cabernet Sauvignon  Day!`,
 		value: () => 2 * garboValue($item`bottle of Cabernet Sauvignon`),
