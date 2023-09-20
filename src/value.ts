@@ -114,7 +114,7 @@ const specialValueLookup = new Map<Item, () => number>([
 			),
 	],
 	[$item`fake hand`, () => 50000],
-	[$item`shadow brick`, () => 25000],
+	// [$item`shadow brick`, () => 25000],
 	[
 		$item`psychoanalytic jar`,
 		() =>
