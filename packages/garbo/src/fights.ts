@@ -185,6 +185,7 @@ import { EmbezzlerFightRunOptions } from "./embezzler/staging";
 import { FreeFightQuest, runGarboQuests } from "./tasks";
 import { expectedFreeFights, possibleTentacleFights } from "./tasks/freeFight";
 import { PostQuest } from "./tasks/post";
+import { shouldAugustCast } from "./resources";
 
 const firstChainMacro = () =>
   Macro.if_(
@@ -847,6 +848,16 @@ const freeFightSources = [
         return {};
       },
     },
+  ),
+  new FreeFight(
+    () => (shouldAugustCast($skill`Aug. 8th: Cat Day!`) ? 1 : 0),
+    () => withMacro(Macro.basicCombat(), () => useSkill($skill`Aug. 8th: Cat Day!`)),
+    true,
+  ),
+  new FreeFight(
+    () => (shouldAugustCast($skill`Aug. 22nd: Tooth Fairy Day!`) ? 1 : 0),
+    () => withMacro(Macro.basicCombat(), () => useSkill($skill`Aug. 22nd: Tooth Fairy Day!`)),
+    true,
   ),
   new FreeFight(
     () => (wantPills() ? 5 - get("_saberForceUses") : 0),
