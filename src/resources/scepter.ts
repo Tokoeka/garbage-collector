@@ -19,10 +19,12 @@ import { Potion } from "../potions";
 import { garboAverageValue, garboValue } from "../garboValue";
 import { canAdventure, canEquip, Item, myLevel, myMeat, Skill, toSlot, useSkill } from "kolmafia";
 
+const FFV = globalOptions.prefs.valueOfFreeFight;
+
 type ScepterSkill = {
   skill: Skill;
   value: () => number;
-  type: "special" | "summon" | "buff";
+  type: "special" | "summon" | "buff" | "fight";
 };
 const SKILL_OPTIONS: ScepterSkill[] = [
   // August 1 deliberately omitted; does not trigger on monster replacers
@@ -63,6 +65,11 @@ const SKILL_OPTIONS: ScepterSkill[] = [
     type: "buff",
   },
   {
+    skill: $skill`Aug. 8th: Cat Day!`,
+    value: () => FFV,
+    type: "fight",
+  },
+  {
     skill: $skill`Aug. 13th: Left/Off Hander's Day!`,
     value: () =>
       new Potion($item`august scepter`, {
@@ -89,6 +96,11 @@ const SKILL_OPTIONS: ScepterSkill[] = [
     skill: $skill`Aug. 18th: Serendipity Day!`,
     value: () => 3000, // Dummy value; we should some day calculate this based on free fight count, careful to avoid circular imports
     type: "buff",
+  },
+  {
+    skill: $skill`Aug. 22nd: Tooth Fairy Day!`,
+    value: () => FFV,
+    type: "fight",
   },
   {
     skill: $skill`Aug. 24th: Waffle Day!`,
@@ -140,7 +152,8 @@ const SKILL_OPTIONS: ScepterSkill[] = [
 let bestScepterSkills: ScepterSkill[] | null = null;
 function getBestScepterSkills(): ScepterSkill[] {
   return (bestScepterSkills ??= SKILL_OPTIONS.filter(
-    ({ skill }) => AugustScepter.todaysSkill() !== skill && skill.dailylimit > 0,
+    ({ skill, type }) =>
+      AugustScepter.todaysSkill() !== skill && skill.dailylimit > 0 && type !== "fight",
   )
     .sort((a, b) => b.value() - a.value())
     .splice(0, clamp(5 - get("_augSkillsCast"), 0, 5)));
