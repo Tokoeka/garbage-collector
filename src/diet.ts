@@ -62,6 +62,7 @@ import {
 	maximizeCached,
 	MayoClinic,
 	MenuItem,
+	realmAvailable,
 	set,
 	sum,
 	sumNumbers,
@@ -76,7 +77,7 @@ import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
 import synthesize from "./synthesis";
 import { estimatedGarboTurns } from "./turns";
-import { garboValue } from "./value";
+import { garboValue } from "./garboValue";
 import { shouldAugustCast } from "./resources";
 
 const MPA = get("valueOfAdventure");

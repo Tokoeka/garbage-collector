@@ -1,4 +1,5 @@
 import {
+	availableChoiceOptions,
 	cliExecute,
 	equip,
 	itemAmount,
@@ -8,8 +9,10 @@ import {
 	myLocation,
 	putCloset,
 	reverseNumberology,
+	runChoice,
 	use,
 	useSkill,
+	visitUrl,
 } from "kolmafia";
 import {
 	$effect,
@@ -45,10 +48,10 @@ import {
 import { teleportEffects } from "../mood";
 import { sessionSinceStart } from "../session";
 import { estimatedGarboTurns, remainingUserTurns } from "../turns";
-import { garboAverageValue, garboValue } from "../value";
+import { garboAverageValue, garboValue } from "../garboValue";
 import bestAutumnatonLocation from "./autumnaton";
 import handleWorkshed from "./workshed";
-import wanderer from "../wanderer";
+import { wanderer } from "../garboWanderer";
 
 function closetStuff(): void {
 	for (const i of $items`bowling ball, funky junk key`) putCloset(itemAmount(i), i);
@@ -197,6 +200,17 @@ function refillCinch() {
 	}
 }
 
+let tokenBought = false;
+function eightBitFatLoot() {
+	if (!tokenBought && get("8BitScore") >= 20000) {
+		visitUrl("place.php?whichplace=8bit&action=8treasure");
+		if (availableChoiceOptions()[2]) {
+			runChoice(2);
+		}
+		tokenBought = true;
+	}
+}
+
 export default function postCombatActions(skipDiet = false): void {
 	closetStuff();
 	juneCleave();
@@ -213,7 +227,8 @@ export default function postCombatActions(skipDiet = false): void {
 	updateMallPrices();
 	stillsuit();
 	funguySpores();
-	wanderer.clear();
+	eightBitFatLoot();
+	wanderer().clear();
 	if (
 		globalOptions.ascend ||
 		AutumnAton.turnsForQuest() < estimatedGarboTurns() + remainingUserTurns()
