@@ -72,7 +72,7 @@ import { withVIPClan } from "./clan";
 import { globalOptions } from "./config";
 import { embezzlerCount } from "./embezzler";
 import { expectedGregs } from "./extrovermectin";
-import { arrayEquals, baseMeat, HIGHLIGHT, realmAvailable, userConfirmDialog, VPE } from "./lib";
+import { arrayEquals, baseMeat, HIGHLIGHT, userConfirmDialog, VPE } from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
 import synthesize from "./synthesis";

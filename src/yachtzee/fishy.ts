@@ -83,8 +83,9 @@ export function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number
 			cost: mallPrice($item`fish juice box`),
 			action: () => {
 				acquire(1, $item`fish juice box`, 1.2 * mallPrice($item`fish juice box`));
-				if (!have($item`fish juice box`))
+				if (!have($item`fish juice box`)) {
 					throw new Error("Unable to obtain fish juice box");
+				}
 				use(1, $item`fish juice box`);
 				if (
 					haveFishyPipe &&
@@ -118,8 +119,9 @@ export function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number
 			cost: mallPrice($item`cuppa Gill tea`) + bestWaterBreathingEquipment.cost,
 			action: () => {
 				acquire(1, $item`cuppa Gill tea`, 1.2 * mallPrice($item`cuppa Gill tea`));
-				if (!have($item`cuppa Gill tea`))
+				if (!have($item`cuppa Gill tea`)) {
 					throw new Error("Unable to obtain cuppa Gill tea");
+				}
 				use(1, $item`cuppa Gill tea`);
 				if (
 					haveFishyPipe &&
@@ -310,8 +312,9 @@ export function optimizeForFishy(yachtzeeTurns: number, setup?: boolean): number
 			turns: 10,
 			cost: haveFishyPipe ? bestWaterBreathingEquipment.cost : Infinity,
 			action: () => {
-				if (haveFishyPipe && haveEffect($effect`Fishy`) < yachtzeeTurns)
+				if (haveFishyPipe && haveEffect($effect`Fishy`) < yachtzeeTurns) {
 					use(1, $item`fishy pipe`);
+				}
 			},
 		},
 	];
