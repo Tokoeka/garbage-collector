@@ -39,6 +39,7 @@ import {
 	myLevel,
 	myMaxhp,
 	myPath,
+	mySoulsauce,
 	myThrall,
 	myTurncount,
 	numericModifier,
@@ -718,7 +719,7 @@ function molemanReady() {
 	return have($item`molehill mountain`) && !get("_molehillMountainUsed");
 }
 
-/* const stunDurations = new Map<Skill | Item, Delayed<number>>([
+const stunDurations = new Map<Skill | Item, Delayed<number>>([
 	[$skill`Blood Bubble`, 1],
 	[
 		$skill`Entangling Noodles`,
@@ -743,7 +744,7 @@ function molemanReady() {
 	[$skill`Soul Bubble`, () => (mySoulsauce() >= 5 ? 2 : 0)],
 	[$skill`Summon Love Gnats`, 1],
 	[$item`Rain-Doh blue balls`, 1],
-]); */
+]);
 
 const freeFightSources = [
 	new FreeFight(
