@@ -99,6 +99,7 @@ import {
 	FindActionSourceConstraints,
 	findLeprechaunMultiplier,
 	FloristFriar,
+	gameDay,
 	get,
 	getAverageAdventures,
 	getFoldGroup,
@@ -149,8 +150,9 @@ import {
 	eventLog,
 	expectedEmbezzlerProfit,
 	freeRest,
+	freeRunConstraints,
+	getUsingFreeBunnyBanish,
 	kramcoGuaranteed,
-	latteActionSourceFinderConstraints,
 	ltbRun,
 	mapMonster,
 	maxPassiveDamage,
@@ -160,7 +162,6 @@ import {
 	romanticMonsterImpossible,
 	safeRestore,
 	setChoice,
-	today,
 	userConfirmDialog,
 } from "./lib";
 import { freeFightMood, meatMood, useBuffExtenders } from "./mood";
@@ -238,7 +239,7 @@ function embezzlerSetup() {
 		setChoice(582, 1);
 		setChoice(579, 3);
 		while (get("lastTempleAdventures") < myAscensions()) {
-			const run = tryFindFreeRun() ?? ltbRun();
+			const run = tryFindFreeRun(freeRunConstraints(false)) ?? ltbRun();
 			if (!run) break;
 			run.constraints.preparation?.();
 			freeFightOutfit(toSpec(run)).dress();
@@ -339,7 +340,7 @@ function startWandererCounter() {
 				embezzlerOutfit().dress();
 			} else {
 				print("You do not have gregs active, so this is a regular free run.");
-				run = tryFindFreeRun() ?? ltbRun();
+				run = tryFindFreeRun(freeRunConstraints(false)) ?? ltbRun();
 				run.constraints.preparation?.();
 				freeFightOutfit(toSpec(run)).dress();
 			}
@@ -489,15 +490,15 @@ export function dailyFights(): void {
 
 				const location = new EmbezzlerFightRunOptions(nextFight).location;
 				const underwater = location.environment === "underwater";
+				const shouldCopy = get("_badlyRomanticArrows") === 0 && !underwater;
 
-				const familiar =
-					get("_badlyRomanticArrows") === 0 && !underwater
-						? $familiars`Obtuse Angel, Reanimated Reanimator`.find(have) ??
-						  meatFamiliar()
-						: meatFamiliar();
+				const bestCopier = $familiars`Obtuse Angel, Reanimated Reanimator`.find(have);
+				const familiar = shouldCopy && bestCopier ? bestCopier : meatFamiliar();
+				const famSpec: OutfitSpec = { familiar };
+				if (familiar === $familiar`Obtuse Angel`) famSpec.famequip = $item`quake of arrows`;
 
 				setLocation(location);
-				embezzlerOutfit({ ...nextFight.spec, familiar }, location).dress();
+				embezzlerOutfit({ ...nextFight.spec, ...famSpec }, location).dress();
 
 				runEmbezzlerFight(nextFight);
 				postCombatActions();
@@ -620,6 +621,7 @@ class FreeRunFight extends FreeFight {
 		while (this.isAvailable()) {
 			const initialSpec = undelay(this.options.spec ?? {});
 			const constraints = {
+				...freeRunConstraints(false),
 				noFamiliar: () => "familiar" in initialSpec,
 				...this.constraints,
 			};
@@ -651,7 +653,7 @@ const pygmyBanishHandlers = [
 		pygmy: $monster`pygmy bowler`,
 		skill: $skill`Snokebomb`,
 		check: "_snokebombUsed",
-		limit: 3,
+		limit: getUsingFreeBunnyBanish() ? 1 : 3,
 		item: $item`Louder Than Bomb`,
 	},
 	{
@@ -681,8 +683,12 @@ const pygmySniffed = () =>
 	sniffSources.some((source) => pygmyBanishHandlers.some(({ pygmy }) => pygmy === get(source)));
 
 const pygmyMacro = Macro.step(
-	...pygmyBanishHandlers.map(({ pygmy, skill, item }) =>
-		Macro.if_(pygmy, skill ? Macro.trySkill(skill).item(item) : Macro.item(item)),
+	...pygmyBanishHandlers.map(({ pygmy, skill, item, check, limit }) =>
+		Macro.externalIf(
+			(check ? get(check) : Infinity) < limit,
+			Macro.if_(pygmy, skill ? Macro.trySkill(skill).item(item) : Macro.item(item)),
+			Macro.if_(pygmy, Macro.item(item)),
+		),
 	),
 )
 	.if_($monster`drunk pygmy`, Macro.trySkill($skill`Extract`).trySingAlong())
@@ -1079,6 +1085,7 @@ const freeFightSources = [
 					retrieveItem(1, $item`Louder Than Bomb`);
 					retrieveItem(1, $item`divine champagne popper`);
 				}
+				const snokeLimit = getUsingFreeBunnyBanish() ? 1 : 3;
 				garboAdventure(
 					$location`Domed City of Grimacia`,
 					Macro.if_(
@@ -1089,7 +1096,9 @@ const freeFightSources = [
 					)
 						.if_(
 							$monster`cat-alien`,
-							Macro.trySkill($skill`Snokebomb`).tryItem($item`tennis ball`),
+							get("_snokebombUsed") < snokeLimit
+								? Macro.trySkill($skill`Snokebomb`).item($item`tennis ball`)
+								: Macro.item($item`tennis ball`),
 						)
 						.if_(
 							$monster`dog-alien`,
@@ -1604,7 +1613,7 @@ const freeFightSources = [
 
 			runShadowRiftTurn();
 
-			if (get("encountersUntilSRChoice", 0) === 0) {
+			if (get("encountersUntilSRChoice") === 0 || get("noncombatForcerActive")) {
 				if (ClosedCircuitPayphone.have() && !ClosedCircuitPayphone.rufusTarget()) {
 					ClosedCircuitPayphone.chooseQuest(() => 2);
 				}
@@ -1620,7 +1629,7 @@ const freeFightSources = [
 				adv1(bestShadowRift(), -1, "");
 			}
 
-			if (!have($effect`Shadow Affinity`) && get("encountersUntilSRChoice", 0) !== 0) {
+			if (!have($effect`Shadow Affinity`) && get("encountersUntilSRChoice") !== 0) {
 				setLocation($location.none); // Reset location to not affect mafia's item drop calculations
 			}
 		},
@@ -1671,7 +1680,7 @@ const freeRunFightSources = [
 		{
 			spec: { equip: $items`latte lovers member's mug` },
 		},
-		latteActionSourceFinderConstraints,
+		freeRunConstraints(true),
 	),
 	new FreeRunFight(
 		() =>
@@ -1689,7 +1698,7 @@ const freeRunFightSources = [
 		{
 			spec: { equip: $items`latte lovers member's mug` },
 		},
-		latteActionSourceFinderConstraints,
+		freeRunConstraints(true),
 	),
 	new FreeRunFight(
 		() =>
@@ -1703,7 +1712,7 @@ const freeRunFightSources = [
 		{
 			spec: { equip: $items`latte lovers member's mug` },
 		},
-		latteActionSourceFinderConstraints,
+		freeRunConstraints(true),
 	),
 	new FreeRunFight(
 		() =>
@@ -1871,7 +1880,6 @@ const freeRunFightSources = [
 				true,
 				$items`high-end ginger wine, astral pilsner, ginger beer`,
 			);
-
 			const gingerBeerValue =
 				(getAverageAdventures($item`ginger beer`) * get("valueOfAdventure")) / 2;
 
@@ -1887,7 +1895,6 @@ const freeRunFightSources = [
 				(availableAmount($item`sprinkles`) < 5 ||
 					(wineValueDif * 2 > cigValue * 5 &&
 						itemAmount($item`high-end ginger wine`) < 11));
-
 			const beerValueDif = gingerBeerValue - best.value;
 			const getGingerBeer: boolean =
 				have($item`gingerbread mug`) &&
@@ -1909,7 +1916,6 @@ const freeRunFightSources = [
 					gingerBest ? "High-End Ginger Wine" : "Ginger Beer"
 				}`,
 			);
-
 			if (getGingerWine) {
 				outfit("gingerbread best");
 				garboAdventure($location`Gingerbread Upscale Retail District`, Macro.abort());
@@ -2070,8 +2076,6 @@ const freeRunFightSources = [
 							)
 							.trySkill($skill`Summon Mayfly Swarm`),
 					)
-					.if_($monster`Fruit Golem`, Macro.trySkill($skill`Feel Hatred`))
-					.if_($monster`Knob Goblin Mutant`, Macro.trySkill($skill`Snokebomb`))
 					.step(runSource.macro),
 			);
 		},
@@ -2341,14 +2345,18 @@ const freeKillSources = [
 	),
 ];
 
+function embezzlersInProgress(): boolean {
+	return (
+		get("beGregariousFightsLeft") > 0 ||
+		get("_monsterHabitatsFightsLeft") > 0 ||
+		!romanticMonsterImpossible() ||
+		Counter.get("Digitize Monster") <= 0
+	);
+}
+
 export function freeRunFights(): void {
 	if (myInebriety() > inebrietyLimit()) return;
-	if (
-		get("beGregariousFightsLeft") > 0 &&
-		get("beGregariousMonster") === $monster`Knob Goblin Embezzler`
-	) {
-		return;
-	}
+	if (embezzlersInProgress()) return;
 
 	propertyManager.setChoices({
 		1387: 2, // "You will go find two friends and meet me here."
@@ -2378,12 +2386,7 @@ export function freeRunFights(): void {
 
 export function freeFights(): void {
 	if (myInebriety() > inebrietyLimit()) return;
-	if (
-		get("beGregariousFightsLeft") > 0 &&
-		get("beGregariousMonster") === $monster`Knob Goblin Embezzler`
-	) {
-		return;
-	}
+	if (embezzlersInProgress()) return;
 
 	propertyManager.setChoices({
 		1387: 2, // "You will go find two friends and meet me here."
@@ -2936,7 +2939,8 @@ function yachtzee(): void {
 				!get("_sleazeAirportToday") && // We cannot get the UMD with a one-day pass
 				garboValue($item`Ultimate Mind Destroyer`) >=
 					2000 * (1 + numericModifier("meat drop") / 100) &&
-				(!lastUMDDate || today - Date.parse(lastUMDDate) >= 1000 * 60 * 60 * 24 * 7);
+				(!lastUMDDate ||
+					gameDay().getTime() - Date.parse(lastUMDDate) >= 1000 * 60 * 60 * 24 * 7);
 
 			setChoice(918, getUMD ? 1 : 2);
 
@@ -2967,8 +2971,6 @@ function runShadowRiftTurn(): void {
 	if (have($item`Clara's bell`) && !globalOptions.clarasBellClaimed) {
 		globalOptions.clarasBellClaimed = true;
 		use($item`Clara's bell`);
-		// Not the most elegant solution, but we need a way to communicate that an NC is forced
-		set("encountersUntilSRChoice", 0);
 	} else if (CinchoDeMayo.have() && CinchoDeMayo.totalAvailableCinch() >= 60) {
 		const lastAcc = equippedItem($slot`acc3`);
 		equip($slot`acc3`, $item`Cincho de Mayo`);
@@ -2976,7 +2978,6 @@ function runShadowRiftTurn(): void {
 			if (!freeRest()) throw new Error("We are out of free rests!");
 		}
 		useSkill($skill`Cincho: Fiesta Exit`);
-		set("encountersUntilSRChoice", 0);
 		equip($slot`acc3`, lastAcc); // Re-equip last item
 	} else if (
 		have($item`Jurassic Parka`) &&
@@ -2988,7 +2989,6 @@ function runShadowRiftTurn(): void {
 		cliExecute("parka spikolodon");
 		const macro = Macro.skill($skill`Launch spikolodon spikes`).basicCombat();
 		garboAdventureAuto(bestShadowRift(), macro);
-		set("encountersUntilSRChoice", 0);
 	} else {
 		adv1(bestShadowRift(), -1, ""); // We wanted to use NC forcers, but none are suitable now
 	}
