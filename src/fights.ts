@@ -180,6 +180,7 @@ import { DraggableFight, WanderOptions } from "./libgarbo";
 import { wanderer } from "./garboWanderer";
 import { runEmbezzlerFight } from "./embezzler/execution";
 import { EmbezzlerFightRunOptions } from "./embezzler/staging";
+import { shouldAugustCast } from "./resources";
 
 const firstChainMacro = () =>
 	Macro.if_(
@@ -774,6 +775,16 @@ const freeFightSources = [
 				? 1
 				: 0,
 		() => withMacro(Macro.basicCombat(), () => use($item`molehill mountain`)),
+		true,
+	),
+	new FreeFight(
+		() => (shouldAugustCast($skill`Aug. 8th: Cat Day!`) ? 1 : 0),
+		() => withMacro(Macro.basicCombat(), () => useSkill($skill`Aug. 8th: Cat Day!`)),
+		true,
+	),
+	new FreeFight(
+		() => (shouldAugustCast($skill`Aug. 22nd: Tooth Fairy Day!`) ? 1 : 0),
+		() => withMacro(Macro.basicCombat(), () => useSkill($skill`Aug. 22nd: Tooth Fairy Day!`)),
 		true,
 	),
 	new FreeFight(
