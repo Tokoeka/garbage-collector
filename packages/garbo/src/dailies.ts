@@ -6,11 +6,11 @@ import { runSafeGarboQuests } from "./tasks/engine";
 import { AscendingQuest } from "./tasks/ascending";
 
 export function dailySetup(): void {
-	runSafeGarboQuests([
-		DailyFamiliarsQuest,
-		DailyQuest,
-		DailyItemsQuest,
-		VolcanoQuest,
-		AscendingQuest,
-	]);
+  runSafeGarboQuests([
+    DailyFamiliarsQuest,
+    DailyQuest,
+    DailyItemsQuest,
+    VolcanoQuest,
+    AscendingQuest,
+  ]);
 }
