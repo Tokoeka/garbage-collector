@@ -20,9 +20,7 @@ function value(color: BonusColor, options: WandererFactoryOptions) {
     ? get("8BitScore") - TREASURE_HOUSE_FAT_LOOT_TOKEN_COST
     : TREASURE_HOUSE_FAT_LOOT_TOKEN_COST;
   return (
-    (options.itemValue($item`fat loot token`) *
-      eightBitPoints(locationColor[color])) /
-    denominator
+    (options.itemValue($item`fat loot token`) * eightBitPoints(locationColor[color])) / denominator
   );
 }
 
@@ -39,11 +37,7 @@ export function eightbitFactory(
     return bonusColor
       .map(
         (color) =>
-          new WandererTarget(
-            `8-bit (${color})`,
-            locationColor[color],
-            value(color, options),
-          ),
+          new WandererTarget(`8-bit (${color})`, locationColor[color], value(color, options)),
       )
       .filter((t) => !locationSkiplist.includes(t.location));
   }

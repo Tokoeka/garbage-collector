@@ -21,17 +21,7 @@ import {
   toItem,
   visitUrl,
 } from "kolmafia";
-import {
-  $familiar,
-  $item,
-  $items,
-  $monster,
-  Clan,
-  get,
-  getFoldGroup,
-  have,
-  set,
-} from "libram";
+import { $familiar, $item, $items, $monster, Clan, get, getFoldGroup, have, set } from "libram";
 import { Macro } from "./combat";
 import { globalOptions } from "./config";
 import { HIGHLIGHT, userConfirmDialog } from "./lib";
@@ -89,9 +79,7 @@ export class StashManager {
 
   constructor() {
     const clanIdOrName = globalOptions.prefs.stashClan;
-    this.clanIdOrName = clanIdOrName.match(/^\d+$/)
-      ? parseInt(clanIdOrName)
-      : clanIdOrName;
+    this.clanIdOrName = clanIdOrName.match(/^\d+$/) ? parseInt(clanIdOrName) : clanIdOrName;
     this.enabled = ![0, "", "none"].some((id) => id === this.clanIdOrName);
   }
 
@@ -122,10 +110,7 @@ export class StashManager {
           if (stashAmount(fold) > 0) {
             try {
               if (takeStash(1, fold)) {
-                print(
-                  `Took ${fold.name} from stash in ${getClanName()}.`,
-                  HIGHLIGHT,
-                );
+                print(`Took ${fold.name} from stash in ${getClanName()}.`, HIGHLIGHT);
                 if (fold !== item) cliExecute(`fold ${item.name}`);
                 this.taken.set(item, (this.taken.get(item) ?? 0) + 1);
                 stashItems.push(fold);
@@ -139,10 +124,7 @@ export class StashManager {
                 );
               }
             } catch {
-              print(
-                `Failed to take ${fold.name} from stash in ${getClanName()}.`,
-                "red",
-              );
+              print(`Failed to take ${fold.name} from stash in ${getClanName()}.`, "red");
             }
           }
         }
@@ -162,10 +144,7 @@ export class StashManager {
   putBack(...items: Item[]): void {
     if (items.length === 0) return;
     if (visitUrl("fight.php").includes("You're fighting")) {
-      print(
-        "In fight, trying to get away to return items to stash...",
-        HIGHLIGHT,
-      );
+      print("In fight, trying to get away to return items to stash...", HIGHLIGHT);
       Macro.if_($monster`Knob Goblin Embezzler`, Macro.attack().repeat())
         .tryItem(...$items`Louder Than Bomb, divine champagne popper`)
         .step("runaway")
@@ -191,9 +170,7 @@ export class StashManager {
             bjornifyFamiliar($familiar.none);
           }
           if (item === $item`Crown of Thrones`) {
-            visitUrl(
-              `desc_item.php?whichitem=${$item`Crown of Thrones`.descid}`,
-            );
+            visitUrl(`desc_item.php?whichitem=${$item`Crown of Thrones`.descid}`);
             enthroneFamiliar($familiar.none);
           }
 
@@ -205,10 +182,7 @@ export class StashManager {
           if (itemAmount(item) >= count && putStash(count, item)) {
             const index = stashItems.indexOf(item);
             if (index >= 0) stashItems.splice(stashItems.indexOf(item), 1);
-            print(
-              `Returned ${item.name} to stash in ${getClanName()}.`,
-              HIGHLIGHT,
-            );
+            print(`Returned ${item.name} to stash in ${getClanName()}.`, HIGHLIGHT);
             this.taken.delete(item);
           } else {
             throw `Failed to return ${item.name} to stash.`;

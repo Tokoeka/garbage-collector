@@ -89,17 +89,11 @@ type MarginalFamiliar = GeneralFamiliar & {
 
 const nonOutfitWeightBonus = () =>
   weightAdjustment() -
-  sum(outfitSlots, (slot: Slot) =>
-    getModifier("Familiar Weight", equippedItem(slot)),
-  );
+  sum(outfitSlots, (slot: Slot) => getModifier("Familiar Weight", equippedItem(slot)));
 
-function familiarModifier(
-  familiar: Familiar,
-  modifier: NumericModifier,
-): number {
+function familiarModifier(familiar: Familiar, modifier: NumericModifier): number {
   const cachedOutfitWeight = getCachedOutfitValues(familiar).weight;
-  const totalWeight =
-    familiarWeight(familiar) + nonOutfitWeightBonus() + cachedOutfitWeight;
+  const totalWeight = familiarWeight(familiar) + nonOutfitWeightBonus() + cachedOutfitWeight;
 
   return numericModifier(familiar, modifier, totalWeight, $item.none);
 }
@@ -111,11 +105,7 @@ function familiarAbilityValue(familiar: Familiar) {
   );
 }
 
-function totalFamiliarValue({
-  expectedValue,
-  outfitValue,
-  familiar,
-}: MarginalFamiliar) {
+function totalFamiliarValue({ expectedValue, outfitValue, familiar }: MarginalFamiliar) {
   return expectedValue + outfitValue + familiarAbilityValue(familiar);
 }
 
@@ -151,10 +141,7 @@ function turnsNeededForFamiliar(
 
 function calculateOutfitValue(f: GeneralFamiliar): MarginalFamiliar {
   const outfit = getCachedOutfitValues(f.familiar);
-  const outfitValue =
-    outfit.bonus +
-    outfit.meat * MEAT_DROP_VALUE +
-    outfit.item * ITEM_DROP_VALUE;
+  const outfitValue = outfit.bonus + outfit.meat * MEAT_DROP_VALUE + outfit.item * ITEM_DROP_VALUE;
   const outfitWeight = outfit.weight;
 
   return { ...f, outfitValue, outfitWeight };
@@ -169,18 +156,14 @@ export function barfFamiliar(): Familiar {
     includeExperienceFamiliars: false,
   }).map(calculateOutfitValue);
 
-  const meatFamiliarEntry = fullMenu.find(
-    ({ familiar }) => familiar === meatFamiliar(),
-  );
+  const meatFamiliarEntry = fullMenu.find(({ familiar }) => familiar === meatFamiliar());
 
   if (!meatFamiliarEntry) {
     throw new Error("Something went wrong when initializing familiars!");
   }
 
   const meatFamiliarValue = totalFamiliarValue(meatFamiliarEntry);
-  const viableMenu = fullMenu.filter(
-    (f) => totalFamiliarValue(f) > meatFamiliarValue,
-  );
+  const viableMenu = fullMenu.filter((f) => totalFamiliarValue(f) > meatFamiliarValue);
 
   if (viableMenu.every(({ limit }) => limit !== "none")) {
     const turnsNeeded = sum(viableMenu, (option: MarginalFamiliar) =>
@@ -204,9 +187,7 @@ export function barfFamiliar(): Familiar {
 
   // Because we run marginal familiars at the end, our marginal MPA is inflated by best.expectedValue - meatFamiliarValue every turn
   // Technically it's the nominalFamiliarValue, which for now is the max of meatFamiliar and jellyfish (if we have the jellyfish)
-  const jellyfish = fullMenu.find(
-    ({ familiar }) => familiar === $familiar`Space Jellyfish`,
-  );
+  const jellyfish = fullMenu.find(({ familiar }) => familiar === $familiar`Space Jellyfish`);
   const jellyfishValue = jellyfish
     ? garboValue($item`stench jelly`) / 20 +
       familiarAbilityValue(jellyfish.familiar) +
@@ -222,11 +203,9 @@ export function barfFamiliar(): Familiar {
   setMarginalFamiliarsExcessValue(excessValue);
 
   const familiarPrintout = (x: MarginalFamiliar) =>
-    `(expected value of ${x.expectedValue.toFixed(
-      1,
-    )} from familiar drops, ${familiarAbilityValue(x.familiar).toFixed(
-      1,
-    )} from familiar abilities and ${x.outfitValue.toFixed(1)} from outfit)`;
+    `(expected value of ${x.expectedValue.toFixed(1)} from familiar drops, ${familiarAbilityValue(
+      x.familiar,
+    ).toFixed(1)} from familiar abilities and ${x.outfitValue.toFixed(1)} from outfit)`;
 
   print(
     `Choosing to use ${best.familiar} ${familiarPrintout(best)} over ${

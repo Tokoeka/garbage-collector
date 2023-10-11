@@ -18,12 +18,11 @@ function candyFactoryValue(): number {
     !get("garbo_candyFactoryValue", 0) ||
     gameDay().getTime() - lastCalculated.getTime() > 7 * 24 * 60 * 60 * 1000
   ) {
-    const candyFactoryDrops = (
-      JSON.parse(fileToBuffer("garbo_item_lists.json")) as GarboItemLists
-    )["trainset"];
+    const candyFactoryDrops = (JSON.parse(fileToBuffer("garbo_item_lists.json")) as GarboItemLists)[
+      "trainset"
+    ];
     const averageDropValue =
-      sum(candyFactoryDrops, (name) => garboValue(toItem(name), true)) /
-      candyFactoryDrops.length;
+      sum(candyFactoryDrops, (name) => garboValue(toItem(name), true)) / candyFactoryDrops.length;
     set("garbo_candyFactoryValue", averageDropValue);
     set("garbo_candyFactoryValueDate", gameDay().getTime());
   }
@@ -35,10 +34,7 @@ const GOOD_TRAIN_STATIONS = [
   {
     // Some day this'll be better
     piece: TrainSet.Station.TRACKSIDE_DINER,
-    value: () =>
-      garboAverageValue(
-        ...$items`bowl of cottage cheese, hot buttered roll, toast`,
-      ),
+    value: () => garboAverageValue(...$items`bowl of cottage cheese, hot buttered roll, toast`),
   },
   { piece: TrainSet.Station.CANDY_FACTORY, value: candyFactoryValue },
   {
@@ -63,9 +59,9 @@ function getBestCycle(): TrainSet.Cycle {
   if (!trainCycle) {
     const cycle = [
       TrainSet.Station.COAL_HOPPER,
-      ...GOOD_TRAIN_STATIONS.sort(
-        ({ value: a }, { value: b }) => b() - a(),
-      ).map(({ piece }) => piece),
+      ...GOOD_TRAIN_STATIONS.sort(({ value: a }, { value: b }) => b() - a()).map(
+        ({ piece }) => piece,
+      ),
       TrainSet.Station.TOWER_FIZZY,
       TrainSet.Station.VIEWING_PLATFORM,
     ] as TrainSet.Cycle;
@@ -78,9 +74,7 @@ function valueStation(station: TrainSet.Station): number {
   if (station === TrainSet.Station.COAL_HOPPER) {
     return valueStation(getBestCycle()[1]);
   }
-  return (
-    GOOD_TRAIN_STATIONS.find(({ piece }) => piece === station)?.value() ?? 0
-  );
+  return GOOD_TRAIN_STATIONS.find(({ piece }) => piece === station)?.value() ?? 0;
 }
 
 function valueOffset(offset: number): number {

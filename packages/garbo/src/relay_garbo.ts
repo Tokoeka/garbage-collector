@@ -17,10 +17,7 @@ const charMap: Map<string, string> = new Map([
 ]);
 
 function escapeUnsafeChars(str: string) {
-  return str.replace(
-    /[<>\b\f\n\r\t\0\u2028\u2029]/g,
-    (x) => charMap.get(x) ?? "",
-  );
+  return str.replace(/[<>\b\f\n\r\t\0\u2028\u2029]/g, (x) => charMap.get(x) ?? "");
 }
 
 export function main(): void {
@@ -49,9 +46,7 @@ export function main(): void {
     setting.value = get(setting.name);
   }
 
-  writeln(
-    '<head><link rel="stylesheet" href="/garbage-collector/garbage-collector.css"></head>',
-  );
+  writeln('<head><link rel="stylesheet" href="/garbage-collector/garbage-collector.css"></head>');
   writeln('<div id="root"></div>');
 
   writeln("<script>");

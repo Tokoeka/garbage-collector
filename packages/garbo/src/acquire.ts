@@ -40,20 +40,12 @@ export function acquire(
   tryRetrievingUntradeable = false,
 ): number {
   if (maxPrice === undefined) maxPrice = priceCaps[item.name];
-  if (
-    (!item.tradeable && !tryRetrievingUntradeable) ||
-    (maxPrice !== undefined && maxPrice <= 0)
-  ) {
+  if ((!item.tradeable && !tryRetrievingUntradeable) || (maxPrice !== undefined && maxPrice <= 0)) {
     return 0;
   }
   if (maxPrice === undefined) throw new Error(`No price cap for ${item.name}.`);
 
-  print(
-    `Trying to acquire ${qty} ${item.plural}; max price ${maxPrice.toFixed(
-      0,
-    )}.`,
-    "green",
-  );
+  print(`Trying to acquire ${qty} ${item.plural}; max price ${maxPrice.toFixed(0)}.`, "green");
 
   if (qty * mallPrice(item) > (maxAggregateCost ?? 1000000)) {
     throw new Error("Aggregate cost too high! Probably a bug.");
@@ -99,9 +91,7 @@ export function acquire(
     withProperty("autoBuyPriceLimit", maxPrice, () => retrieveItem(item, qty));
   }
   if (itemAmount(item) < qty && throwOnFail) {
-    throw new Error(
-      `Failed to purchase sufficient quantities of ${item} from the mall.`,
-    );
+    throw new Error(`Failed to purchase sufficient quantities of ${item} from the mall.`);
   }
 
   return itemAmount(item) - startAmount;

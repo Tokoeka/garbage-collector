@@ -46,12 +46,8 @@ const standardFamiliars: ConstantValueFamiliar[] = [
     familiar: $familiar`Robortender`,
     value: () =>
       garboValue($item`elemental sugarcube`) / 5 +
-      (Robortender.currentDrinks().includes($item`Feliz Navidad`)
-        ? felizValue() * 0.25
-        : 0) +
-      (Robortender.currentDrinks().includes($item`Newark`)
-        ? newarkValue() * 0.25
-        : 0),
+      (Robortender.currentDrinks().includes($item`Feliz Navidad`) ? felizValue() * 0.25 : 0) +
+      (Robortender.currentDrinks().includes($item`Newark`) ? newarkValue() * 0.25 : 0),
   },
   {
     familiar: $familiar`Twitching Space Critter`,
@@ -69,21 +65,16 @@ const standardFamiliars: ConstantValueFamiliar[] = [
     familiar: $familiar`Trick-or-Treating Tot`,
     // This is the value of getting a pirate costume over getting an amulet coin or whatever
     value: () =>
-      have($item`li'l pirate costume`)
-        ? (baseMeat * (300 - bestAlternative)) / 100
-        : 0,
+      have($item`li'l pirate costume`) ? (baseMeat * (300 - bestAlternative)) / 100 : 0,
   },
   {
     familiar: $familiar`Rockin' Robin`,
-    value: () =>
-      garboValue($item`robin's egg`) /
-      clamp(30 - get("rockinRobinProgress"), 1, 30),
+    value: () => garboValue($item`robin's egg`) / clamp(30 - get("rockinRobinProgress"), 1, 30),
   },
   {
     familiar: $familiar`Optimistic Candle`,
     value: () =>
-      garboValue($item`glob of melted wax`) /
-      clamp(30 - get("optimisticCandleProgress"), 1, 30),
+      garboValue($item`glob of melted wax`) / clamp(30 - get("optimisticCandleProgress"), 1, 30),
   },
   {
     familiar: $familiar`Garbage Fire`,
@@ -104,9 +95,7 @@ const standardFamiliars: ConstantValueFamiliar[] = [
   {
     familiar: $familiar`Patriotic Eagle`,
     value: () =>
-      holiday().includes("Dependence Day")
-        ? 0.05 * garboValue($item`souvenir flag`)
-        : 0,
+      holiday().includes("Dependence Day") ? 0.05 * garboValue($item`souvenir flag`) : 0,
   },
 ];
 

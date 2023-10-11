@@ -9,11 +9,7 @@ function Setting(props: SettingProp): JSX.Element {
         {props.type === "boolean" ? (
           <BooleanInput {...props} />
         ) : (
-          <input
-            className="stringPreference"
-            name={props.name}
-            defaultValue={props.value}
-          />
+          <input className="stringPreference" name={props.name} defaultValue={props.value} />
         )}
       </td>
       <td>{props.description}</td>

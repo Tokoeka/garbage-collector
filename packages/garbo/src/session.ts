@@ -15,9 +15,7 @@ import { garboValue } from "./garboValue";
 
 function printSession(session: Session): void {
   const value = session.value(garboValue);
-  const printProfit = (
-    details: { item: Item; value: number; quantity: number }[],
-  ) => {
+  const printProfit = (details: { item: Item; value: number; quantity: number }[]) => {
     for (const { item, quantity, value } of details) {
       print(`  ${item} (${quantity}) @ ${Math.floor(value)}`);
     }
@@ -30,9 +28,7 @@ function printSession(session: Session): void {
     .sort((a, b) => b.value - a.value);
 
   print(`Total Session Value: ${value.total}`);
-  print(
-    `Of that, ${value.meat} came from meat and ${value.items} came from items`,
-  );
+  print(`Of that, ${value.meat} came from meat and ${value.items} came from items`);
   print(` You gained meat on ${highValue.length} items including:`);
   printProfit(highValue);
   print(` You lost meat on ${lowValue.length} items including:`);
@@ -122,10 +118,7 @@ export function trackBarfSessionStatistics(): void {
     const { meat, items } = sessionSinceStart().value(garboValue);
     const numTrackedMeatTurns = myAdventures() - 25 - globalOptions.saveTurns;
     setProperty("_garboMarginalMeatCheckpoint", meat.toFixed(0));
-    setProperty(
-      "_garboMarginalItemCheckpoint",
-      (items - marginalFamiliarsExcessTotal).toFixed(0),
-    );
+    setProperty("_garboMarginalItemCheckpoint", (items - marginalFamiliarsExcessTotal).toFixed(0));
     setProperty("_garboMarginalMeatTurns", numTrackedMeatTurns.toFixed(0));
   }
 
@@ -139,10 +132,7 @@ export function trackBarfSessionStatistics(): void {
     continueMeatTracking = false;
     const { meat, items } = sessionSinceStart().value(garboValue);
     const meatDiff = meat - get("_garboMarginalMeatCheckpoint", 0);
-    const itemDiff =
-      items -
-      marginalFamiliarsExcessTotal -
-      get("_garboMarginalItemCheckpoint", 0);
+    const itemDiff = items - marginalFamiliarsExcessTotal - get("_garboMarginalItemCheckpoint", 0);
     setProperty("_garboMarginalMeatValue", meatDiff.toFixed(0));
     setProperty("_garboMarginalItemValue", itemDiff.toFixed(0));
     if (marginalSession) {
@@ -152,10 +142,7 @@ export function trackBarfSessionStatistics(): void {
 }
 
 function printMarginalSession(): void {
-  if (
-    myInebriety() > inebrietyLimit() ||
-    myAdventures() > globalOptions.saveTurns
-  ) {
+  if (myInebriety() > inebrietyLimit() || myAdventures() > globalOptions.saveTurns) {
     return;
   }
 
@@ -178,48 +165,35 @@ function printMarginalSession(): void {
       numTrackedItemTurns >= Math.max(50, meatTurns)
     ) {
       const { items, itemDetails } = marginalSessionDiff.value(garboValue);
-      const barfItemDetails = Session.current()
-        .diff(barfSession)
-        .value(garboValue).itemDetails;
+      const barfItemDetails = Session.current().diff(barfSession).value(garboValue).itemDetails;
       const outlierItemDetails = itemDetails
         .filter(
           (detail) =>
             outlierItemList.includes(detail.item) ||
             (detail.quantity === 1 &&
               detail.value >= 5000 &&
-              barfItemDetails.some(
-                (d) => d.item === detail.item && d.quantity <= 2,
-              )),
+              barfItemDetails.some((d) => d.item === detail.item && d.quantity <= 2)),
         )
         .sort((a, b) => b.value - a.value);
       print(`Outliers:`, HIGHLIGHT);
       let outlierItems = 0;
       for (const detail of outlierItemDetails) {
         print(
-          `${detail.quantity} ${detail.item} worth ${detail.value.toFixed(
-            0,
-          )} total`,
+          `${detail.quantity} ${detail.item} worth ${detail.value.toFixed(0)} total`,
           HIGHLIGHT,
         );
         outlierItems += detail.value;
       }
-      const outlierIPA =
-        (items - marginalFamiliarsExcessTotal) / numTrackedItemTurns;
-      const IPA =
-        (items - marginalFamiliarsExcessTotal - outlierItems) /
-        numTrackedItemTurns;
+      const outlierIPA = (items - marginalFamiliarsExcessTotal) / numTrackedItemTurns;
+      const IPA = (items - marginalFamiliarsExcessTotal - outlierItems) / numTrackedItemTurns;
       const totalOutlierMPA = MPA + outlierIPA;
       const totalMPA = MPA + IPA;
       print(
-        `Marginal MPA: ${formatNumber(
-          Math.round(MPA * 100) / 100,
-        )} [raw] + ${formatNumber(
+        `Marginal MPA: ${formatNumber(Math.round(MPA * 100) / 100)} [raw] + ${formatNumber(
           Math.round(IPA * 100) / 100,
         )} [items] (${formatNumber(
           Math.round(outlierIPA * 100) / 100,
-        )} [outliers]) = ${formatNumber(
-          Math.round(totalMPA * 100) / 100,
-        )} [total] (${formatNumber(
+        )} [outliers]) = ${formatNumber(Math.round(totalMPA * 100) / 100)} [total] (${formatNumber(
           Math.round(totalOutlierMPA * 100) / 100,
         )} [w/ outliers])`,
         HIGHLIGHT,
@@ -233,9 +207,7 @@ function printMarginalSession(): void {
         "red",
       );
       print(
-        `Marginal MPA: ${formatNumber(
-          Math.round(MPA * 100) / 100,
-        )} [raw] + ${formatNumber(
+        `Marginal MPA: ${formatNumber(Math.round(MPA * 100) / 100)} [raw] + ${formatNumber(
           Math.round(IPA * 100) / 100,
         )} [items] = ${formatNumber(Math.round(totalMPA * 100) / 100)} [total]`,
         HIGHLIGHT,
@@ -269,18 +241,13 @@ export function endSession(printLog = true): void {
   resetGarboDaily();
   const message = (head: string, turns: number, meat: number, items: number) =>
     print(
-      `${head}, across ${formatNumber(
-        turns,
-      )} turns you generated ${formatNumber(
+      `${head}, across ${formatNumber(turns)} turns you generated ${formatNumber(
         meat + items,
-      )} meat, with ${formatNumber(meat)} raw meat and ${formatNumber(
-        items,
-      )} from items`,
+      )} meat, with ${formatNumber(meat)} raw meat and ${formatNumber(items)} from items`,
       HIGHLIGHT,
     );
 
-  const { meat, items, itemDetails, turns } =
-    sessionSinceStart().value(garboValue);
+  const { meat, items, itemDetails, turns } = sessionSinceStart().value(garboValue);
   const totalMeat = meat + getGarboDaily("garboResultsMeat");
   const totalItems = items + getGarboDaily("garboResultsItems");
   const totalTurns = turns + getGarboDaily("garboResultsTurns");
@@ -291,12 +258,7 @@ export function endSession(printLog = true): void {
     const winners = itemDetails.reverse().slice(0, 3);
     print(`Extreme Items:`, HIGHLIGHT);
     for (const detail of [...winners, ...losers]) {
-      print(
-        `${detail.quantity} ${detail.item} worth ${detail.value.toFixed(
-          0,
-        )} total`,
-        HIGHLIGHT,
-      );
+      print(`${detail.quantity} ${detail.item} worth ${detail.value.toFixed(0)} total`, HIGHLIGHT);
     }
   }
 
@@ -310,9 +272,7 @@ export function endSession(printLog = true): void {
 
     printMarginalSession();
     if (globalOptions.quick) {
-      print(
-        "Quick mode was enabled, results may be less accurate than normal.",
-      );
+      print("Quick mode was enabled, results may be less accurate than normal.");
     }
   }
   if (globalOptions.loginvalidwishes) {

@@ -37,9 +37,7 @@ import { baseMeat } from "../lib";
 import { digitizedMonstersRemaining } from "../turns";
 
 export function bestBjornalike(outfit: Outfit): Item | null {
-  const bjornalikes = $items`Buddy Bjorn, Crown of Thrones`.filter((item) =>
-    outfit.canEquip(item),
-  );
+  const bjornalikes = $items`Buddy Bjorn, Crown of Thrones`.filter((item) => outfit.canEquip(item));
   if (bjornalikes.length === 0) return null;
   if (bjornalikes.length === 1) return bjornalikes[0];
 
@@ -67,11 +65,7 @@ export function cleaverCheck(): void {
 
 export function useUPCs(): void {
   const UPC = $item`scratch 'n' sniff UPC sticker`;
-  if (
-    $items`scratch 'n' sniff sword, scratch 'n' sniff crossbow`.every(
-      (i) => !have(i),
-    )
-  ) {
+  if ($items`scratch 'n' sniff sword, scratch 'n' sniff crossbow`.every((i) => !have(i))) {
     visitUrl(`bedazzle.php?action=juststick&sticker=${toInt(UPC)}&pwd`);
   }
   for (let slotNumber = 1; slotNumber <= 3; slotNumber++) {
@@ -82,27 +76,21 @@ export function useUPCs(): void {
     if (sticker !== $item.none) {
       visitUrl(`bedazzle.php?action=peel&pwd&slot=${slotNumber}`);
     }
-    visitUrl(
-      `bedazzle.php?action=stick&pwd&slot=${slotNumber}&sticker=${toInt(UPC)}`,
-    );
+    visitUrl(`bedazzle.php?action=stick&pwd&slot=${slotNumber}&sticker=${toInt(UPC)}`);
   }
 }
 
 const stickerSlots = $slots`sticker1, sticker2, sticker3`;
 const UPC = $item`scratch 'n' sniff UPC sticker`;
 export function useUPCsIfNeeded({ familiar }: Outfit): void {
-  const currentWeapon =
-    25 * (familiar ? findLeprechaunMultiplier(familiar) : 0);
+  const currentWeapon = 25 * (familiar ? findLeprechaunMultiplier(familiar) : 0);
   const embezzlers = globalOptions.ascend
     ? Math.min(20, embezzlerCount() || digitizedMonstersRemaining())
     : 20;
 
-  const addedValueOfFullSword =
-    (embezzlers * ((75 - currentWeapon) * (750 + baseMeat))) / 100;
+  const addedValueOfFullSword = (embezzlers * ((75 - currentWeapon) * (750 + baseMeat))) / 100;
   if (addedValueOfFullSword > 3 * mallPrice(UPC)) {
-    const needed =
-      3 -
-      stickerSlots.filter((sticker) => equippedItem(sticker) === UPC).length;
+    const needed = 3 - stickerSlots.filter((sticker) => equippedItem(sticker) === UPC).length;
     if (needed) acquire(needed, UPC, addedValueOfFullSword / 3, false);
     useUPCs();
   }
@@ -118,15 +106,10 @@ export function latteFilled(): boolean {
     (get("_latteCopyUsed") ||
       (get("latteUnlocks").includes("cajun") &&
         get("latteUnlocks").includes("rawhide") &&
-        (numericModifier(
-          $item`latte lovers member's mug`,
-          "Familiar Weight",
-        ) !== 5 ||
-          numericModifier($item`latte lovers member's mug`, "Meat Drop") !==
-            40 ||
+        (numericModifier($item`latte lovers member's mug`, "Familiar Weight") !== 5 ||
+          numericModifier($item`latte lovers member's mug`, "Meat Drop") !== 40 ||
           (get("latteUnlocks").includes("carrot") &&
-            numericModifier($item`latte lovers member's mug`, "Item Drop") !==
-              20))))
+            numericModifier($item`latte lovers member's mug`, "Item Drop") !== 20))))
   );
 }
 
@@ -144,8 +127,8 @@ export function tryFillLatte(): boolean {
   }
 
   return (
-    numericModifier($item`latte lovers member's mug`, "Familiar Weight") ===
-      5 && numericModifier($item`latte lovers member's mug`, "Meat Drop") === 40
+    numericModifier($item`latte lovers member's mug`, "Familiar Weight") === 5 &&
+    numericModifier($item`latte lovers member's mug`, "Meat Drop") === 40
   );
 }
 

@@ -61,19 +61,13 @@ function _yachtzeeChain(): void {
     const meatToCloset = myMeat() - meatLimit;
     print("");
     print("");
-    print(
-      `We are going to closet all-but-5million meat for your safety!`,
-      "blue",
-    );
+    print(`We are going to closet all-but-5million meat for your safety!`, "blue");
     print("");
     print("");
     if (!get("_yachtzeeChainClosetedMeat")) {
       set("_yachtzeeChainClosetedMeat", meatToCloset);
     } else {
-      set(
-        "_yachtzeeChainClosetedMeat",
-        meatToCloset + get("_yachtzeeChainClosetedMeat"),
-      );
+      set("_yachtzeeChainClosetedMeat", meatToCloset + get("_yachtzeeChainClosetedMeat"));
     }
     cliExecute(`closet put ${meatToCloset} meat`);
   }
@@ -141,11 +135,7 @@ function _yachtzeeChain(): void {
       turncount = myTurncount();
       set("_stenchJellyChargeTarget", get("_stenchJellyChargeTarget", 0) - 1);
     }
-    if (
-      plantCrookweed &&
-      FloristFriar.have() &&
-      FloristFriar.Crookweed.available()
-    ) {
+    if (plantCrookweed && FloristFriar.have() && FloristFriar.Crookweed.available()) {
       FloristFriar.Crookweed.plant();
     }
     plantCrookweed = false;

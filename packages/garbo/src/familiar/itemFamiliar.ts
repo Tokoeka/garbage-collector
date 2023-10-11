@@ -1,28 +1,11 @@
-import {
-  Familiar,
-  myFamiliar,
-  runChoice,
-  useFamiliar,
-  visitUrl,
-} from "kolmafia";
-import {
-  $familiar,
-  $item,
-  findFairyMultiplier,
-  get,
-  have,
-  maxBy,
-  set,
-} from "libram";
+import { Familiar, myFamiliar, runChoice, useFamiliar, visitUrl } from "kolmafia";
+import { $familiar, $item, findFairyMultiplier, get, have, maxBy, set } from "libram";
 import { menu } from "./freeFightFamiliar";
 
 let bestNonCheerleaderFairy: Familiar;
 
 export function bestFairy(): Familiar {
-  if (
-    have($familiar`Trick-or-Treating Tot`) &&
-    have($item`li'l ninja costume`)
-  ) {
+  if (have($familiar`Trick-or-Treating Tot`) && have($item`li'l ninja costume`)) {
     return $familiar`Trick-or-Treating Tot`;
   }
 
@@ -36,12 +19,8 @@ export function bestFairy(): Familiar {
         !f.elementalDamage,
     );
 
-    const highestFairyMult = findFairyMultiplier(
-      maxBy(viableFairies, findFairyMultiplier),
-    );
-    const goodFairies = viableFairies.filter(
-      (f) => findFairyMultiplier(f) === highestFairyMult,
-    );
+    const highestFairyMult = findFairyMultiplier(maxBy(viableFairies, findFairyMultiplier));
+    const goodFairies = viableFairies.filter((f) => findFairyMultiplier(f) === highestFairyMult);
 
     if (
       have($familiar`Reagnimated Gnome`) &&

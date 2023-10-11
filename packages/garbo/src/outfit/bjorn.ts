@@ -7,12 +7,7 @@ import {
   sumNumbers,
 } from "libram";
 import { garboAverageValue, garboValue } from "../garboValue";
-import {
-  BonusEquipMode,
-  modeUseLimitedDrops,
-  modeValueOfItem,
-  modeValueOfMeat,
-} from "../lib";
+import { BonusEquipMode, modeUseLimitedDrops, modeValueOfItem, modeValueOfMeat } from "../lib";
 
 function valueBjornModifiers(
   mode: BonusEquipMode,
@@ -25,27 +20,20 @@ function valueBjornModifiers(
 
   const itemValue = modeValueOfItem(mode);
   const fairyMultiplier = findFairyMultiplier(familiar);
-  const fairyCoefficient =
-    itemValue * (fairyMultiplier + Math.sqrt(fairyMultiplier) / 2);
+  const fairyCoefficient = itemValue * (fairyMultiplier + Math.sqrt(fairyMultiplier) / 2);
 
-  return CrownOfThrones.createModifierValueFunction(
-    ["Familiar Weight", "Meat Drop", "Item Drop"],
-    {
-      "Familiar Weight": (mod) =>
-        mod * (fairyCoefficient + leprechaunCoefficient),
-      "Item Drop": (mod) => mod * itemValue,
-      "Meat Drop": (mod) => mod * meatValue,
-    },
-  );
+  return CrownOfThrones.createModifierValueFunction(["Familiar Weight", "Meat Drop", "Item Drop"], {
+    "Familiar Weight": (mod) => mod * (fairyCoefficient + leprechaunCoefficient),
+    "Item Drop": (mod) => mod * itemValue,
+    "Meat Drop": (mod) => mod * meatValue,
+  });
 }
 
 function dropsValueFunction(drops: Item[] | Map<Item, number>): number {
   return Array.isArray(drops)
     ? garboAverageValue(...drops)
-    : sum(
-        [...drops.entries()],
-        ([item, quantity]) => quantity * garboValue(item),
-      ) / sumNumbers([...drops.values()]);
+    : sum([...drops.entries()], ([item, quantity]) => quantity * garboValue(item)) /
+        sumNumbers([...drops.values()]);
 }
 
 export function valueRider(
@@ -56,9 +44,7 @@ export function valueRider(
   const valueOfDrops =
     rider.dropPredicate?.() ?? true
       ? rider.probability *
-        (typeof rider.drops === "number"
-          ? rider.drops
-          : dropsValueFunction(rider.drops))
+        (typeof rider.drops === "number" ? rider.drops : dropsValueFunction(rider.drops))
       : 0;
   const valueOfModifier = valueBjornModifiers(mode, familiar)(rider.familiar);
   return valueOfDrops + valueOfModifier;
@@ -73,9 +59,7 @@ export function chooseBjorn(
   const fairyMultiplier = findFairyMultiplier(familiar);
   const ignoreLimitedDrops = sim || !modeUseLimitedDrops(mode);
 
-  const key = `Leprechaun:${leprechaunMultiplier.toFixed(
-    2,
-  )};Fairy:${fairyMultiplier.toFixed(
+  const key = `Leprechaun:${leprechaunMultiplier.toFixed(2)};Fairy:${fairyMultiplier.toFixed(
     2,
   )};ignoreLimitedDrops:${ignoreLimitedDrops}`;
 

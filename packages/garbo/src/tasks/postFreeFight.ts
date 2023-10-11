@@ -48,8 +48,7 @@ const PostFreeFightTasks: GarboTask[] = [
   },
   {
     name: "Configure Thrall",
-    ready: () =>
-      myClass() === $class`Pastamancer` && have($skill`Bind Lasagmbie`),
+    ready: () => myClass() === $class`Pastamancer` && have($skill`Bind Lasagmbie`),
     completed: () => myThrall() === $thrall`Lasagmbie`,
     do: () => useSkill($skill`Bind Lasagmbie`),
     outfit: (): OutfitSpec => {

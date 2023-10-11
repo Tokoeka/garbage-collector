@@ -64,9 +64,7 @@ function gunSpec(outfit: Outfit) {
 
 const POINTER_RING_SPECS: (
   outfit: Outfit,
-) => Delayed<{ available: boolean; items: Item[] | OutfitSpec }>[] = (
-  outfit: Outfit,
-) => [
+) => Delayed<{ available: boolean; items: Item[] | OutfitSpec }>[] = (outfit: Outfit) => [
   {
     available: have($skill`Furious Wallop`) && myFury() > 0,
     items: $items`mafia pointer finger ring`,
@@ -90,8 +88,7 @@ const POINTER_RING_SPECS: (
   },
 ];
 
-const trueInebrietyLimit = () =>
-  inebrietyLimit() - (myFamiliar() === $familiar`Stooper` ? 1 : 0);
+const trueInebrietyLimit = () => inebrietyLimit() - (myFamiliar() === $familiar`Stooper` ? 1 : 0);
 
 export function barfOutfit(spec: OutfitSpec = {}, sim = false): Outfit {
   cleaverCheck();
@@ -113,9 +110,7 @@ export function barfOutfit(spec: OutfitSpec = {}, sim = false): Outfit {
 
   if (myInebriety() > trueInebrietyLimit()) {
     if (!outfit.equip($item`Drunkula's wineglass`)) {
-      throw new Error(
-        "We're overdrunk but have found ourself unable to equip a wineglass!",
-      );
+      throw new Error("We're overdrunk but have found ourself unable to equip a wineglass!");
     }
   } else {
     if (
@@ -140,9 +135,7 @@ export function barfOutfit(spec: OutfitSpec = {}, sim = false): Outfit {
   const bjornalike = bestBjornalike(outfit);
   if (bjornalike) {
     outfit.setBonus(bjornalike, bjornChoice.value);
-    const other = $items`Buddy Bjorn, Crown of Thrones`.filter(
-      (i) => i !== bjornalike,
-    )[0];
+    const other = $items`Buddy Bjorn, Crown of Thrones`.filter((i) => i !== bjornalike)[0];
     outfit.avoid.push(other);
 
     switch (bjornalike) {

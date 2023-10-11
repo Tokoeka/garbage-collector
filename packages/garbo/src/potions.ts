@@ -89,9 +89,7 @@ for (const effectGroup of mutuallyExclusiveList) {
 
 const INVALID_CHARS_REGEX = /[.',]/g;
 
-const wishableEffects = Effect.all().filter(
-  (e) => !e.attributes.includes("nohookah"),
-);
+const wishableEffects = Effect.all().filter((e) => !e.attributes.includes("nohookah"));
 const wishableEffectData = wishableEffects.map((e) => {
   const name = e.name.toLowerCase();
   const splitName = name.split(INVALID_CHARS_REGEX);
@@ -102,9 +100,7 @@ const invalidWishStrings = wishableEffectData
   .filter(({ name }) => name.match(INVALID_CHARS_REGEX))
   .filter(({ name, splitName }) =>
     splitName.every((s) =>
-      wishableEffectData.some(
-        (n) => n.name !== name && n.splitName.some((x) => x.includes(s)),
-      ),
+      wishableEffectData.some((n) => n.name !== name && n.splitName.some((x) => x.includes(s))),
     ),
   )
   .map(({ name }) => name);
@@ -129,9 +125,7 @@ const validPawWishes: Map<Effect, string> = new Map(
     .filter(
       ({ e, name }) =>
         !invalidWishStrings.includes(name) &&
-        (globalOptions.prefs.yachtzeechain
-          ? e !== $effect`Eau d' Clochard`
-          : true), // hardcoded heuristics
+        (globalOptions.prefs.yachtzeechain ? e !== $effect`Eau d' Clochard` : true), // hardcoded heuristics
     )
     .map(({ e, name, splitName }) => {
       if (!name.match(INVALID_CHARS_REGEX)) return [e, name];
@@ -150,10 +144,7 @@ const validPawWishes: Map<Effect, string> = new Map(
 );
 
 function retrieveUntradeablePrice(it: Item) {
-  return (
-    retrievePrice(it, availableAmount(it) + 1) -
-    autosellPrice(it) * availableAmount(it)
-  );
+  return retrievePrice(it, availableAmount(it) + 1) - autosellPrice(it) * availableAmount(it);
 }
 
 export interface PotionOptions {
@@ -239,24 +230,18 @@ export class Potion {
   }
 
   smithsness(): number {
-    return (
-      this.effectValues?.smithsness ?? getModifier("Smithsness", this.effect())
-    );
+    return this.effectValues?.smithsness ?? getModifier("Smithsness", this.effect());
   }
 
   meatDrop(): number {
     return (
       this.effectValues?.meatDrop ??
-      getModifier("Meat Drop", this.effect()) +
-        2 * (usingPurse() ? this.smithsness() : 0)
+      getModifier("Meat Drop", this.effect()) + 2 * (usingPurse() ? this.smithsness() : 0)
     );
   }
 
   familiarWeight(): number {
-    return (
-      this.effectValues?.famWeight ??
-      getModifier("Familiar Weight", this.effect())
-    );
+    return this.effectValues?.famWeight ?? getModifier("Familiar Weight", this.effect());
   }
 
   bonusMeat(): number {
@@ -323,11 +308,7 @@ export class Potion {
     );
   }
 
-  static doublingValue(
-    item: Item,
-    embezzlers: number,
-    historical = false,
-  ): number {
+  static doublingValue(item: Item, embezzlers: number, historical = false): number {
     return new Potion(item).doublingValue(embezzlers, historical);
   }
 
@@ -386,8 +367,7 @@ export class Potion {
       value: number;
     }[] = [];
     const limitFunction = limit
-      ? (quantity: number) =>
-          clamp(limit - sum(values, ({ quantity }) => quantity), 0, quantity)
+      ? (quantity: number) => clamp(limit - sum(values, ({ quantity }) => quantity), 0, quantity)
       : (quantity: number) => quantity;
 
     // compute the value of covering embezzlers
@@ -408,24 +388,17 @@ export class Potion {
       values.push({
         name: "overlap",
         quantity: limitFunction(1),
-        value: this.gross(
-          overlapEmbezzlers,
-          globalOptions.nobarf ? overlapEmbezzlers : undefined,
-        ),
+        value: this.gross(overlapEmbezzlers, globalOptions.nobarf ? overlapEmbezzlers : undefined),
       });
     }
 
     const embezzlerCoverage =
-      embezzlerQuantity +
-      (overlapEmbezzlers > 0 ? 1 : 0) * this.effectDuration();
+      embezzlerQuantity + (overlapEmbezzlers > 0 ? 1 : 0) * this.effectDuration();
 
     if (!globalOptions.nobarf) {
       // unless nobarf, compute the value of barf turns
       // if ascending, break those turns that are not fully covered by a potion into their own value
-      const remainingTurns = Math.max(
-        0,
-        totalTurns - embezzlerCoverage - startingTurns,
-      );
+      const remainingTurns = Math.max(0, totalTurns - embezzlerCoverage - startingTurns);
 
       const barfQuantity = this.usesToCover(remainingTurns, !ascending);
       values.push({
@@ -435,10 +408,7 @@ export class Potion {
       });
 
       if (ascending && this.overage(remainingTurns, barfQuantity) < 0) {
-        const ascendingTurns = Math.max(
-          0,
-          remainingTurns - barfQuantity * this.effectDuration(),
-        );
+        const ascendingTurns = Math.max(0, remainingTurns - barfQuantity * this.effectDuration());
         values.push({
           name: "ascending",
           quantity: limitFunction(1),
@@ -465,33 +435,19 @@ export class Potion {
     const effectTurns = haveEffect(this.effect());
     const result = this._use(quantity);
     // If we tried wishing but failed, no longer try this wish in the future
-    if (
-      this.potion === $item`pocket wish` &&
-      haveEffect(this.effect()) <= effectTurns
-    ) {
+    if (this.potion === $item`pocket wish` && haveEffect(this.effect()) <= effectTurns) {
       failedWishes.push(this.effect());
     }
     return result;
   }
 }
 
-function useAsValuable(
-  potion: Potion,
-  embezzlers: number,
-  embezzlersOnly: boolean,
-): number {
+function useAsValuable(potion: Potion, embezzlers: number, embezzlersOnly: boolean): number {
   const value = potion.value(embezzlers);
   const price = potion.price(false);
   const amountsAcquired = value.map((value) =>
     (!embezzlersOnly || value.name === "embezzler") && value.value - price > 0
-      ? potion.acquire(
-          value.quantity,
-          potion.potion,
-          value.value,
-          false,
-          undefined,
-          true,
-        )
+      ? potion.acquire(value.quantity, potion.potion, value.value, false, undefined, true)
       : 0,
   );
 
@@ -500,9 +456,7 @@ function useAsValuable(
     const effect = potion.effect();
     if (isSong(effect) && !have(effect)) {
       for (const song of getActiveSongs()) {
-        const slot = Mood.defaultOptions.songSlots.find((slot) =>
-          slot.includes(song),
-        );
+        const slot = Mood.defaultOptions.songSlots.find((slot) => slot.includes(song));
         if (!slot || slot.includes(effect)) {
           cliExecute(`shrug ${song}`);
         }
@@ -523,30 +477,19 @@ export const rufusPotion = new Potion($item`closed-circuit pay phone`, {
     if (!have($item`closed-circuit pay phone`)) return Infinity;
 
     const target = ClosedCircuitPayphone.rufusTarget();
-    const haveItemQuest =
-      get("rufusQuestType") === "items" && target instanceof Item;
+    const haveItemQuest = get("rufusQuestType") === "items" && target instanceof Item;
     const haveArtifact =
-      get("rufusQuestType") === "artifact" &&
-      target instanceof Item &&
-      have(target);
+      get("rufusQuestType") === "artifact" && target instanceof Item && have(target);
 
     // We will only buff up if we can complete the item quest
-    if (
-      !(
-        !target ||
-        haveItemQuest ||
-        haveArtifact ||
-        have($item`Rufus's shadow lodestone`)
-      )
-    ) {
+    if (!(!target || haveItemQuest || haveArtifact || have($item`Rufus's shadow lodestone`))) {
       return Infinity;
     }
 
     // If we are overdrunk, we will need to be able to grab the NC (with a wineglass)
     if (
       myInebriety() > inebrietyLimit() &&
-      (!have($item`Drunkula's wineglass`) ||
-        !canEquip($item`Drunkula's wineglass`))
+      (!have($item`Drunkula's wineglass`) || !canEquip($item`Drunkula's wineglass`))
     ) {
       return Infinity;
     }
@@ -555,9 +498,7 @@ export const rufusPotion = new Potion($item`closed-circuit pay phone`, {
     const shadowItems = $items`shadow brick, shadow ice, shadow sinew, shadow glass, shadow stick, shadow skin, shadow flame, shadow fluid, shadow sausage, shadow bread, shadow venom, shadow nectar`;
     const averagePrice =
       sum(shadowItems, (it) =>
-        historical && historicalAge(it) < 14
-          ? historicalPrice(it)
-          : mallPrice(it),
+        historical && historicalAge(it) < 14 ? historicalPrice(it) : mallPrice(it),
       ) / shadowItems.length;
 
     return 3 * averagePrice;
@@ -627,9 +568,7 @@ export const pawPotions = Array.from(validPawWishes.keys())
         effect,
         canDouble: false,
         price: () =>
-          !CursedMonkeyPaw.have() ||
-          CursedMonkeyPaw.wishes() === 0 ||
-          failedWishes.includes(effect)
+          !CursedMonkeyPaw.have() || CursedMonkeyPaw.wishes() === 0 || failedWishes.includes(effect)
             ? 2 ** 100 // Something large but non-infinite for sorting reasons
             : 0,
         duration: 30,
@@ -656,10 +595,7 @@ export const pawPotions = Array.from(validPawWishes.keys())
 
 export const farmingPotions = [
   ...Item.all()
-    .filter(
-      (item) =>
-        item.tradeable && !banned.includes(item) && itemType(item) === "potion",
-    )
+    .filter((item) => item.tradeable && !banned.includes(item) && itemType(item) === "potion")
     .map((item) => new Potion(item))
     .filter((potion) => potion.bonusMeat() > 0),
   ...wishPotions,
@@ -669,10 +605,7 @@ export const farmingPotions = [
 
 export function doublingPotions(embezzlers: number): Potion[] {
   return farmingPotions
-    .filter(
-      (potion) =>
-        potion.doubleDuration().gross(embezzlers) / potion.price(true) > 0.5,
-    )
+    .filter((potion) => potion.doubleDuration().gross(embezzlers) / potion.price(true) > 0.5)
     .map((potion) => {
       return { potion: potion, value: potion.doublingValue(embezzlers) };
     })
@@ -680,9 +613,7 @@ export function doublingPotions(embezzlers: number): Potion[] {
     .map((pair) => pair.potion);
 }
 
-export function usePawWishes(
-  singleUseValuation: (potion: Potion) => number,
-): void {
+export function usePawWishes(singleUseValuation: (potion: Potion) => number): void {
   while (CursedMonkeyPaw.wishes() > 0) {
     // Sort the paw potions by the profits of a single wish, then use the best one
     const madeValidWish = pawPotions
@@ -707,30 +638,14 @@ export function potionSetup(embezzlersOnly: boolean): void {
   withLocation($location.none, () => {
     const embezzlers = embezzlerCount();
 
-    if (
-      have($item`Eight Days a Week Pill Keeper`) &&
-      !get("_freePillKeeperUsed")
-    ) {
+    if (have($item`Eight Days a Week Pill Keeper`) && !get("_freePillKeeperUsed")) {
       const possibleDoublingPotions = doublingPotions(embezzlers);
       const bestPotion =
-        possibleDoublingPotions.length > 0
-          ? possibleDoublingPotions[0]
-          : undefined;
-      if (
-        bestPotion &&
-        bestPotion.doubleDuration().net(embezzlers) >
-          pillkeeperOpportunityCost()
-      ) {
-        print(
-          `Determined that ${bestPotion.potion} was the best potion to double`,
-          HIGHLIGHT,
-        );
+        possibleDoublingPotions.length > 0 ? possibleDoublingPotions[0] : undefined;
+      if (bestPotion && bestPotion.doubleDuration().net(embezzlers) > pillkeeperOpportunityCost()) {
+        print(`Determined that ${bestPotion.potion} was the best potion to double`, HIGHLIGHT);
         cliExecute("pillkeeper extend");
-        bestPotion.acquire(
-          1,
-          bestPotion.potion,
-          bestPotion.doubleDuration().gross(embezzlers),
-        );
+        bestPotion.acquire(1, bestPotion.potion, bestPotion.doubleDuration().gross(embezzlers));
         bestPotion.use(1);
       }
     }
@@ -739,9 +654,7 @@ export function potionSetup(embezzlersOnly: boolean): void {
     const testPotions = farmingPotions.filter(
       (potion) => potion.gross(embezzlers) / potion.price(true) > 0.5,
     );
-    const nonWishTestPotions = testPotions.filter(
-      (potion) => potion.potion !== $item`pocket wish`,
-    );
+    const nonWishTestPotions = testPotions.filter((potion) => potion.potion !== $item`pocket wish`);
     nonWishTestPotions.sort((a, b) => b.net(embezzlers) - a.net(embezzlers));
 
     const excludedEffects = new Set<Effect>();
@@ -753,10 +666,7 @@ export function potionSetup(embezzlersOnly: boolean): void {
 
     for (const potion of nonWishTestPotions) {
       const effect = potion.effect();
-      if (
-        !excludedEffects.has(effect) &&
-        useAsValuable(potion, embezzlers, embezzlersOnly) > 0
-      ) {
+      if (!excludedEffects.has(effect) && useAsValuable(potion, embezzlers, embezzlersOnly) > 0) {
         for (const excluded of mutuallyExclusive.get(effect) ?? []) {
           excludedEffects.add(excluded);
         }
@@ -766,14 +676,11 @@ export function potionSetup(embezzlersOnly: boolean): void {
     usePawWishes((potion) => {
       const value = potion.value(embezzlers);
       return value.length > 0
-        ? maxBy(value, ({ quantity, value }) => (quantity > 0 ? value : 0))
-            .value
+        ? maxBy(value, ({ quantity, value }) => (quantity > 0 ? value : 0)).value
         : 0;
     });
 
-    const wishTestPotions = testPotions.filter(
-      (potion) => potion.potion === $item`pocket wish`,
-    );
+    const wishTestPotions = testPotions.filter((potion) => potion.potion === $item`pocket wish`);
     wishTestPotions.sort((a, b) => b.net(embezzlers) - a.net(embezzlers));
 
     for (const potion of wishTestPotions) {
@@ -802,8 +709,7 @@ export function bathroomFinance(embezzlers: number): void {
   if (have($effect`Buy!  Sell!  Buy!  Sell!`)) return;
 
   // Average meat % for embezzlers is sum of arithmetic series, 2 * sum(1 -> embezzlers)
-  const averageEmbezzlerGross =
-    ((baseMeat + 750) * 2 * (embezzlers + 1)) / 2 / 100;
+  const averageEmbezzlerGross = ((baseMeat + 750) * 2 * (embezzlers + 1)) / 2 / 100;
   const embezzlerGross = averageEmbezzlerGross * embezzlers;
   const tourists = 100 - embezzlers;
 
@@ -874,10 +780,7 @@ class VariableMeatPotion {
   }
 
   getOptimalNumberToUse(yachtzees: number, embezzlers: number): number {
-    const barfTurns = Math.max(
-      0,
-      estimatedGarboTurns() - yachtzees - embezzlers,
-    );
+    const barfTurns = Math.max(0, estimatedGarboTurns() - yachtzees - embezzlers);
 
     const potionAmountsToConsider: number[] = [];
     const considerSoftcap = [0, this.softcap];
@@ -885,8 +788,7 @@ class VariableMeatPotion {
     for (const fn of [Math.floor, Math.ceil]) {
       for (const sc of considerSoftcap) {
         for (const em of considerEmbezzlers) {
-          const considerBarfTurns =
-            em === embezzlers && barfTurns > 0 ? [0, barfTurns] : [0];
+          const considerBarfTurns = em === embezzlers && barfTurns > 0 ? [0, barfTurns] : [0];
           for (const bt of considerBarfTurns) {
             const potionAmount = fn((yachtzees + em + bt + sc) / this.duration);
             if (!potionAmountsToConsider.includes(potionAmount)) {
@@ -905,15 +807,13 @@ class VariableMeatPotion {
 
     if (bestOption.value > 0) {
       print(
-        `Expected to profit ${bestOption.value.toFixed(2)} from ${
-          bestOption.quantity
-        } ${this.potion.plural}`,
+        `Expected to profit ${bestOption.value.toFixed(2)} from ${bestOption.quantity} ${
+          this.potion.plural
+        }`,
         "blue",
       );
       const ascendingOverlap =
-        globalOptions.ascend || globalOptions.nobarf
-          ? 0
-          : this.softcap / this.duration;
+        globalOptions.ascend || globalOptions.nobarf ? 0 : this.softcap / this.duration;
       const potionsToUse =
         bestOption.quantity +
         ascendingOverlap -
@@ -924,12 +824,7 @@ class VariableMeatPotion {
     return 0;
   }
 
-  valueNPotions(
-    n: number,
-    yachtzees: number,
-    embezzlers: number,
-    barfTurns: number,
-  ): number {
+  valueNPotions(n: number, yachtzees: number, embezzlers: number, barfTurns: number): number {
     const yachtzeeValue = 2000;
     const embezzlerValue = baseMeat + 750;
     const barfValue = (baseMeat * turnsToNC) / 30;
@@ -951,8 +846,7 @@ class VariableMeatPotion {
       totalValue +=
         (value *
           (cappedTurns * this.cappedMeatBonus +
-            triangleNumber(decayDuration, decayDuration - decayTurns) *
-              this.meatBonusPerTurn)) /
+            triangleNumber(decayDuration, decayDuration - decayTurns) * this.meatBonusPerTurn)) /
         100;
       cappedDuration -= cappedTurns;
       decayDuration -= decayTurns;
@@ -963,10 +857,7 @@ class VariableMeatPotion {
   }
 }
 
-export function variableMeatPotionsSetup(
-  yachtzees: number,
-  embezzlers: number,
-): void {
+export function variableMeatPotionsSetup(yachtzees: number, embezzlers: number): void {
   const potions = [
     new VariableMeatPotion($item`love song of sugary cuteness`, 20, 2),
     new VariableMeatPotion($item`pulled yellow taffy`, 50, 2),
@@ -984,9 +875,7 @@ export function variableMeatPotionsSetup(
 
   for (const potion of potions) {
     const effect = effectModifier(potion.potion, "Effect");
-    const n = excludedEffects.has(effect)
-      ? 0
-      : potion.getOptimalNumberToUse(yachtzees, embezzlers);
+    const n = excludedEffects.has(effect) ? 0 : potion.getOptimalNumberToUse(yachtzees, embezzlers);
     if (n > 0) {
       potion.use(n);
       for (const excluded of mutuallyExclusive.get(effect) ?? []) {
