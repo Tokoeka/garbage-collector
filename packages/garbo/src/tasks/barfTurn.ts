@@ -36,10 +36,10 @@ import {
 	have,
 	SourceTerminal,
 } from "libram";
-import { garboAdventure, garboAdventureAuto, Macro, withMacro } from "./combat";
-import { globalOptions } from "./config";
-import { computeDiet, consumeDiet } from "./diet";
-import { deliverThesisIfAble } from "./fights";
+import { garboAdventure, garboAdventureAuto, Macro, withMacro } from "../combat";
+import { globalOptions } from "../config";
+import { computeDiet, consumeDiet } from "../diet";
+import { deliverThesisIfAble } from "../fights";
 import {
 	eventLog,
 	howManySausagesCouldIEat,
@@ -51,8 +51,8 @@ import {
 	setChoice,
 	sober,
 	VPE,
-} from "./lib";
-import { meatMood } from "./mood";
+} from "../lib";
+import { meatMood } from "../mood";
 import {
 	barfOutfit,
 	embezzlerOutfit,
@@ -60,13 +60,13 @@ import {
 	freeFightOutfit,
 	tryFillLatte,
 	waterBreathingEquipment,
-} from "./outfit";
-import postCombatActions from "./post";
-import { trackBarfSessionStatistics } from "./session";
-import { completeBarfQuest } from "./tasks/daily";
-import { digitizedMonstersRemaining, estimatedGarboTurns } from "./turns";
+} from "../outfit";
+import postCombatActions from "../post";
+import { trackBarfSessionStatistics } from "../session";
+import { completeBarfQuest } from "./daily";
+import { digitizedMonstersRemaining, estimatedGarboTurns } from "../turns";
 import { WanderOptions } from "./libgarbo";
-import { wanderer } from "./garboWanderer";
+import { wanderer } from "../garboWanderer";
 
 const embezzler = $monster`Knob Goblin Embezzler`;
 
