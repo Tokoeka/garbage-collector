@@ -1,4 +1,8 @@
-import { canOpenRedPresent, pocketProfessorLectures, timeToMeatify } from "./lib";
+import {
+  canOpenRedPresent,
+  pocketProfessorLectures,
+  timeToMeatify,
+} from "./lib";
 import { meatFamiliar, setBestLeprechaunAsMeatFamiliar } from "./meatFamiliar";
 import { barfFamiliar } from "./barfFamiliar";
 import { freeFightFamiliar } from "./freeFightFamiliar";

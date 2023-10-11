@@ -42,25 +42,32 @@ import { Quest } from "grimoire-kolmafia";
 
 function drivebyValue(): number {
   const embezzlers = embezzlerCount();
-  const tourists = ((estimatedGarboTurns() - embezzlers) * turnsToNC) / (turnsToNC + 1);
+  const tourists =
+    ((estimatedGarboTurns() - embezzlers) * turnsToNC) / (turnsToNC + 1);
   const marginalRoboWeight = 50;
   const meatPercentDelta =
     Math.sqrt(220 * 2 * marginalRoboWeight) -
     Math.sqrt(220 * 2 * marginalRoboWeight) +
     2 * marginalRoboWeight;
-  return (meatPercentDelta / 100) * ((750 + baseMeat) * embezzlers + baseMeat * tourists);
+  return (
+    (meatPercentDelta / 100) *
+    ((750 + baseMeat) * embezzlers + baseMeat * tourists)
+  );
 }
 
 function entendreValue(): number {
   const embezzlers = embezzlerCount();
-  const tourists = ((estimatedGarboTurns() - embezzlers) * turnsToNC) / (turnsToNC + 1);
+  const tourists =
+    ((estimatedGarboTurns() - embezzlers) * turnsToNC) / (turnsToNC + 1);
   const marginalRoboWeight = 50;
-  const itemPercent = Math.sqrt(55 * marginalRoboWeight) + marginalRoboWeight - 3;
+  const itemPercent =
+    Math.sqrt(55 * marginalRoboWeight) + marginalRoboWeight - 3;
   const garbageBagsDropRate = 0.15 * 3; // 3 bags each with a 15% drop chance
   const meatStackDropRate = 0.3 * 4; // 4 stacks each with a 30% drop chance
   return (
     (itemPercent / 100) *
-    (meatStackDropRate * embezzlers + garbageBagsDropRate * tourists * garbageTouristRatio)
+    (meatStackDropRate * embezzlers +
+      garbageBagsDropRate * tourists * garbageTouristRatio)
   );
 }
 
@@ -84,8 +91,12 @@ export function prepRobortender(): void {
     },
     "Single entendre": { priceCap: entendreValue(), mandatory: false },
   };
-  for (const [drinkName, { priceCap, mandatory }] of Object.entries(roboDrinks)) {
-    if (get("_roboDrinks").toLowerCase().includes(drinkName.toLowerCase())) continue;
+  for (const [drinkName, { priceCap, mandatory }] of Object.entries(
+    roboDrinks,
+  )) {
+    if (get("_roboDrinks").toLowerCase().includes(drinkName.toLowerCase())) {
+      continue;
+    }
     useFamiliar($familiar`Robortender`);
     const drink = toItem(drinkName);
     if (retrievePrice(drink) > priceCap) {
@@ -114,14 +125,19 @@ const DailyFamiliarTasks: GarboTask[] = [
   {
     name: "Prepare Shorter-Order Cook",
     ready: () => have($familiar`Shorter-Order Cook`) && have($item`blue plate`),
-    completed: () => familiarEquippedEquipment($familiar`Shorter-Order Cook`) === $item`blue plate`,
+    completed: () =>
+      familiarEquippedEquipment($familiar`Shorter-Order Cook`) ===
+      $item`blue plate`,
     do: () => equip($familiar`Shorter-Order Cook`, $item`blue plate`),
+    spendsTurn: false,
   },
   {
     name: "Prepare Robortender",
     ready: () => have($familiar`Robortender`),
-    completed: () => get("_roboDrinks").toLowerCase().includes("drive-by shooting"),
+    completed: () =>
+      get("_roboDrinks").toLowerCase().includes("drive-by shooting"),
     do: prepRobortender,
+    spendsTurn: false,
   },
   {
     name: "Acquire amulet coin",
@@ -130,13 +146,18 @@ const DailyFamiliarTasks: GarboTask[] = [
     do: () => use($item`box of Familiar Jacks`),
     acquire: [{ item: $item`box of Familiar Jacks` }],
     outfit: { familiar: $familiar`Cornbeefadon` },
+    spendsTurn: false,
   },
   {
     // TODO: Consider other familiars?
     name: "Equip tiny stillsuit",
-    ready: () => itemAmount($item`tiny stillsuit`) > 0 && have($familiar`Cornbeefadon`),
-    completed: () => familiarEquippedEquipment($familiar`Cornbeefadon`) === $item`tiny stillsuit`,
+    ready: () =>
+      itemAmount($item`tiny stillsuit`) > 0 && have($familiar`Cornbeefadon`),
+    completed: () =>
+      familiarEquippedEquipment($familiar`Cornbeefadon`) ===
+      $item`tiny stillsuit`,
     do: () => equip($familiar`Cornbeefadon`, $item`tiny stillsuit`),
+    spendsTurn: false,
   },
   {
     name: "Acquire box of old Crimbo decorations",
@@ -146,6 +167,7 @@ const DailyFamiliarTasks: GarboTask[] = [
       useFamiliar($familiar`Crimbo Shrub`);
     },
     outfit: { familiar: $familiar`Crimbo Shrub` },
+    spendsTurn: false,
   },
   {
     name: "Decorate Crimbo Shrub",
@@ -159,6 +181,7 @@ const DailyFamiliarTasks: GarboTask[] = [
         "Red Ray",
       ),
     outfit: { familiar: $familiar`Crimbo Shrub` },
+    spendsTurn: false,
   },
   {
     name: "Mummery Meat",
@@ -166,17 +189,21 @@ const DailyFamiliarTasks: GarboTask[] = [
     completed: () => get("_mummeryMods").includes("Meat Drop"),
     do: () => cliExecute("mummery meat"),
     outfit: { familiar: meatFamiliar() },
+    spendsTurn: false,
   },
   {
     name: "Mummery Item",
-    ready: () => have($item`mumming trunk`) && have($familiar`Trick-or-Treating Tot`),
+    ready: () =>
+      have($item`mumming trunk`) && have($familiar`Trick-or-Treating Tot`),
     completed: () => get("_mummeryMods").includes("Item Drop"),
     do: () => cliExecute("mummery item"),
     outfit: { familiar: $familiar`Trick-or-Treating Tot` },
+    spendsTurn: false,
   },
   {
     name: "Moveable feast",
-    ready: () => have($item`moveable feast`) || globalOptions.prefs.stashClan !== "none",
+    ready: () =>
+      have($item`moveable feast`) || globalOptions.prefs.stashClan !== "none",
     completed: () => get("_feastUsed") > 0,
     do: (): void => {
       withStash($items`moveable feast`, () => {
@@ -188,6 +215,7 @@ const DailyFamiliarTasks: GarboTask[] = [
         }
       });
     },
+    spendsTurn: false,
   },
 ];
 

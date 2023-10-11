@@ -54,29 +54,43 @@ import handleWorkshed from "./workshed";
 import { wanderer } from "../garboWanderer";
 
 function closetStuff(): void {
-  for (const i of $items`bowling ball, funky junk key`) putCloset(itemAmount(i), i);
+  for (const i of $items`bowling ball, funky junk key`) {
+    putCloset(itemAmount(i), i);
+  }
 }
 
 function floristFriars(): void {
-  if (!FloristFriar.have() || myLocation() !== $location`Barf Mountain` || FloristFriar.isFull()) {
+  if (
+    !FloristFriar.have() ||
+    myLocation() !== $location`Barf Mountain` ||
+    FloristFriar.isFull()
+  ) {
     return;
   }
-  [FloristFriar.StealingMagnolia, FloristFriar.AloeGuvnor, FloristFriar.PitcherPlant].forEach(
-    (flower) => flower.plant(),
-  );
+  [
+    FloristFriar.StealingMagnolia,
+    FloristFriar.AloeGuvnor,
+    FloristFriar.PitcherPlant,
+  ].forEach((flower) => flower.plant());
 }
 
 function fillPantsgivingFullness(): void {
   if (
     getRemainingStomach() > 0 &&
-    (!globalOptions.prefs.yachtzeechain || get("_garboYachtzeeChainCompleted", false))
+    (!globalOptions.prefs.yachtzeechain ||
+      get("_garboYachtzeeChainCompleted", false))
   ) {
     consumeDiet(computeDiet().pantsgiving(), "PANTSGIVING");
   }
 }
 
 function fillSweatyLiver(): void {
-  if (globalOptions.prefs.yachtzeechain && !get("_garboYachtzeeChainCompleted", false)) return;
+  if (
+    globalOptions.prefs.yachtzeechain &&
+    !get("_garboYachtzeeChainCompleted", false)
+  ) {
+    return;
+  }
 
   const castsWanted = 3 - get("_sweatOutSomeBoozeUsed");
   if (castsWanted <= 0 || !have($item`designer sweatpants`)) return;
@@ -110,8 +124,12 @@ function skipJuneCleaverChoices(): void {
     juneCleaverSkipChoices = [...JuneCleaver.choices]
       .sort(
         (a, b) =>
-          valueJuneCleaverOption(juneCleaverChoiceValues[a][bestJuneCleaverOption(a)]) -
-          valueJuneCleaverOption(juneCleaverChoiceValues[b][bestJuneCleaverOption(b)]),
+          valueJuneCleaverOption(
+            juneCleaverChoiceValues[a][bestJuneCleaverOption(a)],
+          ) -
+          valueJuneCleaverOption(
+            juneCleaverChoiceValues[b][bestJuneCleaverOption(b)],
+          ),
       )
       .splice(0, 3);
   }
@@ -127,13 +145,18 @@ function skipJuneCleaverChoices(): void {
   }
 }
 function juneCleave(): void {
-  if (get("_juneCleaverFightsLeft") <= 0 && teleportEffects.every((e) => !have(e))) {
+  if (
+    get("_juneCleaverFightsLeft") <= 0 &&
+    teleportEffects.every((e) => !have(e))
+  ) {
     equip($slot`weapon`, $item`June cleaver`);
     skipJuneCleaverChoices();
     withProperty("recoveryScript", "", () => {
       garboAdventure(
         $location`Noob Cave`,
-        Macro.abortWithMsg(`Expected June Cleaver non-combat but ended up in combat.`),
+        Macro.abortWithMsg(
+          `Expected June Cleaver non-combat but ended up in combat.`,
+        ),
       );
       if (["Poetic Justice", "Lost and Found"].includes(get("lastEncounter"))) {
         uneffect($effect`Beaten Up`);
@@ -181,7 +204,10 @@ function funguySpores() {
 function refillCinch() {
   if (!CinchoDeMayo.have()) return;
 
-  if (get("_garboYachtzeeChainCompleted") || !globalOptions.prefs.yachtzeechain) {
+  if (
+    get("_garboYachtzeeChainCompleted") ||
+    !globalOptions.prefs.yachtzeechain
+  ) {
     const missingCinch = () => {
       return 100 - CinchoDeMayo.currentCinch();
     };

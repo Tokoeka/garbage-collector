@@ -47,7 +47,8 @@ export function timeToMeatify(): boolean {
   const nextVoidMonster =
     have($item`cursed magnifying glass`) &&
     get("_voidFreeFights") < 5 &&
-    globalOptions.prefs.valueOfFreeFight / 13 > baseMeat * (usingLatte ? 0.75 : 0.6)
+    globalOptions.prefs.valueOfFreeFight / 13 >
+      baseMeat * (usingLatte ? 0.75 : 0.6)
       ? -get("cursedMagnifyingGlassCount") % 13
       : Infinity;
 
@@ -56,10 +57,16 @@ export function timeToMeatify(): boolean {
   // (2) We meatify if Grey Goose is sufficiently heavy and we don't have another free wanderer in our remaining turns
 
   const freeFightNow =
-    get("questPAGhost") !== "unstarted" || nextVoteMonster === 0 || nextVoidMonster === 0;
+    get("questPAGhost") !== "unstarted" ||
+    nextVoteMonster === 0 ||
+    nextVoidMonster === 0;
   const delay = Math.min(
     nextProtonicGhost,
-    nextVoteMonster === 0 ? (get("_voteFreeFights") < 2 ? 11 : Infinity) : nextVoteMonster,
+    nextVoteMonster === 0
+      ? get("_voteFreeFights") < 2
+        ? 11
+        : Infinity
+      : nextVoteMonster,
     nextVoidMonster === 0 ? 13 : nextVoidMonster,
   );
 
@@ -71,7 +78,14 @@ export function timeToMeatify(): boolean {
 }
 
 export function pocketProfessorLectures(): number {
-  return 2 + Math.ceil(Math.sqrt(familiarWeight($familiar`Pocket Professor`) + weightAdjustment()));
+  return (
+    2 +
+    Math.ceil(
+      Math.sqrt(
+        familiarWeight($familiar`Pocket Professor`) + weightAdjustment(),
+      ),
+    )
+  );
 }
 
 export function canOpenRedPresent(): boolean {

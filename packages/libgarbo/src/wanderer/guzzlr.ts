@@ -1,4 +1,11 @@
-import { buy, craftType, Location, mallPrice, print, retrieveItem } from "kolmafia";
+import {
+  buy,
+  craftType,
+  Location,
+  mallPrice,
+  print,
+  retrieveItem,
+} from "kolmafia";
 import { $item, freeCrafts, get, Guzzlr, have } from "libram";
 import {
   canAdventureOrUnlock,
@@ -8,7 +15,10 @@ import {
   wandererTurnsAvailableToday,
 } from "./lib";
 
-function considerAbandon(options: WandererFactoryOptions, locationSkiplist: Location[]) {
+function considerAbandon(
+  options: WandererFactoryOptions,
+  locationSkiplist: Location[],
+) {
   const location = Guzzlr.getLocation();
   const remaningTurns = Math.ceil(
     (100 - get("guzzlrDeliveryProgress")) / (10 - get("_guzzlrDeliveries")),
@@ -24,14 +34,18 @@ function considerAbandon(options: WandererFactoryOptions, locationSkiplist: Loca
     (!location || // if mafia failed to track the location correctly
       locationSkiplist.includes(location) ||
       !canAdventureOrUnlock(location) || // or the zone is marked as "generally cannot adv"
-      (options.ascend && wandererTurnsAvailableToday(options, location) < remaningTurns)) // or ascending and not enough turns to finish
+      (options.ascend &&
+        wandererTurnsAvailableToday(options, location) < remaningTurns)) // or ascending and not enough turns to finish
   ) {
     print("Abandoning...");
     Guzzlr.abandon();
   }
 }
 
-function acceptGuzzlrQuest(options: WandererFactoryOptions, locationSkiplist: Location[]) {
+function acceptGuzzlrQuest(
+  options: WandererFactoryOptions,
+  locationSkiplist: Location[],
+) {
   if (Guzzlr.isQuestActive()) considerAbandon(options, locationSkiplist);
   while (!Guzzlr.isQuestActive()) {
     print("Picking a guzzlr quest");
@@ -40,7 +54,10 @@ function acceptGuzzlrQuest(options: WandererFactoryOptions, locationSkiplist: Lo
       !(options.prioritizeCappingGuzzlr && Guzzlr.haveFullPlatinumBonus())
     ) {
       Guzzlr.acceptPlatinum();
-    } else if (Guzzlr.canGold() && (Guzzlr.haveFullBronzeBonus() || !Guzzlr.haveFullGoldBonus())) {
+    } else if (
+      Guzzlr.canGold() &&
+      (Guzzlr.haveFullBronzeBonus() || !Guzzlr.haveFullGoldBonus())
+    ) {
       // if gold is not maxed, do that first since they are limited per day
       Guzzlr.acceptGold();
     } else {
@@ -51,7 +68,10 @@ function acceptGuzzlrQuest(options: WandererFactoryOptions, locationSkiplist: Lo
   }
 }
 
-function guzzlrValue(buckValue: number, tier: "bronze" | "gold" | "platinum" | null) {
+function guzzlrValue(
+  buckValue: number,
+  tier: "bronze" | "gold" | "platinum" | null,
+) {
   const progressPerTurn = 100 / (10 - get("_guzzlrDeliveries"));
 
   switch (tier) {
@@ -77,7 +97,9 @@ export function guzzlrFactory(
     const location = Guzzlr.getLocation();
     if (location !== null) {
       const guzzlrBooze =
-        Guzzlr.getTier() === "platinum" ? Guzzlr.getCheapestPlatinumCocktail() : Guzzlr.getBooze();
+        Guzzlr.getTier() === "platinum"
+          ? Guzzlr.getCheapestPlatinumCocktail()
+          : Guzzlr.getBooze();
       return guzzlrBooze
         ? [
             new WandererTarget(
@@ -91,11 +113,19 @@ export function guzzlrFactory(
                 }
 
                 if (!have(guzzlrBooze)) {
-                  const fancy = guzzlrBooze && craftType(guzzlrBooze).includes("fancy");
-                  if (guzzlrBooze && (!fancy || (fancy && freeCrafts("booze") > 0))) {
+                  const fancy =
+                    guzzlrBooze && craftType(guzzlrBooze).includes("fancy");
+                  if (
+                    guzzlrBooze &&
+                    (!fancy || (fancy && freeCrafts("booze") > 0))
+                  ) {
                     retrieveItem(guzzlrBooze);
                   } else if (guzzlrBooze) {
-                    buy(1, guzzlrBooze, guzzlrValue(buckValue, Guzzlr.getTier()));
+                    buy(
+                      1,
+                      guzzlrBooze,
+                      guzzlrValue(buckValue, Guzzlr.getTier()),
+                    );
                   }
                 }
                 return have(guzzlrBooze);

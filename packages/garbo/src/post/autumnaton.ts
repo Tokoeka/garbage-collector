@@ -1,10 +1,18 @@
 import { garboAverageValue, garboValue } from "../garboValue";
 import { estimatedGarboTurns, estimatedTurnsTomorrow } from "../turns";
-import { appearanceRates, availableAmount, getMonsters, itemDropsArray, Location } from "kolmafia";
+import {
+  appearanceRates,
+  availableAmount,
+  getMonsters,
+  itemDropsArray,
+  Location,
+} from "kolmafia";
 import { $items, AutumnAton, get, maxBy, sum } from "libram";
 import { globalOptions } from "../config";
 
-export default function bestAutumnatonLocation(locations: Location[]): Location {
+export default function bestAutumnatonLocation(
+  locations: Location[],
+): Location {
   return maxBy(mostValuableUpgrade(locations), averageAutumnatonValue);
 }
 
@@ -16,7 +24,8 @@ function averageAutumnatonValue(
   const badAttributes = ["LUCKY", "ULTRARARE", "BOSS"];
   const rates = appearanceRates(location);
   const monsters = getMonsters(location).filter(
-    (m) => !badAttributes.some((s) => m.attributes.includes(s)) && rates[m.name] > 0,
+    (m) =>
+      !badAttributes.some((s) => m.attributes.includes(s)) && rates[m.name] > 0,
   );
 
   if (monsters.length === 0) {
@@ -29,9 +38,13 @@ function averageAutumnatonValue(
       .flat()
       .map(({ rate, type, drop }) => ({
         value: !["c", "0"].includes(type) ? garboValue(drop, true) : 0,
-        preAcuityExpectation: ["c", "0", ""].includes(type) ? (2 * rate) / 100 : 0,
+        preAcuityExpectation: ["c", "0", ""].includes(type)
+          ? (2 * rate) / 100
+          : 0,
         postAcuityExpectation:
-          rate >= acuityCutoff && ["c", "0", ""].includes(type) ? (8 * rate) / 100 : 0,
+          rate >= acuityCutoff && ["c", "0", ""].includes(type)
+            ? (8 * rate) / 100
+            : 0,
       }));
     const overallExpectedDropQuantity = sum(
       validDrops,
@@ -52,7 +65,10 @@ function averageAutumnatonValue(
   }
 }
 
-function seasonalItemValue(location: Location, seasonalOverride?: number): number {
+function seasonalItemValue(
+  location: Location,
+  seasonalOverride?: number,
+): number {
   // Find the value of the drops based on zone difficulty/type
   const autumnItems = $items`autumn leaf, AutumnFest ale, autumn breeze, autumn dollar, autumn years wisdom`;
   const avgValueOfRandomAutumnItem = garboAverageValue(...autumnItems);
@@ -84,7 +100,9 @@ function expectedRemainingExpeditions(legs = AutumnAton.legs()): number {
   const quests = get("_autumnatonQuests");
   const legOffsetFactor = 11 * Math.max(quests - legs - 1, 0);
   return Math.floor(
-    Math.sqrt(quests ** 2 + (2 * (availableAutumnatonTurns - legOffsetFactor)) / 11),
+    Math.sqrt(
+      quests ** 2 + (2 * (availableAutumnatonTurns - legOffsetFactor)) / 11,
+    ),
   );
 }
 
@@ -140,7 +158,10 @@ function profitFromExtraAutumnItem(
   );
 }
 
-function makeUpgradeValuator(fullLocations: Location[], currentBestLocation: Location) {
+function makeUpgradeValuator(
+  fullLocations: Location[],
+  currentBestLocation: Location,
+) {
   return function (upgrade: AutumnAton.Upgrade) {
     const upgradeLocations = fullLocations.filter(
       (location) => AutumnAton.getUniques(location)?.upgrade === upgrade,
@@ -150,13 +171,18 @@ function makeUpgradeValuator(fullLocations: Location[], currentBestLocation: Loc
       return { upgrade, profit: 0 };
     }
 
-    const bestLocationContainingUpgrade = maxBy(upgradeLocations, averageAutumnatonValue);
+    const bestLocationContainingUpgrade = maxBy(
+      upgradeLocations,
+      averageAutumnatonValue,
+    );
 
     switch (upgrade) {
       case "periscope":
       case "radardish": {
-        const bestLocationWithInstalledUpgrade = maxBy(fullLocations, (loc: Location) =>
-          averageAutumnatonValue(loc, AutumnAton.visualAcuity() + 1),
+        const bestLocationWithInstalledUpgrade = maxBy(
+          fullLocations,
+          (loc: Location) =>
+            averageAutumnatonValue(loc, AutumnAton.visualAcuity() + 1),
         );
         return {
           upgrade,
@@ -170,13 +196,18 @@ function makeUpgradeValuator(fullLocations: Location[], currentBestLocation: Loc
       case "leftleg1": {
         return {
           upgrade,
-          profit: profitFromExtraLeg(bestLocationContainingUpgrade, currentBestLocation),
+          profit: profitFromExtraLeg(
+            bestLocationContainingUpgrade,
+            currentBestLocation,
+          ),
         };
       }
       case "rightarm1":
       case "leftarm1": {
-        const bestLocationWithInstalledUpgrade = maxBy(fullLocations, (loc: Location) =>
-          averageAutumnatonValue(loc, undefined, AutumnAton.zoneItems() + 1),
+        const bestLocationWithInstalledUpgrade = maxBy(
+          fullLocations,
+          (loc: Location) =>
+            averageAutumnatonValue(loc, undefined, AutumnAton.zoneItems() + 1),
         );
         return {
           upgrade,
@@ -189,7 +220,10 @@ function makeUpgradeValuator(fullLocations: Location[], currentBestLocation: Loc
       case "cowcatcher": {
         return {
           upgrade,
-          profit: profitFromExtraAutumnItem(bestLocationContainingUpgrade, currentBestLocation),
+          profit: profitFromExtraAutumnItem(
+            bestLocationContainingUpgrade,
+            currentBestLocation,
+          ),
         };
       }
       default: {
@@ -200,7 +234,9 @@ function makeUpgradeValuator(fullLocations: Location[], currentBestLocation: Loc
 }
 
 function mostValuableUpgrade(fullLocations: Location[]): Location[] {
-  const validLocations = fullLocations.filter((l) => l.parent !== "Clan Basement");
+  const validLocations = fullLocations.filter(
+    (l) => l.parent !== "Clan Basement",
+  );
   // This function shouldn't be getting called if we don't have an expedition left
   if (expectedRemainingExpeditions() < 1) {
     return validLocations;
@@ -216,7 +252,8 @@ function mostValuableUpgrade(fullLocations: Location[]): Location[] {
 
   const currentBestLocation = maxBy(validLocations, averageAutumnatonValue);
   const currentExpectedProfit =
-    averageAutumnatonValue(currentBestLocation) * expectedRemainingExpeditions();
+    averageAutumnatonValue(currentBestLocation) *
+    expectedRemainingExpeditions();
 
   const upgradeValuations = acquirableUpgrades.map(
     makeUpgradeValuator(validLocations, currentBestLocation),
@@ -229,7 +266,8 @@ function mostValuableUpgrade(fullLocations: Location[]): Location[] {
 
   if (profitFromBestUpgrade > currentExpectedProfit) {
     const upgradeLocations = validLocations.filter(
-      (location) => AutumnAton.getUniques(location)?.upgrade === highestValueUpgrade,
+      (location) =>
+        AutumnAton.getUniques(location)?.upgrade === highestValueUpgrade,
     );
     return upgradeLocations;
   } else {

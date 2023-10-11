@@ -14,7 +14,10 @@ import {
 } from "./lib";
 import { BonusEquipMode, modeValueOfMeat } from "../lib";
 
-export function embezzlerOutfit(spec: OutfitSpec = {}, target = $location.none): Outfit {
+export function embezzlerOutfit(
+  spec: OutfitSpec = {},
+  target = $location.none,
+): Outfit {
   cleaverCheck();
   validateGarbageFoldable(spec);
   const outfit = Outfit.from(
@@ -22,7 +25,10 @@ export function embezzlerOutfit(spec: OutfitSpec = {}, target = $location.none):
     new Error(`Failed to construct outfit from spec ${toJson(spec)}`),
   );
 
-  outfit.modifier.push(`${modeValueOfMeat(BonusEquipMode.EMBEZZLER)} Meat Drop`, "-tie");
+  outfit.modifier.push(
+    `${modeValueOfMeat(BonusEquipMode.EMBEZZLER)} Meat Drop`,
+    "-tie",
+  );
   outfit.avoid.push($item`cheap sunglasses`); // Even if we're adventuring in Barf Mountain itself, these are bad
   outfit.familiar ??= meatFamiliar();
 
@@ -34,7 +40,9 @@ export function embezzlerOutfit(spec: OutfitSpec = {}, target = $location.none):
       outfit.equipFirst(familiarWaterBreathingEquipment);
     }
 
-    if (!outfit.equipFirst(waterBreathingEquipment)) outfit.modifier.push("sea");
+    if (!outfit.equipFirst(waterBreathingEquipment)) {
+      outfit.modifier.push("sea");
+    }
   }
 
   useUPCsIfNeeded(outfit);
@@ -56,7 +64,9 @@ export function embezzlerOutfit(spec: OutfitSpec = {}, target = $location.none):
   if (bjornalike) {
     outfit.setBonus(bjornalike, bjornChoice.value);
     outfit.equip(bjornalike);
-    const other = $items`Buddy Bjorn, Crown of Thrones`.filter((i) => i !== bjornalike)[0];
+    const other = $items`Buddy Bjorn, Crown of Thrones`.filter(
+      (i) => i !== bjornalike,
+    )[0];
     outfit.avoid.push(other);
     switch (bjornalike) {
       case $item`Buddy Bjorn`:

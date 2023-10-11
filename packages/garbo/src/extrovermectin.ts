@@ -60,7 +60,9 @@ type GregSource = {
 };
 
 export function expectedGregs(skillSource: "habitat" | "extro"): number[] {
-  const habitatCharges = have($skill`Just the Facts`) ? 3 - get("_monsterHabitatsRecalled", 0) : 0;
+  const habitatCharges = have($skill`Just the Facts`)
+    ? 3 - get("_monsterHabitatsRecalled", 0)
+    : 0;
 
   const habitatGregs: GregSource[] = new Array(habitatCharges).fill({
     copies: 5,
@@ -89,12 +91,18 @@ export function expectedGregs(skillSource: "habitat" | "extro"): number[] {
 
   const orbGregs = have($item`miniature crystal ball`) ? 1 : 0;
 
-  const macrometeors = have($skill`Meteor Lore`) ? 10 - get("_macrometeoriteUses") : 0;
+  const macrometeors = have($skill`Meteor Lore`)
+    ? 10 - get("_macrometeoriteUses")
+    : 0;
   const replaceEnemies = have($item`Powerful Glove`)
     ? Math.floor((100 - get("_powerfulGloveBatteryPowerUsed")) / 10)
     : 0;
 
-  const firstReplaces = clamp(replacementsPerGreg(baseGregs[0]), 0, macrometeors + replaceEnemies);
+  const firstReplaces = clamp(
+    replacementsPerGreg(baseGregs[0]),
+    0,
+    macrometeors + replaceEnemies,
+  );
   const initialCast: { replacesLeft: number; sources: GregSource[] } = {
     replacesLeft: macrometeors + replaceEnemies - firstReplaces,
     sources: [
@@ -109,7 +117,11 @@ export function expectedGregs(skillSource: "habitat" | "extro"): number[] {
   return baseGregs
     .slice(1)
     .reduce((acc, curr): { replacesLeft: number; sources: GregSource[] } => {
-      const currentReplaces = clamp(replacementsPerGreg(curr), 0, acc.replacesLeft);
+      const currentReplaces = clamp(
+        replacementsPerGreg(curr),
+        0,
+        acc.replacesLeft,
+      );
       return {
         replacesLeft: acc.replacesLeft - currentReplaces,
         sources: [
@@ -127,10 +139,12 @@ export function expectedGregs(skillSource: "habitat" | "extro"): number[] {
 }
 
 export function doingGregFight(): boolean {
-  const extrovermectin = get("beGregariousCharges") > 0 || get("beGregariousFightsLeft") > 0;
+  const extrovermectin =
+    get("beGregariousCharges") > 0 || get("beGregariousFightsLeft") > 0;
   const habitat =
     have($skill`Just the Facts`) &&
-    (get("_monsterHabitatsRecalled") < 3 || get("_monsterHabitatsFightsLeft") > 0);
+    (get("_monsterHabitatsRecalled") < 3 ||
+      get("_monsterHabitatsFightsLeft") > 0);
 
   return (
     extrovermectin ||
@@ -143,13 +157,17 @@ export function crateStrategy(): "Sniff" | "Saber" | "Orb" | null {
   if (!doingGregFight()) return null;
   if (
     (have($skill`Transcendent Olfaction`) &&
-      (property.getString("olfactedMonster") === "crate" || get("_olfactionsUsed") < 2)) ||
-    (have($skill`Long Con`) && (get("longConMonster") === crate || get("_longConUsed") < 4))
+      (property.getString("olfactedMonster") === "crate" ||
+        get("_olfactionsUsed") < 2)) ||
+    (have($skill`Long Con`) &&
+      (get("longConMonster") === crate || get("_longConUsed") < 4))
   ) {
     return "Sniff";
   }
   if (have($item`miniature crystal ball`)) return "Orb";
-  if (have($item`Fourth of May Cosplay Saber`) && get("_saberForceUses") < 5) return "Saber";
+  if (have($item`Fourth of May Cosplay Saber`) && get("_saberForceUses") < 5) {
+    return "Saber";
+  }
   return null;
 }
 
@@ -164,20 +182,27 @@ export function hasMonsterReplacers(): boolean {
  * Saberfriends a crate if we are able to do so.
  */
 export function saberCrateIfSafe(): void {
-  const canSaber = have($item`Fourth of May Cosplay Saber`) && get("_saberForceUses") < 5;
-  const isSafeToSaber = get("beGregariousFightsLeft") === 0 || get("_saberForceMonsterCount") > 0;
+  const canSaber =
+    have($item`Fourth of May Cosplay Saber`) && get("_saberForceUses") < 5;
+  const isSafeToSaber =
+    get("beGregariousFightsLeft") === 0 || get("_saberForceMonsterCount") > 0;
   if (!canSaber || !isSafeToSaber) return;
 
   do {
     const run = tryFindFreeRun(freeRunConstraints(false)) ?? ltbRun();
 
-    useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false }));
+    useFamiliar(
+      run.constraints.familiar?.() ??
+        freeFightFamiliar({ canChooseMacro: false }),
+    );
     run.constraints.preparation?.();
     new Requirement([], {
       forceEquip: $items`Fourth of May Cosplay Saber`,
       preventEquip: $items`Kramco Sausage-o-Matic™`,
     })
-      .merge(run.constraints.equipmentRequirements?.() ?? new Requirement([], {}))
+      .merge(
+        run.constraints.equipmentRequirements?.() ?? new Requirement([], {}),
+      )
       .maximize();
     setChoice(1387, 2);
     garboAdventure(
@@ -203,7 +228,9 @@ export function saberCrateIfSafe(): void {
 export function equipOrbIfDesired(): void {
   if (
     have($item`miniature crystal ball`) &&
-    !(get("_saberForceMonster") === crate && get("_saberForceMonsterCount") > 0) &&
+    !(
+      get("_saberForceMonster") === crate && get("_saberForceMonsterCount") > 0
+    ) &&
     crateStrategy() !== "Sniff" &&
     [undefined, crate].includes(CrystalBall.ponder().get($location`Noob Cave`))
   ) {
@@ -228,7 +255,8 @@ function initializeCrates(): void {
           property.getString("longConMonster") !== "crate" ||
           get("_longConUsed") <= 0)) ||
       (crateStrategy() === "Orb" &&
-        ((get("_gallapagosMonster") !== crate && have($skill`Gallapagosian Mating Call`)) ||
+        ((get("_gallapagosMonster") !== crate &&
+          have($skill`Gallapagosian Mating Call`)) ||
           (have($item`latte lovers member's mug`) && !get("_latteCopyUsed"))))
     ) {
       const run = tryFindFreeRun(freeRunConstraints(true)) ?? ltbRun();
@@ -239,7 +267,8 @@ function initializeCrates(): void {
         .trySkill($skill`Long Con`)
         .trySkill($skill`Offer Latte to Opponent`)
         .externalIf(
-          get("_gallapagosMonster") !== crate && have($skill`Gallapagosian Mating Call`),
+          get("_gallapagosMonster") !== crate &&
+            have($skill`Gallapagosian Mating Call`),
           Macro.trySkill($skill`Gallapagosian Mating Call`),
         )
         .trySkill($skill`Use the Force`)
@@ -247,15 +276,21 @@ function initializeCrates(): void {
 
       // equip latte and saber for lattesniff and saberfriends, if we want to
       // Crank up ML to make sure the crate survives several rounds; we may have some passive damage
-      useFamiliar(run.constraints.familiar?.() ?? freeFightFamiliar({ canChooseMacro: false }));
+      useFamiliar(
+        run.constraints.familiar?.() ??
+          freeFightFamiliar({ canChooseMacro: false }),
+      );
       run.constraints.preparation?.();
       new Requirement(["100 Monster Level"], {
-        forceEquip: $items`latte lovers member's mug, Fourth of May Cosplay Saber`.filter((item) =>
-          have(item),
-        ),
+        forceEquip:
+          $items`latte lovers member's mug, Fourth of May Cosplay Saber`.filter(
+            (item) => have(item),
+          ),
         preventEquip: $items`carnivorous potted plant`,
       })
-        .merge(run.constraints.equipmentRequirements?.() ?? new Requirement([], {}))
+        .merge(
+          run.constraints.equipmentRequirements?.() ?? new Requirement([], {}),
+        )
         .maximize();
       garboAdventure(
         $location`Noob Cave`,
@@ -264,7 +299,8 @@ function initializeCrates(): void {
       visitUrl(`desc_effect.php?whicheffect=${$effect`On the Trail`.descid}`);
     } else if (
       crateStrategy() === "Saber" &&
-      (get("_saberForceMonster") !== crate || get("_saberForceMonsterCount") === 0) &&
+      (get("_saberForceMonster") !== crate ||
+        get("_saberForceMonsterCount") === 0) &&
       get("_saberForceUses") < 5
     ) {
       saberCrateIfSafe();
@@ -282,7 +318,8 @@ function getClub() {
         have(i) &&
         canEquip(i) &&
         weaponHands(i) === 2 &&
-        (itemType(i) === "club" || (have($effect`Iron Palms`) && itemType(i) === "sword")),
+        (itemType(i) === "club" ||
+          (have($effect`Iron Palms`) && itemType(i) === "sword")),
     ) ?? $item`amok putter`;
   retrieveItem(availableClub);
   return availableClub;
@@ -361,7 +398,10 @@ const shortBanishes = [
 ];
 
 function iceHouseAllowed(): boolean {
-  if (get("garboDisallowIceHouseNotify", false) || globalOptions.prefs.autoUserConfirm) {
+  if (
+    get("garboDisallowIceHouseNotify", false) ||
+    globalOptions.prefs.autoUserConfirm
+  ) {
     return false;
   }
 
@@ -424,8 +464,16 @@ export function initializeDireWarren(): void {
   const banishedMonsters = getBanishedMonsters();
   const banishedPhyla = getBanishedPhyla();
 
-  if ([...banishedMonsters.values()].find((m) => m === $monster`fluffy bunny`)) return;
-  if ([...banishedPhyla.values()].find((p) => p === $monster`fluffy bunny`.phylum)) return;
+  if (
+    [...banishedMonsters.values()].find((m) => m === $monster`fluffy bunny`)
+  ) {
+    return;
+  }
+  if (
+    [...banishedPhyla.values()].find((p) => p === $monster`fluffy bunny`.phylum)
+  ) {
+    return;
+  }
 
   banishBunny();
 }
@@ -439,8 +487,10 @@ export function initializeExtrovermectinZones(): void {
 
 export function gregReady(): boolean {
   return (
-    (get("beGregariousMonster") === embezzler && get("beGregariousFightsLeft") > 0) ||
-    (get("_monsterHabitatsMonster") === embezzler && get("_monsterHabitatsFightsLeft") > 0)
+    (get("beGregariousMonster") === embezzler &&
+      get("beGregariousFightsLeft") > 0) ||
+    (get("_monsterHabitatsMonster") === embezzler &&
+      get("_monsterHabitatsFightsLeft") > 0)
   );
 }
 
@@ -457,7 +507,10 @@ export function totalGregCharges(countPartial: boolean): number {
 
 export function possibleGregCrystalBall(): number {
   if (have($item`miniature crystal ball`)) {
-    const ponderCount = CrystalBall.ponder().get($location`The Dire Warren`) === embezzler ? 1 : 0;
+    const ponderCount =
+      CrystalBall.ponder().get($location`The Dire Warren`) === embezzler
+        ? 1
+        : 0;
     return totalGregCharges(true) + ponderCount;
   }
   return 0;

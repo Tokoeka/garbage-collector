@@ -7,12 +7,21 @@ import {
   print,
   weightAdjustment,
 } from "kolmafia";
-import { $effect, $familiar, $item, $slot, findLeprechaunMultiplier, have } from "libram";
+import {
+  $effect,
+  $familiar,
+  $item,
+  $slot,
+  findLeprechaunMultiplier,
+  have,
+} from "libram";
 import { familiarWaterBreathingEquipment } from "../outfit";
 
 function bestFamUnderwaterGear(fam: Familiar): Item {
   // Returns best familiar gear for yachtzee chaining
-  return fam.underwater || have($effect`Driving Waterproofly`) || have($effect`Wet Willied`)
+  return fam.underwater ||
+    have($effect`Driving Waterproofly`) ||
+    have($effect`Wet Willied`)
     ? have($item`amulet coin`)
       ? $item`amulet coin`
       : $item`filthy child leash`
@@ -31,7 +40,9 @@ function getBuffedFamiliarWeight(fam: Familiar): number {
 }
 
 export function bestYachtzeeFamiliar(): Familiar {
-  const haveUnderwaterFamEquipment = familiarWaterBreathingEquipment.some((item) => have(item));
+  const haveUnderwaterFamEquipment = familiarWaterBreathingEquipment.some(
+    (item) => have(item),
+  );
   const sortedUnderwaterFamiliars = Familiar.all()
     .filter(
       (fam) =>

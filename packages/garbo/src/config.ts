@@ -201,15 +201,27 @@ You can use multiple options in conjunction, e.g. "garbo nobarf ascend"',
     /*
       Hidden preferences, CLI input ignored
     */
-    stopTurncount: Args.custom<number | null>({ hidden: true, default: null }, () => null, ""),
+    stopTurncount: Args.custom<number | null>(
+      { hidden: true, default: null },
+      () => null,
+      "",
+    ),
     saveTurns: Args.custom<number>({ hidden: true, default: 0 }, () => 0, ""),
-    askedAboutWish: Args.custom<boolean>({ hidden: true, default: false }, () => false, ""),
+    askedAboutWish: Args.custom<boolean>(
+      { hidden: true, default: false },
+      () => false,
+      "",
+    ),
     triedToUnlockHiddenTavern: Args.custom<boolean>(
       { hidden: true, default: false },
       () => false,
       "",
     ),
-    wishAnswer: Args.custom<boolean>({ hidden: true, default: false }, () => false, ""),
+    wishAnswer: Args.custom<boolean>(
+      { hidden: true, default: false },
+      () => false,
+      "",
+    ),
     clarasBellClaimed: Args.custom<boolean>(
       { hidden: true, setting: "_claraBellUsed" },
       () => get("_claraBellUsed"),

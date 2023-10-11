@@ -56,7 +56,9 @@ export function pyecAvailable(): boolean {
 
 export function shrugIrrelevantSongs(): void {
   for (const song of getActiveSongs()) {
-    const slot = Mood.defaultOptions.songSlots.find((slot) => slot.includes(song));
+    const slot = Mood.defaultOptions.songSlots.find((slot) =>
+      slot.includes(song),
+    );
     if (
       !slot &&
       song !== $effect`Ode to Booze` &&
@@ -73,7 +75,9 @@ export function shrugIrrelevantSongs(): void {
 }
 
 export function cinchNCs(): number {
-  return CinchoDeMayo.have() ? Math.floor(CinchoDeMayo.totalAvailableCinch() / 60) : 0;
+  return CinchoDeMayo.have()
+    ? Math.floor(CinchoDeMayo.totalAvailableCinch() / 60)
+    : 0;
 }
 
 export const freeNCs = (): number =>
@@ -82,7 +86,12 @@ export const freeNCs = (): number =>
   cinchNCs();
 
 export function yachtzeeBuffValue(obj: Item | Effect): number {
-  return (2000 * (getModifier("Meat Drop", obj) + getModifier("Familiar Weight", obj) * 2.5)) / 100;
+  return (
+    (2000 *
+      (getModifier("Meat Drop", obj) +
+        getModifier("Familiar Weight", obj) * 2.5)) /
+    100
+  );
 }
 
 export function useSpikolodonSpikes(): void {
@@ -90,12 +99,20 @@ export function useSpikolodonSpikes(): void {
   const run = tryFindFreeRun(freeRunConstraints(false)) ?? ltbRun();
 
   const canJelly =
-    have($familiar`Space Jellyfish`) && !run.constraints.familiar && realmAvailable("stench");
+    have($familiar`Space Jellyfish`) &&
+    !run.constraints.familiar &&
+    realmAvailable("stench");
   const familiar =
     run.constraints.familiar?.() ??
-    (canJelly ? $familiar`Space Jellyfish` : freeFightFamiliar({ allowAttackFamiliars: false }));
+    (canJelly
+      ? $familiar`Space Jellyfish`
+      : freeFightFamiliar({ allowAttackFamiliars: false }));
   run.constraints.preparation?.();
-  freeFightOutfit({ shirt: $item`Jurassic Parka`, ...toSpec(run), familiar }).dress();
+  freeFightOutfit({
+    shirt: $item`Jurassic Parka`,
+    ...toSpec(run),
+    familiar,
+  }).dress();
   cliExecute("parka spikolodon");
 
   const targetZone = canJelly

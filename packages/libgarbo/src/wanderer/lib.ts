@@ -26,9 +26,16 @@ import {
 } from "libram";
 import { NumericProperty } from "libram/dist/propertyTypes";
 
-export const draggableFights = ["backup", "wanderer", "yellow ray", "freefight"] as const;
+export const draggableFights = [
+  "backup",
+  "wanderer",
+  "yellow ray",
+  "freefight",
+] as const;
 export type DraggableFight = (typeof draggableFights)[number];
-export function isDraggableFight<T>(fight: T | string): fight is DraggableFight {
+export function isDraggableFight<T>(
+  fight: T | string,
+): fight is DraggableFight {
   return draggableFights.includes(fight as DraggableFight);
 }
 
@@ -55,7 +62,11 @@ export type WandererFactory = (
   locationSkiplist: Location[],
   options: WandererFactoryOptions,
 ) => WandererTarget[];
-export type WandererLocation = { location: Location; targets: WandererTarget[]; value: number };
+export type WandererLocation = {
+  location: Location;
+  targets: WandererTarget[];
+  value: number;
+};
 
 export const UnlockableZones: UnlockableZone[] = [
   {
@@ -110,16 +121,26 @@ const ILLEGAL_ZONES = ["The Drip"];
 const canAdventureOrUnlockSkipList = [
   ...$locations`The Oasis, The Bubblin' Caldera, Barrrney's Barrr, The F'c'le, The Poop Deck, Belowdecks, Madness Bakery, The Secret Government Laboratory, The Dire Warren, Inside the Palindome, The Haiku Dungeon, An Incredibly Strange Place (Bad Trip), An Incredibly Strange Place (Mediocre Trip), An Incredibly Strange Place (Great Trip), El Vibrato Island, The Daily Dungeon, Trick-or-Treating, Seaside Megalopolis`,
   ...Location.all().filter(
-    ({ parent, zone }) => ILLEGAL_PARENTS.includes(parent) || ILLEGAL_ZONES.includes(zone),
+    ({ parent, zone }) =>
+      ILLEGAL_PARENTS.includes(parent) || ILLEGAL_ZONES.includes(zone),
   ),
 ];
 export function canAdventureOrUnlock(loc: Location): boolean {
   const skiplist = [...canAdventureOrUnlockSkipList];
-  if (!have($item`repaid diaper`) && have($item`Great Wolf's beastly trousers`)) {
+  if (
+    !have($item`repaid diaper`) &&
+    have($item`Great Wolf's beastly trousers`)
+  ) {
     skiplist.push($location`The Icy Peak`);
   }
-  const canUnlock = UnlockableZones.some((z) => loc.zone === z.zone && (z.available() || !z.noInv));
-  return !underwater(loc) && !skiplist.includes(loc) && (canAdventure(loc) || canUnlock);
+  const canUnlock = UnlockableZones.some(
+    (z) => loc.zone === z.zone && (z.available() || !z.noInv),
+  );
+  return (
+    !underwater(loc) &&
+    !skiplist.includes(loc) &&
+    (canAdventure(loc) || canUnlock)
+  );
 }
 
 export function unlock(loc: Location, value: number): boolean {
@@ -144,7 +165,10 @@ function canWanderTypeBackup(location: Location): boolean {
 }
 
 function canWanderTypeFreeFight(location: Location): boolean {
-  if (location === $location`The Fun-Guy Mansion` && get("funGuyMansionKills", 0) >= 100) {
+  if (
+    location === $location`The Fun-Guy Mansion` &&
+    get("funGuyMansionKills", 0) >= 100
+  ) {
     return false;
   }
   return (

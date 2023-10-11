@@ -34,10 +34,16 @@ type VolcanoItem = { quantity: number; item: Item; choice: number };
 function volcanoItemValue({ quantity, item }: VolcanoItem): number {
   if (item === $item`fused fuse`) {
     // Check if clara's bell is available and unused
-    if (!have($item`Clara's bell`) || globalOptions.clarasBellClaimed) return Infinity;
+    if (!have($item`Clara's bell`) || globalOptions.clarasBellClaimed) {
+      return Infinity;
+    }
     // Check if we can use Clara's bell for Yachtzee
     // If so, we call the opportunity cost of this about 40k
-    if (realmAvailable("sleaze") && have($item`fishy pipe`) && !get("_fishyPipeUsed")) {
+    if (
+      realmAvailable("sleaze") &&
+      have($item`fishy pipe`) &&
+      !get("_fishyPipeUsed")
+    ) {
       return quantity * 40000;
     } else {
       return quantity * get("valueOfAdventure");
@@ -75,7 +81,9 @@ function checkVolcanoQuest() {
   );
   if (bestItem.item === $item`fused fuse`) {
     globalOptions.clarasBellClaimed = true;
-    logMessage("Grab a fused fused with your clara's bell charge while overdrunk!");
+    logMessage(
+      "Grab a fused fused with your clara's bell charge while overdrunk!",
+    );
   } else if (volcanoItemValue(bestItem) < volcoinoValue) {
     withProperty("autoBuyPriceLimit", volcoinoValue, () =>
       retrieveItem(bestItem.item, bestItem.quantity),
@@ -91,6 +99,7 @@ const DailyVolcanoTasks: GarboTask[] = [
     ready: () => realmAvailable("hot"),
     completed: () => get("_volcanoItemRedeemed"),
     do: checkVolcanoQuest,
+    spendsTurn: false,
   },
   {
     name: "Free Volcoino",
@@ -105,12 +114,14 @@ const DailyVolcanoTasks: GarboTask[] = [
         (x) => <AcquireItem>{ item: x },
       ),
     outfit: { modifier: "disco style" },
+    spendsTurn: false,
   },
   {
     name: "Free Mining",
     ready: () => realmAvailable("hot") && have($skill`Unaccompanied Miner`),
     completed: () => get("_unaccompaniedMinerUsed") >= 5,
-    do: () => cliExecute(`minevolcano.ash ${5 - get("_unaccompaniedMinerUsed")}`),
+    do: () =>
+      cliExecute(`minevolcano.ash ${5 - get("_unaccompaniedMinerUsed")}`),
     prepare: () => restoreHp(myMaxhp() * 0.9),
     post: (): void => {
       if (have($effect`Beaten Up`)) {
@@ -120,6 +131,7 @@ const DailyVolcanoTasks: GarboTask[] = [
         restoreHp(myMaxhp() * 0.9);
       }
     },
+    spendsTurn: false,
   },
 ];
 

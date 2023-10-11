@@ -1,5 +1,11 @@
-import { Familiar, Item } from "kolmafia";
-import { $familiar, $item, $items, findLeprechaunMultiplier, have } from "libram";
+import { Familiar, familiarWeight, Item } from "kolmafia";
+import {
+  $familiar,
+  $item,
+  $items,
+  findLeprechaunMultiplier,
+  have,
+} from "libram";
 import { garboAverageValue, garboValue } from "../garboValue";
 import { GeneralFamiliar } from "./lib";
 
@@ -10,7 +16,10 @@ type StandardDropFamiliar = {
   additionalValue?: () => number;
 };
 
-function expectedTurnsValue(expected: number[] | ((index: number) => number), index: number) {
+function expectedTurnsValue(
+  expected: number[] | ((index: number) => number),
+  index: number,
+) {
   return Array.isArray(expected) ? expected[index] : expected(index);
 }
 
@@ -24,8 +33,10 @@ function valueStandardDropFamiliar({
   drop,
   additionalValue,
 }: StandardDropFamiliar): GeneralFamiliar {
-  const expectedTurns = expectedTurnsValue(expected, familiar.dropsToday) || Infinity;
-  const expectedValue = dropValue(drop) / expectedTurns + (additionalValue?.() ?? 0);
+  const expectedTurns =
+    expectedTurnsValue(expected, familiar.dropsToday) || Infinity;
+  const expectedValue =
+    dropValue(drop) / expectedTurns + (additionalValue?.() ?? 0);
   return {
     familiar,
     expectedValue,
@@ -159,6 +170,13 @@ const rotatingFamiliars: StandardDropFamiliar[] = [
     expected: (i) => 10 * i + 10, // faster with half-height cigar
     drop: $item`grubby wool`,
   },
+  {
+    familiar: $familiar`Jill-of-All-Trades`,
+    expected: (i) => 3 * Math.pow(20, i),
+    drop: $item`map to a candy-rich block`,
+    additionalValue: () =>
+      (6 + 4 * familiarWeight($familiar`Jill-of-All-Trades`)) * 0.33,
+  },
 ];
 
 export default function getDropFamiliars(): GeneralFamiliar[] {
@@ -170,7 +188,9 @@ export default function getDropFamiliars(): GeneralFamiliar[] {
     );
 }
 
-export function getAllDrops(fam: Familiar): { expectedValue: number; expectedTurns: number }[] {
+export function getAllDrops(
+  fam: Familiar,
+): { expectedValue: number; expectedTurns: number }[] {
   const target = rotatingFamiliars.find(({ familiar }) => familiar === fam);
   if (!have(fam) || !target) return [];
 

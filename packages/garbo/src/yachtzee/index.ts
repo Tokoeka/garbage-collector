@@ -61,13 +61,19 @@ function _yachtzeeChain(): void {
     const meatToCloset = myMeat() - meatLimit;
     print("");
     print("");
-    print(`We are going to closet all-but-5million meat for your safety!`, "blue");
+    print(
+      `We are going to closet all-but-5million meat for your safety!`,
+      "blue",
+    );
     print("");
     print("");
     if (!get("_yachtzeeChainClosetedMeat")) {
       set("_yachtzeeChainClosetedMeat", meatToCloset);
     } else {
-      set("_yachtzeeChainClosetedMeat", meatToCloset + get("_yachtzeeChainClosetedMeat"));
+      set(
+        "_yachtzeeChainClosetedMeat",
+        meatToCloset + get("_yachtzeeChainClosetedMeat"),
+      );
     }
     cliExecute(`closet put ${meatToCloset} meat`);
   }
@@ -97,7 +103,9 @@ function _yachtzeeChain(): void {
   let plantCrookweed = true;
   while (Math.min(jellyTurns, fishyTurns) > 0) {
     executeNextDietStep();
-    if (!get("noncombatForcerActive")) throw new Error("We did not use stench jellies");
+    if (!get("noncombatForcerActive")) {
+      throw new Error("We did not use stench jellies");
+    }
     // Switch familiars in case changes in fam weight from buffs means our current familiar is no longer optimal
     prepareOutfitAndFamiliar();
     if (!have($effect`Really Deep Breath`)) {
@@ -115,7 +123,9 @@ function _yachtzeeChain(): void {
       }
     }
     if (!have($effect`Polka of Plenty`)) {
-      if (have($effect`Ode to Booze`)) cliExecute(`shrug ${$effect`Ode to Booze`}`);
+      if (have($effect`Ode to Booze`)) {
+        cliExecute(`shrug ${$effect`Ode to Booze`}`);
+      }
       if (
         getActiveSongs().length < (have($skill`Mariachi Memory`) ? 4 : 3) &&
         have($skill`The Polka of Plenty`)
@@ -131,7 +141,11 @@ function _yachtzeeChain(): void {
       turncount = myTurncount();
       set("_stenchJellyChargeTarget", get("_stenchJellyChargeTarget", 0) - 1);
     }
-    if (plantCrookweed && FloristFriar.have() && FloristFriar.Crookweed.available()) {
+    if (
+      plantCrookweed &&
+      FloristFriar.have() &&
+      FloristFriar.Crookweed.available()
+    ) {
       FloristFriar.Crookweed.plant();
     }
     plantCrookweed = false;

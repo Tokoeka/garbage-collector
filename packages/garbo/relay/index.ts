@@ -6,7 +6,10 @@ import "./App.css";
 
 getData((data: Data) => {
   render(
-    React.createElement(App, { updatedSettings: data.updatedSettings, settings: data.settings }),
+    React.createElement(App, {
+      updatedSettings: data.updatedSettings,
+      settings: data.settings,
+    }),
     document.getElementById("root"),
   );
 });

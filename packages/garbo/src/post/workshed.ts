@@ -1,10 +1,31 @@
-import { getWorkshed, haveEffect, Item, print, totalTurnsPlayed, use, visitUrl } from "kolmafia";
-import { $effect, $item, $items, AsdonMartin, DNALab, get, have, TrainSet } from "libram";
+import {
+  getWorkshed,
+  haveEffect,
+  Item,
+  print,
+  totalTurnsPlayed,
+  use,
+  visitUrl,
+} from "kolmafia";
+import {
+  $effect,
+  $item,
+  $items,
+  AsdonMartin,
+  DNALab,
+  get,
+  have,
+  TrainSet,
+} from "libram";
 import { dietCompleted } from "../diet";
 import { globalOptions } from "../config";
 import { potionSetupCompleted } from "../potions";
 import { estimatedGarboTurns, estimatedTurnsTomorrow } from "../turns";
-import { getPrioritizedStations, grabMedicine, rotateToOptimalCycle } from "./workshed_utils";
+import {
+  getPrioritizedStations,
+  grabMedicine,
+  rotateToOptimalCycle,
+} from "./workshed_utils";
 import { HIGHLIGHT } from "../lib";
 type WorkshedOptions = {
   workshed: Item;
@@ -28,7 +49,10 @@ class GarboWorkshed {
   }
 
   canRemove(): boolean {
-    return (this.done?.() ?? true) || estimatedGarboTurns() <= (GarboWorkshed.next?.minTurns ?? 0);
+    return (
+      (this.done?.() ?? true) ||
+      estimatedGarboTurns() <= (GarboWorkshed.next?.minTurns ?? 0)
+    );
   }
 
   use(): void {
@@ -93,7 +117,10 @@ const worksheds = [
       } else {
         const bestStations = getPrioritizedStations();
         if (bestStations.includes(TrainSet.next())) return;
-        print(`Reconfiguring trainset, as our next station is ${TrainSet.next()}`, HIGHLIGHT);
+        print(
+          `Reconfiguring trainset, as our next station is ${TrainSet.next()}`,
+          HIGHLIGHT,
+        );
         return rotateToOptimalCycle();
       }
     },
@@ -112,13 +139,15 @@ const worksheds = [
     done: () => {
       return (
         haveEffect($effect`Driving Observantly`) >=
-        estimatedGarboTurns() + (globalOptions.ascend ? 0 : estimatedTurnsTomorrow)
+        estimatedGarboTurns() +
+          (globalOptions.ascend ? 0 : estimatedTurnsTomorrow)
       );
     },
     action: () => {
       AsdonMartin.drive(
         $effect`Driving Observantly`,
-        estimatedGarboTurns() + (globalOptions.ascend ? 0 : estimatedTurnsTomorrow),
+        estimatedGarboTurns() +
+          (globalOptions.ascend ? 0 : estimatedTurnsTomorrow),
       );
     },
   }),

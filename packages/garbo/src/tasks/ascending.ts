@@ -9,7 +9,10 @@ function bestLockPickChoice(): number {
   return (
     1 +
     toInt(
-      maxBy($items`Boris's key lime, Jarlsberg's key lime, Sneaky Pete's key lime`, garboValue),
+      maxBy(
+        $items`Boris's key lime, Jarlsberg's key lime, Sneaky Pete's key lime`,
+        garboValue,
+      ),
     ) -
     toInt($item`Boris's key lime`)
   );
@@ -24,7 +27,8 @@ const AscendingTasks: GarboTask[] = [
       useSkill($skill`Lock Picking`);
       if (handlingChoice()) runChoice(-1);
     },
-    choices: { 1414: bestLockPickChoice },
+    choices: () => ({ 1414: bestLockPickChoice() }),
+    spendsTurn: false,
   },
   ...[
     {
@@ -47,7 +51,9 @@ const AscendingTasks: GarboTask[] = [
     name: `Cook ${lime}`,
     completed: () => !have(key) || garboValue(lime) < garboValue($item`lime`),
     do: () => create(lime),
-    ready: () => (globalOptions.ascend && freeCrafts("food") > 0) || get("hasChef"),
+    ready: () =>
+      (globalOptions.ascend && freeCrafts("food") > 0) || get("hasChef"),
+    spendsTurn: false,
   })),
 ];
 

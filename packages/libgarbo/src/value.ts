@@ -8,7 +8,15 @@ import {
   sellPrice,
   toInt,
 } from "kolmafia";
-import { $class, $item, $items, Delayed, getSaleValue, sum, undelay } from "libram";
+import {
+  $class,
+  $item,
+  $items,
+  Delayed,
+  getSaleValue,
+  sum,
+  undelay,
+} from "libram";
 
 type ItemQuantity = {
   item: Item;
@@ -21,27 +29,43 @@ export type ValueFunctions = {
 };
 
 export function makeValue(
-  options: { quick: boolean; itemValues?: Map<Item, Delayed<number>> } = { quick: false },
+  options: { quick: boolean; itemValues?: Map<Item, Delayed<number>> } = {
+    quick: false,
+  },
 ): ValueFunctions {
   const regularValueCache = new Map<Item, number>();
   const historicalValueCache = new Map<Item, number>();
   const inputValues: [Item, () => number][] = options.itemValues
-    ? [...options.itemValues.entries()].map(([item, val]) => [item, () => undelay(val)])
+    ? [...options.itemValues.entries()].map(([item, val]) => [
+        item,
+        () => undelay(val),
+      ])
     : [];
   const specialValueLookup = new Map<Item, () => number>([
     [
       $item`Freddy Kruegerand`,
-      currency(...$items`bottle of Bloodweiser, electric Kool-Aid, Dreadsylvanian skeleton key`),
+      currency(
+        ...$items`bottle of Bloodweiser, electric Kool-Aid, Dreadsylvanian skeleton key`,
+      ),
     ],
     [$item`Beach Buck`, currency($item`one-day ticket to Spring Break Beach`)],
-    [$item`Coinspiracy`, currency(...$items`Merc Core deployment orders, karma shawarma`)],
+    [
+      $item`Coinspiracy`,
+      currency(...$items`Merc Core deployment orders, karma shawarma`),
+    ],
     [$item`FunFunds™`, currency($item`one-day ticket to Dinseylandfill`)],
     [$item`Volcoino`, currency($item`one-day ticket to That 70s Volcano`)],
-    [$item`Wal-Mart gift certificate`, currency($item`one-day ticket to The Glaciest`)],
+    [
+      $item`Wal-Mart gift certificate`,
+      currency($item`one-day ticket to The Glaciest`),
+    ],
     [$item`Rubee™`, currency($item`FantasyRealm guest pass`)],
     [$item`Guzzlrbuck`, currency($item`Never Don't Stop Not Striving`)],
     ...complexCandy(),
-    [$item`Merc Core deployment orders`, () => value($item`one-day ticket to Conspiracy Island`)],
+    [
+      $item`Merc Core deployment orders`,
+      () => value($item`one-day ticket to Conspiracy Island`),
+    ],
     [
       $item`free-range mushroom`,
       () =>
@@ -75,7 +99,10 @@ export function makeValue(
     ],
     [
       $item`weathered barrel`,
-      () => averageValue(...$items`bean burrito, enchanted bean burrito, jumping bean burrito`),
+      () =>
+        averageValue(
+          ...$items`bean burrito, enchanted bean burrito, jumping bean burrito`,
+        ),
     ],
     [
       $item`dusty barrel`,
@@ -147,13 +174,24 @@ export function makeValue(
         i,
         currency(
           ...$items`seal tooth, chisel, petrified noodles, jabañero pepper, banjo strings, hot buttered roll, wooden figurine, ketchup, catsup, volleyball`,
-          ...(myClass() === $class`Seal Clubber` ? $items`figurine of an ancient seal` : []),
+          ...(myClass() === $class`Seal Clubber`
+            ? $items`figurine of an ancient seal`
+            : []),
         ),
       ],
     ),
-    [$item`Boris's key`, () => value($item`Boris's key lime`) - value($item`lime`)],
-    [$item`Jarlsberg's key`, () => value($item`Jarlsberg's key lime`) - value($item`lime`)],
-    [$item`Sneaky Pete's key`, () => value($item`Sneaky Pete's key lime`) - value($item`lime`)],
+    [
+      $item`Boris's key`,
+      () => value($item`Boris's key lime`) - value($item`lime`),
+    ],
+    [
+      $item`Jarlsberg's key`,
+      () => value($item`Jarlsberg's key lime`) - value($item`lime`),
+    ],
+    [
+      $item`Sneaky Pete's key`,
+      () => value($item`Sneaky Pete's key lime`) - value($item`lime`),
+    ],
     [
       $item`fat loot token`,
       currency(
@@ -171,7 +209,8 @@ export function makeValue(
   function saleValue(item: Item, useHistorical: boolean): number {
     if (useHistorical) {
       if (historicalAge(item) <= 7.0 && historicalPrice(item) > 0) {
-        const isMallMin = historicalPrice(item) === Math.max(100, 2 * autosellPrice(item));
+        const isMallMin =
+          historicalPrice(item) === Math.max(100, 2 * autosellPrice(item));
         return isMallMin ? autosellPrice(item) : 0.9 * historicalPrice(item);
       }
     }
@@ -187,7 +226,8 @@ export function makeValue(
         return [i, sellPrice(coinmaster, i)];
       }
     });
-    return () => Math.max(...unitCost.map(([item, cost]) => value(item) / cost));
+    return () =>
+      Math.max(...unitCost.map(([item, cost]) => value(item) / cost));
   }
 
   function complexCandy(): [Item, () => number][] {
@@ -202,21 +242,31 @@ export function makeValue(
     }
     const candyIdPrices: [Item, () => number][] = candies
       .filter((i) => !i.tradeable)
-      .map((i) => [i, () => Math.min(...candyLookup[toInt(i) % 5].map((i) => value(i)))]);
+      .map((i) => [
+        i,
+        () => Math.min(...candyLookup[toInt(i) % 5].map((i) => value(i))),
+      ]);
     return candyIdPrices;
   }
 
-  function value(inputItem: Item | ItemQuantity, useHistorical = false): number {
+  function value(
+    inputItem: Item | ItemQuantity,
+    useHistorical = false,
+  ): number {
     const { item, quantity } =
       inputItem instanceof Item ? { item: inputItem, quantity: 1 } : inputItem;
     if (exclusions.has(item)) return 0;
     useHistorical ||= options.quick;
     const cachedValue =
-      regularValueCache.get(item) ?? (useHistorical ? historicalValueCache.get(item) : undefined);
+      regularValueCache.get(item) ??
+      (useHistorical ? historicalValueCache.get(item) : undefined);
     if (cachedValue === undefined) {
       const specialValueCompute = specialValueLookup.get(item);
       const value = specialValueCompute?.() ?? saleValue(item, useHistorical);
-      (useHistorical ? historicalValueCache : regularValueCache).set(item, value);
+      (useHistorical ? historicalValueCache : regularValueCache).set(
+        item,
+        value,
+      );
       return value;
     }
     return quantity * cachedValue;

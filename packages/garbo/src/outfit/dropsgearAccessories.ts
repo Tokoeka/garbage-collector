@@ -46,7 +46,9 @@ function luckyGoldRing(mode: BonusEquipMode) {
     ...[
       itemAmount($item`hobo nickel`) > 0 ? 100 : 0, // This should be closeted
       itemAmount($item`sand dollar`) > 0 ? garboValue($item`sand dollar`) : 0, // This should be closeted
-      itemAmount($item`Freddy Kruegerand`) > 0 ? garboValue($item`Freddy Kruegerand`) : 0,
+      itemAmount($item`Freddy Kruegerand`) > 0
+        ? garboValue($item`Freddy Kruegerand`)
+        : 0,
       ...lgrCurrencies().map((i) => garboValue(i)),
     ].filter((value) => value > 0),
   ];
@@ -82,10 +84,12 @@ function cinchoDeMayo(mode: BonusEquipMode) {
     CinchoDeMayo.currentCinch() === 0 ||
     // Ignore for DMT? Requires specific combat stuff, so probably weird there
     mode === BonusEquipMode.DMT ||
+    mode === BonusEquipMode.EMBEZZLER ||
     // Require manuel to make sure we don't kill during stasis
     !monsterManuelAvailable() ||
     // Don't use Cincho if we're planning on doing yachtzees, and haven't completed them yet
-    (!get("_garboYachtzeeChainCompleted") && globalOptions.prefs.yachtzeechain) ||
+    (!get("_garboYachtzeeChainCompleted") &&
+      globalOptions.prefs.yachtzeechain) ||
     // If we have more than 50 passive damage, we'll never be able to cast projectile pinata without risking the monster dying
     maxPassiveDamage() >= 50
   ) {
@@ -129,13 +133,25 @@ export function usingThumbRing(): boolean {
     setLocation($location`Barf Mountain`);
     const meatAccessories = Item.all()
       .filter(
-        (item) => have(item) && toSlot(item) === $slot`acc1` && getModifier("Meat Drop", item) > 0,
+        (item) =>
+          have(item) &&
+          toSlot(item) === $slot`acc1` &&
+          getModifier("Meat Drop", item) > 0,
       )
-      .map((item) => [item, (getModifier("Meat Drop", item) * baseMeat) / 100] as [Item, number]);
+      .map(
+        (item) =>
+          [item, (getModifier("Meat Drop", item) * baseMeat) / 100] as [
+            Item,
+            number,
+          ],
+      );
 
     const accessoryValues = new Map<Item, number>(accessoryBonuses);
     for (const [accessory, value] of meatAccessories) {
-      accessoryValues.set(accessory, value + (accessoryValues.get(accessory) ?? 0));
+      accessoryValues.set(
+        accessory,
+        value + (accessoryValues.get(accessory) ?? 0),
+      );
     }
 
     if (
@@ -151,7 +167,9 @@ export function usingThumbRing(): boolean {
     const bestAccessories = [...accessoryValues.entries()]
       .sort(([, aBonus], [, bBonus]) => bBonus - aBonus)
       .map(([item]) => item);
-    cachedUsingThumbRing = bestAccessories.slice(0, 2).includes($item`mafia thumb ring`);
+    cachedUsingThumbRing = bestAccessories
+      .slice(0, 2)
+      .includes($item`mafia thumb ring`);
   }
   return cachedUsingThumbRing;
 }

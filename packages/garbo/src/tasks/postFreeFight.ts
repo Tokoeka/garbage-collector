@@ -44,10 +44,12 @@ const PostFreeFightTasks: GarboTask[] = [
     completed: () => get("_VYKEACompanionLevel") > 0,
     do: () => cliExecute(`create level ${bestVykeaLevel()} couch`),
     acquire: [{ item: $item`VYKEA hex key` }],
+    spendsTurn: false,
   },
   {
     name: "Configure Thrall",
-    ready: () => myClass() === $class`Pastamancer` && have($skill`Bind Lasagmbie`),
+    ready: () =>
+      myClass() === $class`Pastamancer` && have($skill`Bind Lasagmbie`),
     completed: () => myThrall() === $thrall`Lasagmbie`,
     do: () => useSkill($skill`Bind Lasagmbie`),
     outfit: (): OutfitSpec => {
@@ -55,6 +57,7 @@ const PostFreeFightTasks: GarboTask[] = [
       return { modifier: "MP" };
     },
     prepare: () => restoreMp(200),
+    spendsTurn: false,
   },
   {
     name: "Level Up Thrall",
@@ -64,6 +67,7 @@ const PostFreeFightTasks: GarboTask[] = [
       myThrall() !== $thrall.none,
     completed: () => get("_pastaAdditive") || myThrall().level >= 10,
     do: () => use($item`experimental carbon fiber pasta additive`),
+    spendsTurn: false,
   },
 ];
 
