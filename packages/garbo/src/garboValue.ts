@@ -18,5 +18,5 @@ export function garboValue(item: Item): number {
 }
 
 export function garboAverageValue(...items: Item[]): number {
-  return garboValueFunctions().averageValue(...items);
+	return garboValueFunctions().averageValue(...items);
 }
