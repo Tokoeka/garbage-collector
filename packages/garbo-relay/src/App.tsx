@@ -1,27 +1,10 @@
-import * as React from "react";
 import Setting from "./components/Setting";
-
-declare global {
-  function getData(callback: (data: Data) => void): void;
-  type SettingProp = {
-    name: string;
-    type: string;
-    description: string;
-    value: string | number | boolean;
-  };
-  type Data = {
-    settings: SettingProp[];
-    updatedSettings: UpdatedSetting[];
-  };
-  type UpdatedSetting = {
-    name: string;
-    value: string;
-  };
-}
+import garboGif from "./garbo.gif";
 
 function App({ settings, updatedSettings }: Data): JSX.Element {
   const preferences = settings.map((setting) => (
     <Setting
+      key={setting.name}
       value={setting.value}
       type={setting.type}
       name={setting.name}
@@ -45,7 +28,7 @@ function App({ settings, updatedSettings }: Data): JSX.Element {
   return (
     <div id="garbageCollectorContainer">
       <div id="notificationsContainer">{updatedPreferences}</div>
-      <img src="/images/relayimages/garbo/garbo.gif" />
+      <img src={garboGif} />
       <form id="garboForm" action="" method="post">
         <input
           className="interrupt"
@@ -54,7 +37,9 @@ function App({ settings, updatedSettings }: Data): JSX.Element {
           onClick={onInterruptClicked}
         />
         <input id="garboInterrupt" type="hidden" name="garbo_interrupt" />
-        <table>{preferences}</table>
+        <table>
+          <tbody>{preferences}</tbody>
+        </table>
         <input className="save" type="submit" value="Save Changes" />
       </form>
     </div>

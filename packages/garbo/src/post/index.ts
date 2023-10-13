@@ -63,9 +63,13 @@ function floristFriars(): void {
   if (!FloristFriar.have() || myLocation() !== $location`Barf Mountain` || FloristFriar.isFull()) {
     return;
   }
-  [FloristFriar.StealingMagnolia, FloristFriar.AloeGuvnor, FloristFriar.PitcherPlant].forEach(
-    (flower) => flower.plant(),
-  );
+  [
+    FloristFriar.StealingMagnolia,
+    FloristFriar.AloeGuvnor,
+    FloristFriar.PitcherPlant,
+  ].forEach((flower) => {
+    if (flower.available()) flower.plant();
+  });
 }
 
 function fillPantsgivingFullness(): void {

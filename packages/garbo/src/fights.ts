@@ -120,7 +120,7 @@ import {
   withChoice,
 } from "libram";
 import { MonsterProperty } from "libram/dist/propertyTypes";
-import { WanderDetails } from "libgarbo";
+import { WanderDetails } from "garbo-lib";
 
 import { acquire } from "./acquire";
 import { withStash } from "./clan";
@@ -132,6 +132,7 @@ import { embezzlerCount, embezzlerSources, getNextEmbezzlerFight } from "./embez
 import {
   crateStrategy,
   doingGregFight,
+  gregReady,
   initializeExtrovermectinZones,
   saberCrateIfSafe,
 } from "./extrovermectin";
@@ -332,8 +333,10 @@ function startWandererCounter() {
     }
     do {
       let run: ActionSource;
-      if (get("beGregariousFightsLeft") > 0) {
-        print("You still have gregs active, so we're going to wear your meat outfit.");
+      if (gregReady()) {
+        print(
+          "You still have gregs active, so we're going to wear your meat outfit.",
+        );
         run = ltbRun();
         run.constraints.preparation?.();
         embezzlerOutfit().dress();

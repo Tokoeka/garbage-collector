@@ -9,6 +9,7 @@ import {
   myAdventures,
   myInebriety,
   myLevel,
+  myTurncount,
   runChoice,
   totalTurnsPlayed,
   toUrl,
@@ -36,7 +37,7 @@ import {
   undelay,
 } from "libram";
 import { OutfitSpec, Quest } from "grimoire-kolmafia";
-import { WanderDetails } from "libgarbo";
+import { WanderDetails } from "garbo-lib";
 
 import { GarboStrategy, Macro } from "../combat";
 import { globalOptions } from "../config";
@@ -99,6 +100,14 @@ function wanderTask(
     combat: new GarboStrategy(() => Macro.basicCombat()),
     ...base,
   };
+}
+
+function canContinue(): boolean {
+  return (
+    myAdventures() > globalOptions.saveTurns &&
+    (globalOptions.stopTurncount === null ||
+      myTurncount() < globalOptions.stopTurncount)
+  );
 }
 
 function shouldGoUnderwater(): boolean {
@@ -213,7 +222,9 @@ const BarfTurnTasks: GarboTask[] = [
   {
     name: "Thesis",
     ready: () =>
-      have($familiar`Pocket Professor`) && myAdventures() === 1 + globalOptions.saveTurns,
+      have($familiar`Pocket Professor`) &&
+      myAdventures() === 1 + globalOptions.saveTurns &&
+      $familiar`Pocket Professor`.experience >= 400,
     completed: () => get("_thesisDelivered"),
     do: () => deliverThesisIfAble(),
     sobriety: "sober",
@@ -263,9 +274,13 @@ const BarfTurnTasks: GarboTask[] = [
       shouldGoUnderwater()
         ? $location`The Briny Deeps`
         : wanderer().getTarget({ wanderer: "wanderer", allowEquipment: false }),
-    choices: shouldGoUnderwater()
-      ? {}
-      : wanderer().getChoices({ wanderer: "wanderer", allowEquipment: false }),
+    choices: () =>
+      shouldGoUnderwater()
+        ? {}
+        : wanderer().getChoices({
+            wanderer: "wanderer",
+            allowEquipment: false,
+          }),
     combat: new GarboStrategy(
       () =>
         Macro.externalIf(shouldGoUnderwater(), Macro.item($item`pulled green taffy`)).meatKill(),
@@ -422,5 +437,5 @@ const BarfTurnTasks: GarboTask[] = [
 export const BarfTurnQuest: Quest<GarboTask> = {
   name: "Barf Turn",
   tasks: BarfTurnTasks,
-  completed: () => myAdventures() === 0,
+  completed: () => !canContinue(),
 };

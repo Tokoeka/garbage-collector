@@ -22,6 +22,7 @@ import {
   itemAmount,
   itemDropsArray,
   Location,
+  mallPrices,
   meatDropModifier,
   Monster,
   mpCost,
@@ -46,6 +47,7 @@ import {
   restoreMp,
   runChoice,
   runCombat,
+  sessionStorage,
   setLocation,
   Skill,
   soulsauceCost,
@@ -898,4 +900,12 @@ export function newarkValue(): number {
     set("garbo_newarkValueDate", gameDay().getTime());
   }
   return get("garbo_newarkValue", 0);
+}
+
+export function allMallPrices() {
+  const today = todayToString();
+  if (sessionStorage.getItem("allpricedate") !== today) {
+    mallPrices("allitems");
+    sessionStorage.setItem("allpricedate", today);
+  }
 }
