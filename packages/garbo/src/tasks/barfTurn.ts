@@ -43,7 +43,6 @@ import { globalOptions } from "../config";
 import { wanderer } from "../garboWanderer";
 import {
   embezzler,
-  EMBEZZLER_MULTIPLIER,
   howManySausagesCouldIEat,
   kramcoGuaranteed,
   romanticMonsterImpossible,

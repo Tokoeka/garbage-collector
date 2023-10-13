@@ -14,7 +14,7 @@ import { globalOptions } from "../config";
 import { embezzlerCount } from "../embezzler";
 import { Potion } from "../potions";
 import { garboAverageValue, garboValue } from "../garboValue";
-import { canAdventure, canEquip, Item, myLevel, myMeat, Skill, toSlot, useSkill } from "kolmafia";
+import { canAdventure, myLevel, myMeat, Skill, useSkill } from "kolmafia";
 import { GarboTask } from "../tasks/engine";
 
 import { VPE } from "../lib";
