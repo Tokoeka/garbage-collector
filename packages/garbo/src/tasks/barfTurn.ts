@@ -105,8 +105,7 @@ function wanderTask(
 function canContinue(): boolean {
   return (
     myAdventures() > globalOptions.saveTurns &&
-    (globalOptions.stopTurncount === null ||
-      myTurncount() < globalOptions.stopTurncount)
+    (globalOptions.stopTurncount === null || myTurncount() < globalOptions.stopTurncount)
   );
 }
 

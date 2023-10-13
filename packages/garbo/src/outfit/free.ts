@@ -1,14 +1,6 @@
 import { Outfit, OutfitSpec } from "grimoire-kolmafia";
 import { Location, toJson } from "kolmafia";
-import {
-  $familiar,
-  $familiars,
-  $item,
-  $items,
-  get,
-  Guzzlr,
-  SourceTerminal,
-} from "libram";
+import { $familiar, $familiars, $item, $items, get, Guzzlr, SourceTerminal } from "libram";
 import { WanderDetails } from "garbo-lib";
 
 import { freeFightFamiliar } from "../familiar";

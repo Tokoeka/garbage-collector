@@ -334,9 +334,7 @@ function startWandererCounter() {
     do {
       let run: ActionSource;
       if (gregReady()) {
-        print(
-          "You still have gregs active, so we're going to wear your meat outfit.",
-        );
+        print("You still have gregs active, so we're going to wear your meat outfit.");
         run = ltbRun();
         run.constraints.preparation?.();
         embezzlerOutfit().dress();

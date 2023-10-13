@@ -322,9 +322,7 @@ export function main(argString = ""): void {
     setAutoAttack(0);
     visitUrl(`account.php?actions[]=flag_aabosses&flag_aabosses=1&action=Update`, true);
 
-    const maximizerCombinationLimit = isQuickGear()
-      ? 100000
-      : get("maximizerCombinationLimit");
+    const maximizerCombinationLimit = isQuickGear() ? 100000 : get("maximizerCombinationLimit");
 
     const bannedAutoRestorers = have($item`Cincho de Mayo`)
       ? [
