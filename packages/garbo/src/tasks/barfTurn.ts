@@ -54,12 +54,12 @@ import { GarboStrategy, Macro } from "../combat";
 import { globalOptions, targettingMeat } from "../config";
 import { wanderer } from "../garboWanderer";
 import {
-  EMBEZZLER_MULTIPLIER,
   getBestLuckyAdventure,
   howManySausagesCouldIEat,
   kramcoGuaranteed,
   romanticMonsterImpossible,
   sober,
+  VPE
 } from "../lib";
 import {
   barfOutfit,
@@ -157,7 +157,7 @@ function shouldGoUnderwater(): boolean {
   if (
     mallPrice($item`pulled green taffy`) >
     (targettingMeat()
-      ? EMBEZZLER_MULTIPLIER() * get("valueOfAdventure")
+      ? VPE() - get("valueOfAdventure")
       : get("valueOfAdventure"))
   ) {
     return false;

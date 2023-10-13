@@ -20,6 +20,10 @@ import { targetMeat } from "../lib";
 import { garboValue } from "../garboValue";
 
 const MIDNIGHTS = [
+  // TODO: ADD Industrial Midnight
+  /* const gingerBeerValue =
+        (getAverageAdventures($item`ginger beer`) * get("valueOfAdventure")) / 2;
+  */
   {
     location: $location`Gingerbread Upscale Retail District`,
     choices: { 1209: 2, 1214: 1 },
