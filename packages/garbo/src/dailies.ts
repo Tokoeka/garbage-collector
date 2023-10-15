@@ -4,15 +4,8 @@ import {
   DailyItemsQuest,
   DailyQuest,
   runSafeGarboQuests,
-  VolcanoQuest,
 } from "./tasks";
 
 export function dailySetup(): void {
-  runSafeGarboQuests([
-    DailyFamiliarsQuest,
-    DailyQuest,
-    DailyItemsQuest,
-    VolcanoQuest,
-    AscendingQuest,
-  ]);
+  runSafeGarboQuests([DailyFamiliarsQuest, DailyQuest, DailyItemsQuest, AscendingQuest]);
 }

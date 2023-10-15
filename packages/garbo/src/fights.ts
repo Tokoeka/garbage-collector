@@ -135,7 +135,7 @@ import {
   gregReady,
   initializeExtrovermectinZones,
   saberCrateIfSafe,
-} from "./extrovermectin";
+} from "./resources/extrovermectin";
 import {
   bestFairy,
   freeFightFamiliar,
