@@ -377,9 +377,13 @@ const BarfTurnTasks: GarboTask[] = [
       shouldGoUnderwater()
         ? $location`The Briny Deeps`
         : wanderer().getTarget({ wanderer: "wanderer", allowEquipment: false }),
-    choices: shouldGoUnderwater()
-      ? {}
-      : wanderer().getChoices({ wanderer: "wanderer", allowEquipment: false }),
+    choices: () =>
+      shouldGoUnderwater()
+        ? {}
+        : wanderer().getChoices({
+            wanderer: "wanderer",
+            allowEquipment: false,
+          }),
     combat: new GarboStrategy(
       () =>
         Macro.externalIf(shouldGoUnderwater(), Macro.item($item`pulled green taffy`)).meatKill(),
@@ -514,9 +518,10 @@ export const WandererQuest: Quest<GarboTask> = {
 export const NonBarfTurnQuest: Quest<GarboTask> = {
   name: "Non Barf Turn",
   tasks: NonBarfTurnTasks,
-  completed: () =>
-    !canContinue() ||
-    clamp(myAdventures() - digitizedMonstersRemaining(), 1, myAdventures()) >= nonBarfTurns(),
+  ready: () =>
+    clamp(myAdventures() - digitizedMonstersRemaining(), 1, myAdventures()) <=
+    nonBarfTurns() + globalOptions.saveTurns,
+  completed: () => !canContinue(),
 };
 
 export const BarfTurnQuest: Quest<GarboTask> = {

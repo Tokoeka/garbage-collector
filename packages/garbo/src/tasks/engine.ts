@@ -1,10 +1,18 @@
-import { Engine, EngineOptions, getTasks, Quest, StrictCombatTask } from "grimoire-kolmafia";
-import { eventLog, safeInterrupt, sober } from "../lib";
+import {
+  Engine,
+  EngineOptions,
+  getTasks,
+  Outfit,
+  Quest,
+  StrictCombatTask,
+} from "grimoire-kolmafia";
+import { eventLog, safeInterrupt, safeRestore, sober } from "../lib";
 import { wanderer } from "../garboWanderer";
-import { $skill, Delayed, get, SourceTerminal, undelay } from "libram";
-import { print, totalTurnsPlayed } from "kolmafia";
-import postCombatActions from "../post";
+import { $familiar, $item, $skill, Delayed, get, SourceTerminal, undelay } from "libram";
+import { equip, itemAmount, print, totalTurnsPlayed } from "kolmafia";
 import { GarboStrategy } from "../combat";
+import { sessionSinceStart } from "../session";
+import { garboValue } from "../garboValue";
 
 export type GarboTask = StrictCombatTask<never, GarboStrategy> & {
   sobriety?: Delayed<"drunk" | "sober" | undefined>;
@@ -33,6 +41,13 @@ export class BaseGarboEngine extends Engine<never, GarboTask> {
     return super.available(task);
   }
 
+  dress(task: GarboTask, outfit: Outfit) {
+    super.dress(task, outfit);
+    if (itemAmount($item`tiny stillsuit`) > 0) {
+      equip($familiar`Cornbeefadon`, $item`tiny stillsuit`);
+    }
+  }
+
   execute(task: GarboTask): void {
     safeInterrupt();
     const spentTurns = totalTurnsPlayed();
@@ -41,8 +56,8 @@ export class BaseGarboEngine extends Engine<never, GarboTask> {
     if (duplicate && SourceTerminal.have() && SourceTerminal.duplicateUsesRemaining() > 0) {
       SourceTerminal.educate([$skill`Extract`, $skill`Duplicate`]);
     }
+    if ("combat" in task) safeRestore();
     super.execute(task);
-    postCombatActions();
     if (totalTurnsPlayed() !== spentTurns) {
       if (!undelay(task.spendsTurn)) {
         print(`Task ${task.name} spent a turn but was marked as not spending turns`);
@@ -51,6 +66,7 @@ export class BaseGarboEngine extends Engine<never, GarboTask> {
     const foughtAnEmbezzler = get("lastEncounter") === "Knob Goblin Embezzler";
     if (foughtAnEmbezzler) logEmbezzler(task.name);
     wanderer().clear();
+    sessionSinceStart().value(garboValue);
     if (duplicate && SourceTerminal.have()) {
       for (const skill of before) {
         SourceTerminal.educate(skill);

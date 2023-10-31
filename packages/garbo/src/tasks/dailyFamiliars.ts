@@ -4,7 +4,6 @@ import {
   equip,
   familiarEquippedEquipment,
   hippyStoneBroken,
-  itemAmount,
   myPrimestat,
   retrieveItem,
   retrievePrice,
@@ -131,8 +130,7 @@ const DailyFamiliarTasks: GarboTask[] = [
   {
     name: "Acquire box of Familiar Jacks",
     ready: () => have($familiar`Cornbeefadon`),
-    completed: () =>
-      have($item`box of Familiar Jacks`) || have($item`amulet coin`),
+    completed: () => have($item`box of Familiar Jacks`) || have($item`amulet coin`),
     do: () =>
       // TODO: acquire max price calculation
       acquire(1, $item`box of Familiar Jacks`, get("autoBuyPriceLimit")),
@@ -140,21 +138,12 @@ const DailyFamiliarTasks: GarboTask[] = [
   },
   {
     name: "Acquire amulet coin",
-    ready: () =>
-      have($familiar`Cornbeefadon`) && have($item`box of Familiar Jacks`),
+    ready: () => have($familiar`Cornbeefadon`) && have($item`box of Familiar Jacks`),
     completed: () => have($item`amulet coin`),
     do: (): void => {
       use($item`box of Familiar Jacks`);
     },
     outfit: { familiar: $familiar`Cornbeefadon` },
-    spendsTurn: false,
-  },
-  {
-    // TODO: Consider other familiars?
-    name: "Equip tiny stillsuit",
-    ready: () => itemAmount($item`tiny stillsuit`) > 0 && have($familiar`Cornbeefadon`),
-    completed: () => familiarEquippedEquipment($familiar`Cornbeefadon`) === $item`tiny stillsuit`,
-    do: () => equip($familiar`Cornbeefadon`, $item`tiny stillsuit`),
     spendsTurn: false,
   },
   {

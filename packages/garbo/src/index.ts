@@ -74,7 +74,7 @@ import { endSession, startSession } from "./session";
 import { estimatedGarboTurns } from "./turns";
 import { yachtzeeChain } from "./yachtzee";
 import { garboAverageValue } from "./garboValue";
-import { BarfTurnQuests, runGarboQuests, SetupEmbezzlerQuest } from "./tasks";
+import { BarfTurnQuests, PostQuest, runGarboQuests, SetupEmbezzlerQuest } from "./tasks";
 
 // Max price for tickets. You should rethink whether Barf is the best place if they're this expensive.
 const TICKET_MAX_PRICE = 500000;
@@ -98,7 +98,14 @@ function ensureBarfAccess() {
 export function main(argString = ""): void {
   sinceKolmafiaRevision(27640);
   checkGithubVersion();
-  allMallPrices();
+
+  Args.fill(globalOptions, argString);
+  globalOptions.prefs.yachtzeechain = false;
+  if (globalOptions.version) return; // Since we always print the version, all done!
+  if (globalOptions.help) {
+    Args.showHelp(globalOptions);
+    return;
+  }
 
   // Hit up main.php to get out of easily escapable choices
   visitUrl("main.php");
@@ -111,13 +118,7 @@ export function main(argString = ""): void {
     );
   }
 
-  Args.fill(globalOptions, argString);
-  globalOptions.prefs.yachtzeechain = false;
-  if (globalOptions.version) return; // Since we always print the version, all done!
-  if (globalOptions.help) {
-    Args.showHelp(globalOptions);
-    return;
-  }
+  allMallPrices();
 
   if (globalOptions.turns) {
     if (globalOptions.turns >= 0) {
@@ -509,7 +510,7 @@ export function main(argString = ""): void {
           meatMood().execute(estimatedGarboTurns());
           useBuffExtenders();
           try {
-            runGarboQuests(BarfTurnQuests);
+            runGarboQuests([PostQuest(), ...BarfTurnQuests]);
 
             // buy one-day tickets with FunFunds if user desires
             if (

@@ -209,6 +209,7 @@ export function bonusGear(
     ...bagOfManyConfections(),
     ...stickers(mode),
     ...powerGlove(),
+    ...sneegleebs(),
     ...(valueCircumstantialBonus
       ? new Map<Item, number>([
           ...pantsgiving(mode),
@@ -313,4 +314,25 @@ function powerGlove(): Map<Item, number> {
       0.25 * garboAverageValue(...$items`blue pixel, green pixel, red pixel, white pixel`),
     ],
   ]);
+}
+
+const POSSIBLE_SNEEGLEEB_DROPS = Item.all().filter(
+  (i) => i.tradeable && i.discardable && (i.inebriety || i.fullness || i.potion),
+);
+let sneegleebBonus: number;
+const SNEEGLEEB_DROP_RATE = 0.13;
+const MAX_SNEEGLEEB_PRICE = 100_000; // arbitrary, to help avoid outliers
+function sneegleebs(): Map<Item, number> {
+  sneegleebBonus ??=
+    (sum(POSSIBLE_SNEEGLEEB_DROPS, (item) => Math.min(garboValue(item), MAX_SNEEGLEEB_PRICE)) /
+      POSSIBLE_SNEEGLEEB_DROPS.length) *
+    SNEEGLEEB_DROP_RATE;
+  return new Map<Item, number>(
+    (
+      [
+        [$item`KoL Con 13 snowglobe`, sneegleebBonus],
+        [$item`can of mixed everything`, sneegleebBonus / 2],
+      ] as const
+    ).filter(([item]) => have(item)),
+  );
 }

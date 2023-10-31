@@ -15,7 +15,7 @@ const locationBanlist = $locations`The Daily Dungeon`; // The Daily Dungeon has 
 const badAttributes = ["LUCKY", "ULTRARARE", "BOSS"];
 
 export default function bestAutumnatonLocation(locations: Location[]): Location {
-  return maxBy(mostValuableUpgrade(locations), averageAutumnatonValue);
+  return maxBy(bestLocationsByUpgrade(locations), averageAutumnatonValue);
 }
 
 function averageAutumnatonValue(
@@ -26,10 +26,7 @@ function averageAutumnatonValue(
   if (location === $location`Shadow Rift`) setLocation($location`Shadow Rift`); // FIXME This bypasses a mafia bug where ingress is not updated
   const rates = appearanceRates(location);
   const monsters = getMonsters(location).filter(
-    (m) =>
-      !locationBanlist.includes(location) &&
-      !badAttributes.some((s) => m.attributes.includes(s)) &&
-      rates[m.name] > 0,
+    (m) => !badAttributes.some((s) => m.attributes.includes(s)) && rates[m.name] > 0,
   );
 
   if (monsters.length === 0) {
@@ -212,8 +209,10 @@ function makeUpgradeValuator(fullLocations: Location[], currentBestLocation: Loc
   };
 }
 
-function mostValuableUpgrade(fullLocations: Location[]): Location[] {
-  const validLocations = fullLocations.filter((l) => l.parent !== "Clan Basement");
+function bestLocationsByUpgrade(fullLocations: Location[]): Location[] {
+  const validLocations = fullLocations.filter(
+    (l) => l.parent !== "Clan Basement" && !locationBanlist.includes(l),
+  );
   // This function shouldn't be getting called if we don't have an expedition left
   if (expectedRemainingExpeditions() < 1) {
     return validLocations;
