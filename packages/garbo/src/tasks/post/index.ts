@@ -156,6 +156,14 @@ function juneCleaver(): GarboPostTask {
     ),
     choices: juneCleaverChoices,
     available: () => JuneCleaver.have(),
+    post: () => {
+      if (
+        ["Poetic Justice", "Lost and Found"].includes(get("lastEncounter")) &&
+        have($effect`Beaten Up`)
+      ) {
+        useSkill($skill`Tongue of the Walrus`);
+      }
+    },
   };
 }
 
@@ -185,7 +193,7 @@ function refillCinch(): GarboPostTask {
       // Only rest if we'll get full value out of the cinch
       // If our current cinch is less than the total available, it means we have free rests left.
       while (
-        missingCinch() > CinchoDeMayo.cinchRestoredBy() &&
+        missingCinch() >= CinchoDeMayo.cinchRestoredBy() &&
         CinchoDeMayo.currentCinch() < CinchoDeMayo.totalAvailableCinch()
       ) {
         if (!freeRest()) break;
