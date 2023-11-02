@@ -67,7 +67,7 @@ type GarboFreeFightTask = Extract<GarboTask, { combat: GarboStrategy }> & {
 
 const DEFAULT_FREE_FIGHT_TASK = {
   // GarboTask
-  combat: new GarboStrategy(Macro.basicCombat()),
+  combat: new GarboStrategy(() => Macro.basicCombat()),
   outfit: freeFightOutfit,
   spendsTurn: false,
   // GarboFreeFightTask
@@ -144,7 +144,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       get("ghostLocation") !== null,
     completed: () => get("questPAGhost") === "unstarted",
     do: () => get("ghostLocation"),
-    combat: new GarboStrategy(Macro.ghostBustin()),
+    combat: new GarboStrategy(() => Macro.ghostBustin()),
     outfit: () => freeFightOutfit({ back: $item`protonic accelerator pack` }),
     tentacle: true,
   },
@@ -230,7 +230,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       (11 / 200) * garboValue($item`eldritch ichor`) > mallPrice($item`crappy waiter disguise`)
         ? [$effect`Crappily Disguised as a Waiter`]
         : [],
-    combat: new GarboStrategy(
+    combat: new GarboStrategy(() =>
       Macro.if_(
         $monster`Sssshhsssblllrrggghsssssggggrrgglsssshhssslblgl`,
         // Using while_ here in case you run out of mp
@@ -250,7 +250,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     ready: () => mallPrice($item`lynyrd snare`) <= globalOptions.prefs.valueOfFreeFight,
     completed: () => get("_lynyrdSnareUses") >= 3,
     do: () => use($item`lynyrd snare`),
-    combat: new GarboStrategy(Macro.basicCombat()),
+    combat: new GarboStrategy(() => Macro.basicCombat()),
     combatCount: () => clamp(3 - get("_lynyrdSnareUses"), 0, 3),
     tentacle: false,
   },
@@ -265,7 +265,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       visitUrl("inv_eat.php?pwd&whichitem=10207");
       runCombat();
     },
-    combat: new GarboStrategy(
+    combat: new GarboStrategy(() =>
       Macro.trySkill($skill`Curse of Marinara`)
         .trySkill($skill`Shell Up`)
         .trySkill($skill`Shadow Noodles`)
@@ -316,7 +316,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       visitUrl("inv_eat.php?pwd&whichitem=10207");
       runCombat();
     },
-    combat: new GarboStrategy(
+    combat: new GarboStrategy(() =>
       Macro.trySkill($skill`Curse of Marinara`)
         .trySkill($skill`Conspiratorial Whispers`)
         .trySkill($skill`Shadow Noodles`)
@@ -392,7 +392,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       retrieveItem(club);
       return freeFightOutfit({ weapon: club });
     },
-    combat: new GarboStrategy(
+    combat: new GarboStrategy(() =>
       Macro.startCombat()
         .trySkill($skill`Furious Wallop`)
         .while_("hasskill Lunging Thrust-Smack", Macro.skill($skill`Lunging Thrust-Smack`))
@@ -412,7 +412,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     completed: () => get("_brickoFights") >= 10,
     do: () => use($item`BRICKO ooze`),
     outfit: () => freeFightOutfit({}, { canChooseMacro: false }),
-    combat: new GarboStrategy(Macro.basicCombat()),
+    combat: new GarboStrategy(() => Macro.basicCombat()),
     combatCount: () => clamp(10 - get("_brickoFights"), 0, 10),
     tentacle: false,
   },
@@ -466,7 +466,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       }
     },
     choices: () => ({ 1119: 6 }), // escape DMT
-    combat: new GarboStrategy(
+    combat: new GarboStrategy(() =>
       Macro.externalIf(
         garboValue($item`abstraction: certainty`) >= garboValue($item`abstraction: thought`),
         Macro.if_($monster`Perceiver of Sensations`, Macro.tryItem($item`abstraction: thought`)),

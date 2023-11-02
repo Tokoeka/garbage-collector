@@ -93,8 +93,11 @@ function fillPantsgivingFullness(): GarboPostTask {
 function fillSweatyLiver(): GarboPostTask {
   return {
     name: "Fill Sweaty Liver",
-    ready: () => have($item`designer sweatpants`) && !globalOptions.nodiet,
-    completed: () => get("sweat") < 25 * clamp(3 - get("_sweatOutSomeBoozeUsed"), 0, 3),
+    ready: () =>
+      have($item`designer sweatpants`) &&
+      !globalOptions.nodiet &&
+      get("sweat") >= 25 * clamp(3 - get("_sweatOutSomeBoozeUsed"), 0, 3),
+    completed: () => get("_sweatOutSomeBoozeUsed") >= 3,
     do: () => {
       while (get("_sweatOutSomeBoozeUsed") < 3) {
         useSkill($skill`Sweat Out Some Booze`);
@@ -151,7 +154,7 @@ function juneCleaver(): GarboPostTask {
     completed: () => get("_juneCleaverFightsLeft") > 0,
     do: () => (myInebriety() > inebrietyLimit() ? $location`Drunken Stupor` : $location`Noob Cave`),
     outfit: { weapon: $item`June cleaver` },
-    combat: new GarboStrategy(
+    combat: new GarboStrategy(() =>
       Macro.abortWithMsg(`Expected June Cleaver non-combat but ended up in combat.`),
     ),
     choices: juneCleaverChoices,
