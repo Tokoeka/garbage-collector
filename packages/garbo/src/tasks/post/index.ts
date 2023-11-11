@@ -151,7 +151,7 @@ const juneCleaverChoices = () =>
 function juneCleaver(): GarboPostTask {
   return {
     name: "June Cleaver",
-    ready: () => JuneCleaver.have() && teleportEffects.every((e) => !have(e)),
+    ready: () => JuneCleaver.have() && teleportEffects.every((e) => !have(e)) && myAdventures() > 0,
     completed: () => get("_juneCleaverFightsLeft") > 0,
     do: () => (myInebriety() > inebrietyLimit() ? $location`Drunken Stupor` : $location`Noob Cave`),
     outfit: { weapon: $item`June cleaver` },
@@ -262,8 +262,7 @@ function leafResin(): GarboPostTask {
     name: "Leaf Resin",
     available: BurningLeaves.have(),
     ready: () =>
-      BurningLeaves.numberOfLeaves() > 75 &&
-      (estimatedGarboTurns() > 100 || !globalOptions.ascend),
+      BurningLeaves.numberOfLeaves() > 75 && (estimatedGarboTurns() > 100 || !globalOptions.ascend),
     completed: () => have($effect`Resined`),
     acquire: [{ item: $item`distilled resin` }],
     do: () => use($item`distilled resin`),
