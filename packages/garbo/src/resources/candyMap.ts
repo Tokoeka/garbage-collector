@@ -133,7 +133,9 @@ function doCandyTreat(): GarboTask {
       treated = true;
     },
     spendsTurn: false,
-    combat: new GarboStrategy(() => Macro.abort()),
+    combat: new GarboStrategy(() =>
+      Macro.abortWithMsg("We were planning on Treating, but we've been Tricked!"),
+    ),
   };
 }
 

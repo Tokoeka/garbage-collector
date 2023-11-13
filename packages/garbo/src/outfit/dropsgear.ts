@@ -16,6 +16,7 @@ import {
   $items,
   $slot,
   $slots,
+  BurningLeaves,
   clamp,
   DaylightShavings,
   get,
@@ -219,6 +220,7 @@ export function bonusGear(
           ...mayflowerBouquet(mode),
           ...(mode === BonusEquipMode.BARF ? magnifyingGlass() : []),
           ...juneCleaver(mode),
+          ...rakeLeaves(mode),
         ])
       : []),
   ]);
@@ -288,6 +290,17 @@ function juneCleaver(mode: BonusEquipMode): Map<Item, number> {
 
   const interval = mode === BonusEquipMode.EMBEZZLER ? 30 : JuneCleaver.getInterval();
   return new Map<Item, number>([[$item`June cleaver`, juneCleaverEV / interval]]);
+}
+
+function rakeLeaves(mode: BonusEquipMode): Map<Item, number> {
+  if (mode === BonusEquipMode.EMBEZZLER || !BurningLeaves.have()) {
+    return new Map();
+  }
+  const rakeValue = garboValue($item`inflammable leaf`) * 1.5;
+  return new Map<Item, number>([
+    [$item`rake`, rakeValue],
+    [$item`tiny rake`, rakeValue],
+  ]);
 }
 
 function stickers(mode: BonusEquipMode): Map<Item, number> {
