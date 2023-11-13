@@ -47,6 +47,18 @@ const MIDNIGHTS = [
     },
   },
   {
+    location: $location`Gingerbread Industrial Zone`,
+    choices: { 1207: 1, 1212: 3 },
+    available: () => have($item`gingerbread mug`) && itemAmount($item`ginger beer`) < 11,
+    value: () => {
+      const best = bestConsumable("booze", true, $items`ginger beer, astral pilsner`);
+      const gingerBeerValue =
+        (getAverageAdventures($item`ginger beer`) * get("valueOfAdventure")) / 2;
+      const valueDif = gingerBeerValue - best.value;
+      return 2 * valueDif;
+    },
+  },
+  {
     location: $location`Gingerbread Upscale Retail District`,
     available: () =>
       haveOutfit("gingerbread best") &&
