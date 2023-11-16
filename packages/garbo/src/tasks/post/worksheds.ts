@@ -154,8 +154,8 @@ function workshedTask(workshed: GarboWorkshed): GarboPostTask {
   return {
     name: `Workshed: ${workshed.workshed}`,
     completed: () => workshed.done?.() ?? true,
-    ready: () => getWorkshed() === workshed.workshed && workshed.available(),
-    do: () => workshed?.use(),
+    ready: () => getWorkshed() === workshed.workshed && workshed.available() && !!workshed.action,
+    do: () => workshed.use(),
     available: () =>
       [GarboWorkshed.current?.workshed, GarboWorkshed.next?.workshed].includes(workshed.workshed),
   };
