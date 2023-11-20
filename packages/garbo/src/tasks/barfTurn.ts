@@ -393,12 +393,28 @@ const BarfTurnTasks: GarboTask[] = [
     spendsTurn: true,
   },
   {
+    name: "Digitize Wanderer (Underwater, for Green Taffy)",
+    completed: () => Counter.get("Digitize Monster") > 0,
+    ready: shouldGoUnderwater,
+    acquire: () => [{ item: $item`pulled green taffy` }],
+    do: $location`The Briny Deeps`,
+    outfit: () => embezzlerOutfit({}, $location`The Briny Deeps`),
+    combat: new GarboStrategy(
+      () => Macro.item($item`pulled green taffy`).meatKill(),
+      () =>
+        Macro.if_(
+          `(monsterid ${embezzler.id}) && !gotjump && !(pastround 2)`,
+          Macro.item($item`pulled green taffy`).meatKill(),
+        ).abortWithMsg(
+          `Expected a digitized ${SourceTerminal.getDigitizeMonster()}, but encountered something else.`,
+        ),
+    ),
+    sobriety: "sober",
+    spendsTurn: true,
+  },
+  {
     name: "Digitize Wanderer",
     completed: () => Counter.get("Digitize Monster") > 0,
-    acquire: () =>
-      SourceTerminal.getDigitizeMonster() === embezzler && shouldGoUnderwater()
-        ? [{ item: $item`pulled green taffy` }]
-        : [],
     outfit: () =>
       digitizedEmbezzler()
         ? embezzlerOutfit(
@@ -409,24 +425,18 @@ const BarfTurnTasks: GarboTask[] = [
             }),
           )
         : freeFightOutfit(),
-    do: () =>
-      shouldGoUnderwater()
-        ? $location`The Briny Deeps`
-        : wanderer().getTarget({ wanderer: "wanderer", allowEquipment: false }),
+    do: () => wanderer().getTarget({ wanderer: "wanderer", allowEquipment: false }),
     choices: () =>
-      shouldGoUnderwater()
-        ? {}
-        : wanderer().getChoices({
-            wanderer: "wanderer",
-            allowEquipment: false,
-          }),
+      wanderer().getChoices({
+        wanderer: "wanderer",
+        allowEquipment: false,
+      }),
     combat: new GarboStrategy(
-      () =>
-        Macro.externalIf(shouldGoUnderwater(), Macro.item($item`pulled green taffy`)).meatKill(),
+      () => Macro.meatKill(),
       () =>
         Macro.if_(
           `(monsterid ${embezzler.id}) && !gotjump && !(pastround 2)`,
-          Macro.externalIf(shouldGoUnderwater(), Macro.item($item`pulled green taffy`)).meatKill(),
+          Macro.meatKill(),
         ).abortWithMsg(
           `Expected a digitized ${SourceTerminal.getDigitizeMonster()}, but encountered something else.`,
         ),
