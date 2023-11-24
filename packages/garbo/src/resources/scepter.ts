@@ -19,8 +19,6 @@ import { GarboTask } from "../tasks/engine";
 
 import { VPE } from "../lib";
 
-const FFV = globalOptions.prefs.valueOfFreeFight;
-
 type ScepterSkill = {
   skill: Skill;
   value: () => number;
@@ -64,7 +62,7 @@ const SKILL_OPTIONS: ScepterSkill[] = [
   },
   {
     skill: $skill`Aug. 8th: Cat Day!`,
-    value: () => FFV,
+    value: () => globalOptions.prefs.valueOfFreeFight,
     type: "fight",
   },
   {
@@ -97,7 +95,7 @@ const SKILL_OPTIONS: ScepterSkill[] = [
   },
   {
     skill: $skill`Aug. 22nd: Tooth Fairy Day!`,
-    value: () => FFV,
+    value: () => globalOptions.prefs.valueOfFreeFight,
     type: "fight",
   },
   {
