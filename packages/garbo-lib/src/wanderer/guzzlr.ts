@@ -1,4 +1,4 @@
-import { buy, craftType, Location, mallPrice, print, retrieveItem } from "kolmafia";
+import { buy, craftType, Item, Location, mallPrice, print, retrieveItem } from "kolmafia";
 import { $item, freeCrafts, get, Guzzlr, have } from "libram";
 import {
   canAdventureOrUnlock,
@@ -51,18 +51,23 @@ function acceptGuzzlrQuest(options: WandererFactoryOptions, locationSkiplist: Lo
   }
 }
 
-function guzzlrValue(buckValue: number, tier: "bronze" | "gold" | "platinum" | null) {
-  const progressPerTurn = 100 / (10 - get("_guzzlrDeliveries"));
+function guzzlrValuePerTurn(
+  buckValue: number,
+  tier: "bronze" | "gold" | "platinum" | null,
+  guzzlrBooze: Item,
+) {
+  const turnsToCompleteQuest = 100 / Math.max(3, 10 - get("_guzzlrDeliveries"));
+  const boozePrice = mallPrice(guzzlrBooze);
 
   switch (tier) {
     case null:
       return 0;
     case "bronze":
-      return (3 * buckValue) / progressPerTurn;
+      return (3 * buckValue - boozePrice) / turnsToCompleteQuest;
     case "gold":
-      return (6 * buckValue) / progressPerTurn;
+      return (6 * buckValue - boozePrice) / turnsToCompleteQuest;
     case "platinum":
-      return (21.5 * buckValue) / progressPerTurn;
+      return (21.5 * buckValue - boozePrice) / turnsToCompleteQuest;
   }
 }
 
@@ -83,7 +88,7 @@ export function guzzlrFactory(
             new WandererTarget(
               "Guzzlr",
               location,
-              guzzlrValue(buckValue, Guzzlr.getTier()) - mallPrice(guzzlrBooze),
+              guzzlrValuePerTurn(buckValue, Guzzlr.getTier(), guzzlrBooze),
               () => {
                 if (!guzzlrBooze) {
                   // this is an error state - accepted a guzzlr quest but mafia doesn't know the booze
@@ -95,7 +100,7 @@ export function guzzlrFactory(
                   if (guzzlrBooze && (!fancy || (fancy && freeCrafts("booze") > 0))) {
                     retrieveItem(guzzlrBooze);
                   } else if (guzzlrBooze) {
-                    buy(1, guzzlrBooze, guzzlrValue(buckValue, Guzzlr.getTier()));
+                    buy(1, guzzlrBooze, buckValue * Guzzlr.expectedReward());
                   }
                 }
                 return have(guzzlrBooze);

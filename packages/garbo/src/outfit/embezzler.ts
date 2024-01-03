@@ -1,6 +1,6 @@
 import { Outfit, OutfitSpec } from "grimoire-kolmafia";
 import { toJson } from "kolmafia";
-import { $item, $items, $location, Guzzlr } from "libram";
+import { $familiar, $item, $items, $location, Guzzlr } from "libram";
 import { meatFamiliar } from "../familiar";
 import { chooseBjorn } from "./bjorn";
 import { bonusGear } from "./dropsgear";
@@ -37,6 +37,11 @@ export function embezzlerOutfit(spec: OutfitSpec = {}, target = $location.none):
     if (!outfit.equipFirst(waterBreathingEquipment)) {
       outfit.modifier.push("sea");
     }
+  }
+
+  if (outfit.familiar === $familiar`Jill-of-All-Trades`) {
+    outfit.equip($item`LED candle`);
+    outfit.setModes({ jillcandle: "ultraviolet" });
   }
 
   useUPCsIfNeeded(outfit);

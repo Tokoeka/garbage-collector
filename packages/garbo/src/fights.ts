@@ -93,6 +93,7 @@ import {
   getFoldGroup,
   GingerBread,
   have,
+  Latte,
   maxBy,
   property,
   realmAvailable,
@@ -115,12 +116,16 @@ import { globalOptions } from "./config";
 import { postFreeFightDailySetup } from "./dailiespost";
 import { embezzlerCount, embezzlerSources, getNextEmbezzlerFight } from "./embezzler";
 import {
+  bestMidnightAvailable,
   crateStrategy,
   doingGregFight,
+  faxMonster,
   gregReady,
   initializeExtrovermectinZones,
   saberCrateIfSafe,
-} from "./resources/extrovermectin";
+  shouldUnlockIngredients,
+  tryFillLatte,
+} from "./resources";
 import {
   bestFairy,
   freeFightFamiliar,
@@ -158,7 +163,6 @@ import {
   freeFightOutfit,
   magnifyingGlass,
   toSpec,
-  tryFillLatte,
   waterBreathingEquipment,
 } from "./outfit";
 import postCombatActions from "./post";
@@ -167,10 +171,8 @@ import { garboValue } from "./garboValue";
 import { wanderer } from "./garboWanderer";
 import { runEmbezzlerFight } from "./embezzler/execution";
 import { EmbezzlerFightRunOptions } from "./embezzler/staging";
-import { faxMonster } from "./resources/fax";
 import { FreeFightQuest, runGarboQuests } from "./tasks";
 import { expectedFreeFights, possibleTentacleFights } from "./tasks/freeFight";
-import { bestMidnightAvailable } from "./resources";
 import { PostQuest } from "./tasks/post";
 
 const firstChainMacro = () =>
@@ -934,19 +936,6 @@ const freeFightSources = [
   ),
 
   new FreeFight(
-    () => get("_sausageFights") === 0 && have($item`Kramco Sausage-o-Matic™`),
-    () => {
-      propertyManager.setChoices(wanderer().getChoices("wanderer"));
-      adv1(wanderer().getTarget("wanderer"), -1, "");
-    },
-    true,
-    {
-      spec: { offhand: $item`Kramco Sausage-o-Matic™` },
-      wandererOptions: "wanderer",
-    },
-  ),
-
-  new FreeFight(
     () =>
       get("questL11Ron") === "finished"
         ? clamp(5 - get("_glarkCableUses"), 0, itemAmount($item`glark cable`))
@@ -1190,57 +1179,28 @@ const priorityFreeRunFightSources = [
   ),
 ];
 
+function latteFight(
+  ingredient: Exclude<Latte.Ingredient, "vanilla" | "cinnamon" | "pumpkin">,
+): FreeRunFight {
+  return new FreeRunFight(
+    () =>
+      shouldUnlockIngredients() &&
+      !Latte.ingredientsUnlocked().includes(ingredient) &&
+      canAdventure(Latte.locationOf(ingredient)),
+    (runSource: ActionSource) => {
+      const location = Latte.locationOf(ingredient);
+      propertyManager.setChoices(wanderer().unsupportedChoices.get(location) ?? {});
+      garboAdventure(location, runSource.macro);
+    },
+    {
+      spec: { equip: $items`latte lovers member's mug` },
+    },
+    freeRunConstraints(true),
+  );
+}
+
 const freeRunFightSources = [
-  // Unlock Latte ingredients
-  new FreeRunFight(
-    () =>
-      have($item`latte lovers member's mug`) &&
-      !get("latteUnlocks").includes("cajun") &&
-      questStep("questL11MacGuffin") > -1,
-    (runSource: ActionSource) => {
-      propertyManager.setChoices({
-        923: 1, // go to the blackberries in All Around the Map
-        924: 1, // fight a blackberry bush, so that we can freerun
-      });
-      garboAdventure($location`The Black Forest`, runSource.macro);
-    },
-    {
-      spec: { equip: $items`latte lovers member's mug` },
-    },
-    freeRunConstraints(true),
-  ),
-  new FreeRunFight(
-    () =>
-      have($item`latte lovers member's mug`) &&
-      get("latteUnlocks").includes("cajun") &&
-      !get("latteUnlocks").includes("rawhide") &&
-      questStep("questL02Larva") > -1,
-    (runSource: ActionSource) => {
-      propertyManager.setChoices({
-        502: 2, // go towards the stream in Arboreal Respite, so we can skip adventure
-        505: 2, // skip adventure
-      });
-      garboAdventure($location`The Spooky Forest`, runSource.macro);
-    },
-    {
-      spec: { equip: $items`latte lovers member's mug` },
-    },
-    freeRunConstraints(true),
-  ),
-  new FreeRunFight(
-    () =>
-      have($item`latte lovers member's mug`) &&
-      !get("latteUnlocks").includes("carrot") &&
-      get("latteUnlocks").includes("cajun") &&
-      get("latteUnlocks").includes("rawhide"),
-    (runSource: ActionSource) => {
-      garboAdventure($location`The Dire Warren`, runSource.macro);
-    },
-    {
-      spec: { equip: $items`latte lovers member's mug` },
-    },
-    freeRunConstraints(true),
-  ),
+  ...(["cajun", "rawhide", "carrot"] as const).map(latteFight),
   // Fire Extinguisher on best available target.
   new FreeRunFight(
     () =>
@@ -2227,6 +2187,7 @@ function voidMonster(): void {
   postCombatActions();
 }
 
+const BAD_CLL_MONSTERS = $monsters`alert mariachi`;
 type FreeKill = { spec?: OutfitSpec; macro: Skill | Item; used: () => boolean };
 const freeKills: FreeKill[] = [
   {
@@ -2290,13 +2251,16 @@ function killRobortCreaturesForFree() {
 
   while (freeKill && CombatLoversLocket.have() && CombatLoversLocket.reminiscesLeft() > 1) {
     const roboTarget = CombatLoversLocket.findMonster(
-      () => true,
+      (monster: Monster) => !BAD_CLL_MONSTERS.includes(monster),
       (monster: Monster) =>
         valueDrops(monster) + garboValue(Robortender.dropFrom(monster)) * Robortender.dropChance(),
     );
 
     if (!roboTarget) break;
-    const regularTarget = CombatLoversLocket.findMonster(() => true, valueDrops);
+    const regularTarget = CombatLoversLocket.findMonster(
+      (monster: Monster) => !BAD_CLL_MONSTERS.includes(monster),
+      valueDrops,
+    );
     const familiar =
       regularTarget === roboTarget
         ? freeFightFamiliar({

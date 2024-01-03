@@ -1,3 +1,4 @@
+import { canAdventure, myLevel, myMeat, Skill, useSkill } from "kolmafia";
 import {
   $effect,
   $familiar,
@@ -12,11 +13,9 @@ import {
 } from "libram";
 import { globalOptions } from "../config";
 import { embezzlerCount } from "../embezzler";
-import { Potion } from "../potions";
 import { garboAverageValue, garboValue } from "../garboValue";
-import { canAdventure, myLevel, myMeat, Skill, useSkill } from "kolmafia";
+import { Potion } from "../potions";
 import { GarboTask } from "../tasks/engine";
-
 import { VPE } from "../lib";
 
 type ScepterSkill = {
@@ -166,7 +165,9 @@ export function shouldAugustCast(skill: Skill) {
     ((getBestScepterSkills().some((s) => skill === s.skill) &&
       skill.dailylimit &&
       get("_augSkillsCast") < 5) ||
-      (AugustScepter.todaysSkill() === skill && !AugustScepter.getTodayCast()))
+      (AugustScepter.todaysSkill() === skill &&
+        !AugustScepter.getTodayCast() &&
+        skill.dailylimit >= 1))
   );
 }
 

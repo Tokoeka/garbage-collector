@@ -35,6 +35,7 @@ import {
   GingerBread,
   have,
   questStep,
+  set,
   SourceTerminal,
   sum,
   undelay,
@@ -58,8 +59,6 @@ import {
   embezzlerOutfit,
   familiarWaterBreathingEquipment,
   freeFightOutfit,
-  latteFilled,
-  tryFillLatte,
   waterBreathingEquipment,
 } from "../outfit";
 import { digitizedMonstersRemaining } from "../turns";
@@ -67,9 +66,14 @@ import { deliverThesisIfAble } from "../fights";
 import { computeDiet, consumeDiet } from "../diet";
 
 import { GarboTask } from "./engine";
-import { completeBarfQuest } from "../resources/realm";
 import { garboValue } from "../garboValue";
-import { bestMidnightAvailable } from "../resources";
+import {
+  bestMidnightAvailable,
+  completeBarfQuest,
+  shouldFillLatte,
+  tryFillLatte,
+} from "../resources";
+import { acquire } from "../acquire";
 
 const steveAdventures: Map<Location, number[]> = new Map([
   [$location`The Haunted Bedroom`, [1, 3, 1]],
@@ -308,12 +312,58 @@ const NonBarfTurnTasks: AlternateTask[] = [
     sobriety: "drunk",
     turns: () => availableAmount($item`Map to Safety Shelter Grimace Prime`),
   },
+  {
+    name: "Use Day Shorteners (drunk)",
+    ready: () =>
+      globalOptions.ascend &&
+      garboValue($item`extra time`) > mallPrice($item`day shortener`) + 5 * get("valueOfAdventure"),
+    completed: () => get(`_garboDayShortenersUsed`, 0) >= 3, // Arbitrary cap at 3, since using 3 results in only 1 adventure
+    do: () => {
+      if (
+        acquire(
+          1,
+          $item`day shortener`,
+          garboValue($item`extra time`) - 5 * get("valueOfAdventure"),
+          false,
+        )
+      ) {
+        use($item`day shortener`);
+      }
+      set(`_garboDayShortenersUsed`, get(`_garboDayShortenersUsed`, 0) + 1);
+    },
+    spendsTurn: true,
+    sobriety: "drunk",
+    turns: () => 5 * (3 - get(`_garboDayShortenersUsed`, 0)),
+  },
+  {
+    name: "Use Day Shorteners (sober)",
+    ready: () =>
+      !globalOptions.ascend &&
+      garboValue($item`extra time`) > mallPrice($item`day shortener`) + 5 * get("valueOfAdventure"),
+    completed: () => get(`_garboDayShortenersUsed`, 0) >= 3, // Arbitrary cap at 3, since using 3 results in only 1 adventure
+    do: () => {
+      if (
+        acquire(
+          1,
+          $item`day shortener`,
+          garboValue($item`extra time`) - 5 * get("valueOfAdventure"),
+          false,
+        )
+      ) {
+        use($item`day shortener`);
+      }
+      set(`_garboDayShortenersUsed`, get(`_garboDayShortenersUsed`, 0) + 1);
+    },
+    spendsTurn: true,
+    sobriety: "sober",
+    turns: () => 5 * (3 - get(`_garboDayShortenersUsed`, 0)),
+  },
 ];
 
 const BarfTurnTasks: GarboTask[] = [
   {
     name: "Latte",
-    completed: () => latteFilled(),
+    completed: () => !shouldFillLatte(),
     do: () => tryFillLatte(),
     spendsTurn: false,
   },

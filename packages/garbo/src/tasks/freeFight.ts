@@ -37,6 +37,7 @@ import {
   $monster,
   $phyla,
   $skill,
+  BurningLeaves,
   ChateauMantegna,
   clamp,
   CombatLoversLocket,
@@ -58,6 +59,8 @@ import { garboValue } from "../garboValue";
 import { freeFightOutfit } from "../outfit";
 import { GarboTask } from "./engine";
 import { doCandyTrick, shouldAugustCast } from "../resources";
+import { kramcoGuaranteed } from "../lib";
+import { wanderer } from "../garboWanderer";
 
 type GarboFreeFightTask = Extract<GarboTask, { combat: GarboStrategy }> & {
   combatCount: () => number;
@@ -429,7 +432,17 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     combatCount: () => clamp(10 - get("_brickoFights"), 0, 10),
     tentacle: false,
   },
-  // First kramco (wanderer)
+  {
+    name: "Kramco",
+    ready: () => have($item`Kramco Sausage-o-Matic™`),
+    completed: () => !kramcoGuaranteed(),
+    do: () => wanderer().getTarget({ wanderer: "freefight", allowEquipment: false }),
+    outfit: () => freeFightOutfit({ offhand: $item`Kramco Sausage-o-Matic™` }),
+    choices: () => wanderer().getChoices({ wanderer: "freefight", allowEquipment: false }),
+    combat: new GarboStrategy(() => Macro.basicCombat()),
+    combatCount: () => clamp(1 - get("_sausageFights"), 0, 1),
+    tentacle: true,
+  },
   // Grimacia
   // Saber
   // Pygmys
@@ -539,6 +552,18 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     combatCount: () => clamp(3 - CombatLoversLocket.reminiscesLeft() - locketsToSave(), 0, 3),
   },
   { ...doCandyTrick(), combatCount: () => 5, tentacle: true },
+  // leaf burning fights
+  {
+    name: "Burning Leaves Flaming Leaflet Fight",
+    ready: () =>
+      BurningLeaves.have() &&
+      BurningLeaves.numberOfLeaves() >=
+        (BurningLeaves.burnFor.get($monster`flaming leaflet`) ?? Infinity),
+    completed: () => get("_leafMonstersFought") >= 5,
+    do: () => BurningLeaves.burnSpecialLeaves($monster`flaming leaflet`),
+    tentacle: true,
+    combatCount: () => clamp(5 - get("_leafMonstersFought"), 0, 5),
+  },
   // li'l ninja costume
   // closed-circuit pay phone (make into it's own Quest)
 ].map(freeFightTask);

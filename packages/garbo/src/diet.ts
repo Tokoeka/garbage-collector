@@ -71,14 +71,12 @@ import { acquire, priceCaps } from "./acquire";
 import { withVIPClan } from "./clan";
 import { globalOptions } from "./config";
 import { embezzlerCount } from "./embezzler";
-import { expectedGregs } from "./resources/extrovermectin";
+import { expectedGregs, shouldAugustCast, synthesize } from "./resources";
 import { arrayEquals, baseMeat, HIGHLIGHT, userConfirmDialog, VPE } from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
-import synthesize from "./resources/synthesis";
 import { estimatedGarboTurns } from "./turns";
 import { garboValue } from "./garboValue";
-import { shouldAugustCast } from "./resources";
 
 const MPA = get("valueOfAdventure");
 print(`Using adventure value ${MPA}.`, HIGHLIGHT);
@@ -241,6 +239,21 @@ export function nonOrganAdventures(): void {
   if (globalOptions.ascend) {
     useIfUnused($item`borrowed time`, "_borrowedTimeUsed", 20 * MPA);
   }
+
+  if (get("_extraTimeUsed", 3) < 3) {
+    const extraTimeValue = (timesUsed: number): number => {
+      const advs = [1, 3, 5][3 - timesUsed];
+      return advs * MPA;
+    };
+    const extraTimeRemaining = 2 - get("_extraTimeUsed", 3);
+    for (let i = extraTimeRemaining; i > 0; i--) {
+      if (extraTimeValue(i) > mallPrice($item`extra time`)) {
+        if (acquire(1, $item`extra time`, extraTimeValue(i), false)) {
+          use($item`extra time`);
+        }
+      } else break;
+    }
+  }
 }
 
 function pillCheck(): void {
@@ -379,7 +392,7 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`frozen banquet`),
     new MenuItem($item`deviled egg`),
     new MenuItem($item`spaghetti breakfast`, { maximum: spaghettiBreakfast }),
-    new MenuItem($item`extra-greasy slider`),
+    new MenuItem($item`extra-greasy slider`, { maximum: 1 }),
     new MenuItem(mallMin(lasagnas)),
     new MenuItem(mallMin(smallEpics)),
     new MenuItem($item`green hamhock`),
@@ -400,7 +413,7 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`splendid martini`),
     new MenuItem($item`low tide martini`),
     new MenuItem($item`Eye and a Twist`),
-    new MenuItem($item`jar of fermented pickle juice`),
+    new MenuItem($item`jar of fermented pickle juice`, { maximum: 1 }),
     new MenuItem(mallMin(complexMushroomWines)),
     new MenuItem(mallMin(perfectDrinks)),
     new MenuItem($item`green eggnog`),
@@ -412,7 +425,7 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`prismatic wad`),
     new MenuItem($item`transdermal smoke patch`),
     new MenuItem($item`antimatter wad`),
-    new MenuItem($item`voodoo snuff`),
+    new MenuItem($item`voodoo snuff`, { maximum: 1 }),
     new MenuItem($item`blood-drive sticker`),
     new MenuItem(mallMin(standardSpleenItems)),
     new MenuItem(mallMin($items`not-a-pipe, glimmering roc feather`)),
