@@ -90,7 +90,7 @@ const worksheds = [
     minTurns: 80,
   }),
   new GarboWorkshed({
-    workshed: $item`Asdon Martin keyfob`,
+    workshed: $item`Asdon Martin keyfob (on ring)`,
     done: () => {
       return (
         haveEffect($effect`Driving Observantly`) >=

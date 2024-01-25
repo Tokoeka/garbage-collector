@@ -98,7 +98,7 @@ const valueDrops = (monster: Monster) =>
   );
 const locketMonster = () => CombatLoversLocket.findMonster(isFree, valueDrops);
 const locketsToSave = () =>
-  CombatLoversLocket.availableLocketMonsters().includes($monster`Knob Goblin Embezzler`) ? 1 : 0;
+  CombatLoversLocket.availableLocketMonsters().includes(globalOptions.target) ? 1 : 0;
 
 const maxSealsAvailable = () => (retrieveItem(1, $item`Claw of the Infernal Seal`) ? 10 : 5);
 
@@ -436,9 +436,9 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     name: "Kramco",
     ready: () => have($item`Kramco Sausage-o-Matic™`),
     completed: () => !kramcoGuaranteed(),
-    do: () => wanderer().getTarget({ wanderer: "freefight", allowEquipment: false }),
+    do: () => wanderer().getTarget({ wanderer: "wanderer", allowEquipment: false }),
     outfit: () => freeFightOutfit({ offhand: $item`Kramco Sausage-o-Matic™` }),
-    choices: () => wanderer().getChoices({ wanderer: "freefight", allowEquipment: false }),
+    choices: () => wanderer().getChoices({ wanderer: "wanderer", allowEquipment: false }),
     combat: new GarboStrategy(() => Macro.basicCombat()),
     combatCount: () => clamp(1 - get("_sausageFights"), 0, 1),
     tentacle: true,

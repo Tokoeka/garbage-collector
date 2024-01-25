@@ -1,9 +1,10 @@
 import { haveEquipped, Location, mallPrice, retrieveItem } from "kolmafia";
 import { $item, $location, $skill, get } from "libram";
-import { embezzler, propertyManager, VPE } from "../lib";
+import { propertyManager, VPE } from "../lib";
 import { checkUnderwater, EmbezzlerFightConfigOptions, RunOptions } from "./lib";
 import { Macro } from "../combat";
 import { wanderer } from "../garboWanderer";
+import { globalOptions } from "../config";
 
 const taffyIsWorthIt = () =>
   mallPrice($item`pulled green taffy`) < VPE() - get("valueOfAdventure") &&
@@ -13,8 +14,11 @@ const wandererFailsafeMacro = () =>
   Macro.externalIf(
     haveEquipped($item`backup camera`) &&
       get("_backUpUses") < 11 &&
-      get("lastCopyableMonster") === embezzler,
-    Macro.if_(`!monsterid ${embezzler.id}`, Macro.skill($skill`Back-Up to your Last Enemy`)),
+      get("lastCopyableMonster") === globalOptions.target,
+    Macro.if_(
+      `!monsterid ${globalOptions.target.id}`,
+      Macro.skill($skill`Back-Up to your Last Enemy`),
+    ),
   );
 
 export class EmbezzlerFightRunOptions implements RunOptions {

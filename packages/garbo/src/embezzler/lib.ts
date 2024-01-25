@@ -16,7 +16,7 @@ import { OutfitSpec } from "grimoire-kolmafia";
 
 import { waterBreathingEquipment } from "../outfit";
 import { Macro } from "../combat";
-import { embezzler } from "../lib";
+import { globalOptions } from "../config";
 
 /**
  * Configure the behavior of the fights in use in different parts of the fight engine
@@ -76,7 +76,7 @@ export function changeLastAdvLocationTask(): {
   do: () => void;
 } {
   const base = {
-    ready: () => CrystalBall.ponder().get($location`The Dire Warren`) !== embezzler,
+    ready: () => CrystalBall.ponder().get($location`The Dire Warren`) !== globalOptions.target,
     completed: () => myLocation() !== $location`The Dire Warren`,
   };
   switch (getChangeLastAdvLocationMethod()) {

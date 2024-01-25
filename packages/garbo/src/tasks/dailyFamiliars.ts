@@ -24,7 +24,7 @@ import {
 } from "libram";
 import { withStash } from "../clan";
 import { globalOptions } from "../config";
-import { embezzlerCount } from "../embezzler";
+import { copyTargetCount } from "../embezzler";
 import { meatFamiliar, setBestLeprechaunAsMeatFamiliar } from "../familiar";
 import {
   baseMeat,
@@ -41,7 +41,7 @@ import { Quest } from "grimoire-kolmafia";
 import { acquire } from "../acquire";
 
 function drivebyValue(): number {
-  const embezzlers = embezzlerCount();
+  const embezzlers = copyTargetCount();
   const tourists = ((estimatedGarboTurns() - embezzlers) * turnsToNC) / (turnsToNC + 1);
   const marginalRoboWeight = 50;
   const meatPercentDelta =
@@ -52,7 +52,7 @@ function drivebyValue(): number {
 }
 
 function entendreValue(): number {
-  const embezzlers = embezzlerCount();
+  const embezzlers = copyTargetCount();
   const tourists = ((estimatedGarboTurns() - embezzlers) * turnsToNC) / (turnsToNC + 1);
   const marginalRoboWeight = 50;
   const itemPercent = Math.sqrt(55 * marginalRoboWeight) + marginalRoboWeight - 3;

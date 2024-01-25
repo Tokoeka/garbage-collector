@@ -32,6 +32,39 @@ const MIDNIGHTS = [
     },
   },
   {
+    location: $location`Gingerbread Upscale Retail District`,
+    available: () =>
+      haveOutfit("gingerbread best") &&
+      outfitPieces("gingerbread best").every((piece) => canEquip(piece)) &&
+      have($item`sprinkles`, 300),
+    choices: { 1209: 2, 1214: 2 },
+    value: () => garboValue($item`fancy chocolate sculpture`),
+  },
+  {
+    location: $location`Gingerbread Upscale Retail District`,
+    available: () =>
+      haveOutfit("gingerbread best") &&
+      outfitPieces("gingerbread best").every((piece) => canEquip(piece)) &&
+      have($item`sprinkles`, 1000),
+    choices: { 1209: 2, 1214: 3 },
+    value: () => garboValue($item`Pop Art: a Guide`),
+  },
+  {
+    location: $location`Gingerbread Upscale Retail District`,
+    available: () =>
+      haveOutfit("gingerbread best") &&
+      outfitPieces("gingerbread best").every((piece) => canEquip(piece)) &&
+      have($item`sprinkles`, 1000),
+    choices: { 1209: 2, 1214: 4 },
+    value: () => garboValue($item`No Hats as Art`),
+  },
+  {
+    location: $location`Gingerbread Civic Center`,
+    choices: { 1203: 2 },
+    available: () => have($item`sprinkles`, 300) && !GingerBread.canJudgeFudge(),
+    value: () => garboValue($item`counterfeit city`),
+  },
+  {
     location: $location`Gingerbread Industrial Zone`,
     choices: { 1207: 1, 1212: 3 },
     available: () => have($item`gingerbread mug`) && itemAmount($item`ginger beer`) < 11,
