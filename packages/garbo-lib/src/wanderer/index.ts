@@ -144,7 +144,7 @@ export class WandererManager {
     [$location`The Haunted Library`, { 163: 4, 888: 5, 889: 5 }],
     [$location`The Haunted Gallery`, { 89: 6, 91: 2 }],
     [$location`The Hidden Park`, { 789: 6 }],
-    [$location`A Mob of Zeppelin Protesters`, { 1432: 1, 856: 2, 857: 2, 858: 2 }],
+    [$location`A Mob of Zeppelin Protesters`, { 1432: 1, 856: 2, 857: 3, 858: 2 }],
     [$location`A-Boo Peak`, { 1430: 2 }],
     [$location`Sloppy Seconds Diner`, { 919: 6 }],
     [$location`VYKEA`, { 1115: 6 }],
