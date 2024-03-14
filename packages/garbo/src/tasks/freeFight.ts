@@ -4,8 +4,6 @@ import {
   canadiaAvailable,
   canAdventure,
   canEquip,
-  changeMcd,
-  gnomadsAvailable,
   guildStoreAvailable,
   handlingChoice,
   inebrietyLimit,
