@@ -1,10 +1,7 @@
 import { Quest } from "grimoire-kolmafia";
 import {
   availableAmount,
-  canadiaAvailable,
   canEquip,
-  changeMcd,
-  gnomadsAvailable,
   guildStoreAvailable,
   handlingChoice,
   Item,
@@ -15,13 +12,10 @@ import {
   Monster,
   myClass,
   myMaxhp,
-  mySoulsauce,
-  numericModifier,
   restoreHp,
   retrieveItem,
   runChoice,
   runCombat,
-  Skill,
   use,
   useSkill,
   visitUrl,
@@ -41,14 +35,12 @@ import {
   ChateauMantegna,
   clamp,
   CombatLoversLocket,
-  Delayed,
   ensureEffect,
   get,
   have,
   maxBy,
   sum,
   TunnelOfLove,
-  undelay,
   uneffect,
   Witchess,
 } from "libram";
@@ -110,7 +102,7 @@ function sealsAvailable(): number {
   return Math.min(max, available);
 }
 
-const stunDurations = new Map<Skill | Item, Delayed<number>>([
+/* const stunDurations = new Map<Skill | Item, Delayed<number>>([
   [$skill`Blood Bubble`, 1],
   [
     $skill`Entangling Noodles`,
@@ -135,7 +127,7 @@ const stunDurations = new Map<Skill | Item, Delayed<number>>([
   [$skill`Soul Bubble`, () => (mySoulsauce() >= 5 ? 2 : 0)],
   [$skill`Summon Love Gnats`, 1],
   [$item`Rain-Doh blue balls`, 1],
-]);
+]); */
 
 const FreeFightTasks: GarboFreeFightTask[] = [
   {
@@ -270,7 +262,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     combatCount: () => clamp(3 - get("_lynyrdSnareUses"), 0, 3),
     tentacle: false,
   },
-  {
+  /* {
     name: "[glitch season reward name]: retrocape edition",
     ready: () =>
       (globalOptions.prefs.fightGlitch ?? false) &&
@@ -323,7 +315,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       }
     },
     tentacle: false,
-  },
+  }, */
   {
     name: "[glitch season reward name]",
     ready: () => globalOptions.prefs.fightGlitch ?? false,
