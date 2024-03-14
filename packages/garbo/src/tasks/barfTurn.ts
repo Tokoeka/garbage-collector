@@ -64,6 +64,7 @@ import { deliverThesisIfAble } from "../fights";
 import { computeDiet, consumeDiet } from "../diet";
 
 import { GarboTask } from "./engine";
+import { trackMarginalMpa } from "../session";
 import { garboValue } from "../garboValue";
 import {
   bestMidnightAvailable,
@@ -499,7 +500,7 @@ const BarfTurnTasks: GarboTask[] = [
     do: () => use($item`envyfish egg`),
     spendsTurn: true,
     outfit: embezzlerOutfit,
-    combat: new GarboStrategy(() => Macro.embezzler()),
+    combat: new GarboStrategy(() => Macro.embezzler("envyfish egg")),
   },
   wanderTask(
     "yellow ray",
@@ -630,7 +631,10 @@ export const BarfTurnQuest: Quest<GarboTask> = {
             Macro.meatKill(),
           ).abort(),
       ),
-      post: () => completeBarfQuest(),
+      post: () => {
+        completeBarfQuest();
+        trackMarginalMpa();
+      },
       spendsTurn: true,
     },
   ],

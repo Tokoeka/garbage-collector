@@ -338,7 +338,7 @@ function startWandererCounter() {
       }
       garboAdventure(
         $location`The Haunted Kitchen`,
-        Macro.if_(globalOptions.target, Macro.embezzler()).step(run.macro),
+        Macro.if_(globalOptions.target, Macro.embezzler("wanderer")).step(run.macro),
       );
     } while (
       get("lastCopyableMonster") === $monster`Government agent` ||
@@ -432,6 +432,7 @@ export function dailyFights(): void {
             runEmbezzlerFight(fightSource, {
               macro: macro(),
               useAuto: false,
+              action: "Pocket Professor",
             });
             eventLog.initialCopyTargetsFought +=
               1 + get("_pocketProfessorLectures") - startLectures;
@@ -499,7 +500,7 @@ export function dailyFights(): void {
         setLocation(location);
         embezzlerOutfit({ ...nextFight.spec, ...famSpec }, location).dress();
 
-        runEmbezzlerFight(nextFight);
+        runEmbezzlerFight(nextFight, { action: nextFight.name });
         postCombatActions();
 
         print(`Finished ${nextFight.name}`);

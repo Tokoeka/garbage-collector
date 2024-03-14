@@ -26,11 +26,13 @@ export class EmbezzlerFightRunOptions implements RunOptions {
   #macro?: Macro;
   #location?: Location;
   #useAuto?: boolean;
+  #action?: string;
   constructor(
     configOptions: EmbezzlerFightConfigOptions,
-    { macro, location, useAuto }: Partial<RunOptions> = {},
+    { macro, location, useAuto, action }: Partial<RunOptions> = {},
   ) {
     this.configOptions = configOptions;
+    this.#action = action;
     this.#macro = macro;
     this.#location = location;
     this.#useAuto = useAuto;
@@ -59,7 +61,7 @@ export class EmbezzlerFightRunOptions implements RunOptions {
   }
 
   get macro(): Macro {
-    const baseMacro = this.#macro ?? Macro.embezzler();
+    const baseMacro = this.#macro ?? Macro.embezzler(this.action);
     return this.configOptions.draggable === "wanderer"
       ? wandererFailsafeMacro().step(baseMacro)
       : baseMacro;
@@ -67,5 +69,9 @@ export class EmbezzlerFightRunOptions implements RunOptions {
 
   get useAuto(): boolean {
     return this.#useAuto ?? true;
+  }
+
+  get action(): string {
+    return this.#action ?? "???";
   }
 }
