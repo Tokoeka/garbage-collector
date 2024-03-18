@@ -142,7 +142,7 @@ export function modeValueOfItem(mode: BonusEquipMode): number {
 
 export const WISH_VALUE = 50000;
 export const HIGHLIGHT = isDarkMode() ? "yellow" : "blue";
-export const ESTIMATED_OVERDRUNK_TURNS = 60;
+export const ESTIMATED_OVERDRUNK_TURNS = 40;
 export const VPE = (): number => globalOptions.prefs.embezzlerValue;
 
 export const propertyManager = new PropertiesManager();

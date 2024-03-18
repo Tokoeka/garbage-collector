@@ -1,4 +1,4 @@
-import { Item, print } from "kolmafia";
+import { inebrietyLimit, Item, myInebriety, print } from "kolmafia";
 import { $items, get, Session, set } from "libram";
 import { globalOptions } from "./config";
 import { formatNumber, HIGHLIGHT, resetDailyPreference } from "./lib";
@@ -6,13 +6,14 @@ import { failedWishes } from "./potions";
 import { garboValue } from "./garboValue";
 import { estimatedGarboTurns } from "./turns";
 
-type SessionKey = "full" | "barf" | "meat-start" | "meat-end" | "item";
+type SessionKey = "full" | "barf" | "meat-start" | "meat-end" | "item" | "item-end";
 const sessions: Map<SessionKey, Session> = new Map();
 /**
  * Start a new session, deleting any old session
  */
 export function startSession(): void {
   sessions.set("full", Session.current());
+  print("DEBUG: Starting Session", "red");
 }
 
 /**
@@ -37,23 +38,39 @@ export function trackMarginalMpa() {
   const current = Session.current();
   if (!barf) {
     sessions.set("barf", Session.current());
+    print("DEBUG: Starting Barf Tracking", "red");
   } else {
     const turns = barf.diff(current).totalTurns;
+    let overDrunk = 0;
+    if (globalOptions.ascend && myInebriety() <= inebrietyLimit()) {
+      overDrunk = -40;
+    }
     // track items if we have run at least 100 turns in barf mountain or we have less than 200 turns left in barf mountain
     const item = sessions.get("item");
     if (!item && (turns > 100 || estimatedGarboTurns() <= 200)) {
       sessions.set("item", current);
+      print("DEBUG: Starting Item Tracking", "red");
     }
+
+    // end tracking items prior to depositing clan stash items back
+    const itemEnd = sessions.get("item-end");
+    if (!itemEnd && estimatedGarboTurns() + overDrunk <= 3) {
+      sessions.set("item-end", current);
+      print("DEBUG: Ending Item Tracking", "red");
+    }
+
     // start tracking meat if there are less than 75 turns left in barf mountain
     const meatStart = sessions.get("meat-start");
     if (!meatStart && estimatedGarboTurns() <= 75) {
       sessions.set("meat-start", current);
+      // print("DEBUG: Starting Meat tracking", "red");
     }
 
     // stop tracking meat if there are less than 25 turns left in barf moutain
     const meatEnd = sessions.get("meat-end");
-    if (!meatEnd && estimatedGarboTurns() <= 25) {
+    if (!meatEnd && estimatedGarboTurns() + overDrunk <= 25) {
       sessions.set("meat-end", current);
+      print("DEBUG: Ending Meat tracking", "red");
     }
   }
 }
@@ -65,9 +82,21 @@ function printMarginalSession() {
   const meatStart = sessions.get("meat-start");
   const meatEnd = sessions.get("meat-end");
   const item = sessions.get("item");
+  const itemEnd = sessions.get("item-end");
+  print("DEBUG: PMS1", "red");
+  if (barf) {
+    print("DEBUG: PMS Barf");
+  }
+  if (meatStart) {
+    print("DEBUG: PMS MeatStart");
+  }
+  if (meatEnd) {
+    print("DEBUG: PMS MeatEnd");
+  }
 
   // we can only print out marginal items if we've started tracking for marginal value
   if (barf && meatStart && meatEnd) {
+    print("DEBUG: PMS2", "red");
     const { itemDetails: barfItemDetails } = barf.value(garboValue);
 
     const isOutlier = (detail: { item: Item; value: number; quantity: number }) =>
@@ -81,9 +110,10 @@ function printMarginalSession() {
       isOutlier,
     });
 
-    if (item) {
+    if (item && itemEnd) {
+      print("DEBUG: PMS3", "red");
       // MPA printout including maringal items
-      const itemMpa = Session.computeMPA(item, Session.current(), {
+      const itemMpa = Session.computeMPA(item, itemEnd, {
         value: garboValue,
         isOutlier,
         excludeValue: { item: extraValue },
@@ -144,7 +174,9 @@ function setGarboDaily(property: GarboResultsProperty, value: number) {
   set(property, value);
 }
 function resetGarboDaily() {
+  print("DEBUG: Garbo Daily Reset", "red");
   if (resetDailyPreference("garboResultsDate")) {
+    print("DEBUG: Reset TRUE", "red");
     for (const prop of garboResultsProperties) {
       setGarboDaily(prop, 0);
     }
@@ -152,6 +184,7 @@ function resetGarboDaily() {
 }
 
 export function endSession(printLog = true): void {
+  print("DEBUG: Session End", "red");
   resetGarboDaily();
   const message = (head: string, turns: number, meat: number, items: number) =>
     print(
@@ -168,8 +201,8 @@ export function endSession(printLog = true): void {
 
   if (printLog) {
     // list the top 3 gaining and top 3 losing items
-    const losers = itemDetails.sort((a, b) => a.value - b.value).slice(0, 3);
-    const winners = itemDetails.reverse().slice(0, 3);
+    const losers = itemDetails.sort((a, b) => a.value - b.value).slice(0, 10);
+    const winners = itemDetails.reverse().slice(0, 10);
     print(`Extreme Items:`, HIGHLIGHT);
     for (const detail of [...winners, ...losers]) {
       print(`${detail.quantity} ${detail.item} worth ${detail.value.toFixed(0)} total`, HIGHLIGHT);
