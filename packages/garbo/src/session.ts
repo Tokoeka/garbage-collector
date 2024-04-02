@@ -6,13 +6,7 @@ import { failedWishes } from "./potions";
 import { garboValue } from "./garboValue";
 import { estimatedGarboTurns } from "./turns";
 
-type SessionKey =
-  | "full"
-  | "barf"
-  | "meat-start"
-  | "meat-end"
-  | "item-start"
-  | "item-end";
+type SessionKey = "full" | "barf" | "meat-start" | "meat-end" | "item-start" | "item-end";
 const sessions: Map<SessionKey, Session> = new Map();
 /**
  * Start a new session, deleting any old session
@@ -199,8 +193,8 @@ export function endSession(printLog = true): void {
 
   if (printLog) {
     // list the top 3 gaining and top 3 losing items
-    const losers = itemDetails.sort((a, b) => a.value - b.value).slice(0, 3);
-    const winners = itemDetails.reverse().slice(0, 3);
+    const losers = itemDetails.sort((a, b) => a.value - b.value).slice(0, 10);
+    const winners = itemDetails.reverse().slice(0, 10);
     print(`Extreme Items:`, HIGHLIGHT);
     for (const detail of [...winners, ...losers]) {
       print(
