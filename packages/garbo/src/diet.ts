@@ -74,10 +74,11 @@ import { copyTargetCount } from "./embezzler";
 import { expectedGregs, shouldAugustCast, synthesize } from "./resources";
 import {
   arrayEquals,
-  EMBEZZLER_MULTIPLIER,
+  baseMeat,
   HIGHLIGHT,
   targetMeat,
   userConfirmDialog,
+  VPE,
 } from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
@@ -592,7 +593,7 @@ function gregariousCount(): {
 
 function copiers(): MenuItem<Note>[] {
   const embezzlerDifferential = targettingMeat()
-    ? EMBEZZLER_MULTIPLIER() * MPA
+    ? VPE() - MPA
     : 0;
   const { expectedGregariousFights, marginalGregariousFights } =
     gregariousCount();

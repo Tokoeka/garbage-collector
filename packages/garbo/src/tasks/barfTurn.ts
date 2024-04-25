@@ -59,7 +59,7 @@ import {
   kramcoGuaranteed,
   romanticMonsterImpossible,
   sober,
-  VPE
+  VPE,
 } from "../lib";
 import {
   barfOutfit,
@@ -153,7 +153,6 @@ function shouldGoUnderwater(): boolean {
   }
   if (!canAdventure($location`The Briny Deeps`)) return false;
 
-  // TODO: if you didn't digitize an embezzler, this equation may not be right
   if (
     mallPrice($item`pulled green taffy`) >
     (targettingMeat()
