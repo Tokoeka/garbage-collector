@@ -35,12 +35,12 @@ import { globalOptions } from "../config";
  * @member {boolean?} wrongEncounterName if mafia does not update the lastEncounter properly when doing this fight (defaults to value of gregariousReplace)
  */
 export interface EmbezzlerFightConfigOptions {
-	spec?: OutfitSpec;
-	draggable?: DraggableFight;
-	canInitializeWandererCounters?: boolean;
-	wrongEncounterName?: boolean;
-	gregariousReplace?: boolean;
-	location?: Location;
+  spec?: OutfitSpec;
+  draggable?: DraggableFight;
+  canInitializeWandererCounters?: boolean;
+  wrongEncounterName?: boolean;
+  gregariousReplace?: boolean;
+  location?: Location;
 }
 
 export interface RunOptions {
@@ -63,10 +63,10 @@ export function checkUnderwater(): boolean {
   ) {
     if (!have($effect`Fishy`) && !get("_fishyPipeUsed")) use($item`fishy pipe`);
 
-		return have($effect`Fishy`);
-	}
+    return have($effect`Fishy`);
+  }
 
-	return false;
+  return false;
 }
 
 type ChangeLastAdvLocationMethod = "hiddencity" | "dailydungeon";

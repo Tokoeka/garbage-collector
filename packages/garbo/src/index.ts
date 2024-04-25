@@ -513,7 +513,10 @@ export function main(argString = ""): void {
             get("_garboYachtzeeChainCompleted", false))
         ) {
           runDiet();
-        } else if (!globalOptions.simdiet && !(myInebriety() > inebrietyLimit())) {
+        } else if (
+          !globalOptions.simdiet &&
+          !(myInebriety() > inebrietyLimit())
+        ) {
           nonOrganAdventures();
         }
 

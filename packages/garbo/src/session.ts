@@ -6,7 +6,13 @@ import { failedWishes } from "./potions";
 import { garboValue } from "./garboValue";
 import { estimatedGarboTurns } from "./turns";
 
-type SessionKey = "full" | "barf" | "meat-start" | "meat-end" | "item-start" | "item-end";
+type SessionKey =
+  | "full"
+  | "barf"
+  | "meat-start"
+  | "meat-end"
+  | "item-start"
+  | "item-end";
 const sessions: Map<SessionKey, Session> = new Map();
 /**
  * Start a new session, deleting any old session
