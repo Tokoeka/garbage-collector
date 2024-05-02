@@ -251,7 +251,17 @@ export function main(argString = ""): void {
   if (
     !globalOptions.nobarf &&
     globalOptions.prefs.valueOfAdventure &&
-    globalOptions.prefs.valueOfAdventure >= 10000
+    globalOptions.prefs.valueOfAdventure >= 8500 &&
+    globalOptions.prefs.valueOfAdventure < 17500
+  ) {
+    userConfirmDialog(
+      `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, are you sure you want to continue?`,
+      false,
+    );
+  }
+  if (
+    globalOptions.prefs.valueOfAdventure &&
+    globalOptions.prefs.valueOfAdventure >= 17500
   ) {
     throw `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, which is definitely incorrect. Please set it to your reliable marginal turn value.`;
   }
