@@ -86,14 +86,16 @@ const PostFreeFightTasks: GarboTask[] = [
     ready: () =>
       (have($item`packet of mushroom spores`) ||
         getCampground()["packet of mushroom spores"] !== undefined) &&
-      get("_mushroomGardenFights") > 0 &&
-      get("_mushroomGardenVisited") === false,
+      get("_mushroomGardenFights") > 0,
     completed: () => get("_mushroomGardenVisited") === true,
     do: () => {
       if (have($item`packet of mushroom spores`)) {
         use($item`packet of mushroom spores`);
       }
-      setChoice(1410, globalOptions.ascend ? 2 : 1);
+      setChoice(
+        1410,
+        globalOptions.ascend || get("mushroomGardenCropLevel") >= 11 ? 2 : 1,
+      );
       garboAdventure($location`Your Mushroom Garden`, Macro.basicCombat());
       if (have($item`packet of tall grass seeds`)) {
         use($item`packet of tall grass seeds`);
