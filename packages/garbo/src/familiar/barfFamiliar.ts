@@ -26,12 +26,7 @@ import {
 } from "libram";
 import { NumericModifier } from "libram/dist/modifierTypes";
 import { bonusGear } from "../outfit";
-import {
-  baseMeat,
-  BonusEquipMode,
-  EMBEZZLER_MULTIPLIER,
-  HIGHLIGHT,
-} from "../lib";
+import { baseMeat, BonusEquipMode, HIGHLIGHT, VPE } from "../lib";
 import { computeBarfOutfit } from "../outfit/barf";
 import { estimatedGarboTurns } from "../turns";
 import { getAllDrops } from "./dropFamiliars";

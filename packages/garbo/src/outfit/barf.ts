@@ -28,12 +28,7 @@ import { barfFamiliar } from "../familiar";
 import { chooseBjorn } from "./bjorn";
 import { bonusGear } from "./dropsgear";
 import { bestBjornalike, cleaverCheck, validateGarbageFoldable } from "./lib";
-import {
-  BonusEquipMode,
-  EMBEZZLER_MULTIPLIER,
-  modeValueOfItem,
-  modeValueOfMeat,
-} from "../lib";
+import { BonusEquipMode, modeValueOfItem, modeValueOfMeat, VPE } from "../lib";
 import { trackMarginalTurnExtraValue } from "../session";
 
 function chooseGun() {
@@ -124,7 +119,7 @@ export function computeBarfOutfit(
     outfit.familiar === $familiar`Chest Mimic` &&
     $familiar`Chest Mimic`.experience < 550
   ) {
-    const famExpValue = (EMBEZZLER_MULTIPLIER() * get("valueOfAdventure")) / 50;
+    const famExpValue = (VPE() - get("valueOfAdventure")) / 50;
     outfit.modifier.push(`${famExpValue} Familiar Experience`);
   }
 
