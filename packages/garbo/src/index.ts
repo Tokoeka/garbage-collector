@@ -388,8 +388,6 @@ export function main(argString = ""): void {
           "maximizerMRUList",
           "testudinalTeachings",
           "garboEmbezzlerDate",
-          "garboEmbezzlerCount",
-          "garboEmbezzlerSources",
           "spadingData",
         ]),
       ]
