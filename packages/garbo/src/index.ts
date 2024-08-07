@@ -387,7 +387,6 @@ export function main(argString = ""): void {
           "libram_savedMacro",
           "maximizerMRUList",
           "testudinalTeachings",
-          "garboEmbezzlerDate",
           "spadingData",
         ]),
       ]
