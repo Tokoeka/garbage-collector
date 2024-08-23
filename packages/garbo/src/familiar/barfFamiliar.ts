@@ -58,7 +58,7 @@ const SPECIAL_FAMILIARS_FOR_CACHING = new Map<
     $familiar`Chest Mimic`,
     {
       extraValue: ({ famexp }) =>
-        (famexp * EMBEZZLER_MULTIPLIER() * get("valueOfAdventure")) / 50,
+        (famexp * (VPE() - get("valueOfAdventure"))) / 50,
     },
   ],
   [$familiar`Jill-of-All-Trades`, { equip: $item`LED candle` }],

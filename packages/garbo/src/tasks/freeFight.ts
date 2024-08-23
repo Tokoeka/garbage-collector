@@ -1,7 +1,6 @@
 import { Quest } from "grimoire-kolmafia";
 import {
   availableAmount,
-  canadiaAvailable,
   canAdventure,
   canEquip,
   guildStoreAvailable,

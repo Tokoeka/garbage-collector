@@ -74,7 +74,6 @@ import { copyTargetCount } from "./embezzler";
 import { expectedGregs, shouldAugustCast, synthesize } from "./resources";
 import {
   arrayEquals,
-  baseMeat,
   HIGHLIGHT,
   targetMeat,
   userConfirmDialog,
