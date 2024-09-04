@@ -118,7 +118,7 @@ export const eventLog: {
 
 export enum BonusEquipMode {
   FREE,
-  EMBEZZLER,
+  MEAT_TARGET,
   DMT,
   BARF,
 }
@@ -135,7 +135,7 @@ export function modeValueOfMeat(mode: BonusEquipMode): number {
   return modeIsFree(mode)
     ? 0
     : (baseMeat() +
-        (mode === BonusEquipMode.EMBEZZLER ? targetMeatDifferential() : 0)) /
+        (mode === BonusEquipMode.MEAT_TARGET ? targetMeatDifferential() : 0)) /
         100;
 }
 
@@ -146,7 +146,8 @@ export function modeValueOfItem(mode: BonusEquipMode): number {
 export const WISH_VALUE = 50000;
 export const HIGHLIGHT = isDarkMode() ? "yellow" : "blue";
 export const ESTIMATED_OVERDRUNK_TURNS = 40;
-export const VPE = (): number => globalOptions.prefs.embezzlerValue;
+export const MEAT_TARGET_VALUE = (): number =>
+  globalOptions.prefs.meatTargetValue;
 
 export const propertyManager = new PropertiesManager();
 
@@ -395,7 +396,7 @@ export function pillkeeperOpportunityCost(): number {
   const alternateUses = [
     {
       can: canTreasury,
-      value: VPE(),
+      value: MEAT_TARGET_VALUE(),
     },
     {
       can: realmAvailable("sleaze"),
@@ -515,29 +516,32 @@ export function checkGithubVersion(): void {
       gitInfo("Loathing-Associates-Scripting-Society-garbage-collector-release")
         .commit;
 
-    // Query GitHub for latest release commit
-    const gitBranches: { name: string; commit: { sha: string } }[] = JSON.parse(
-      visitUrl(
-        `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/branches`,
-      ),
+    const gitData = visitUrl(
+      `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/branches`,
     );
-    const releaseSHA = gitBranches.find(
-      (branchInfo) => branchInfo.name === "release",
-    )?.commit?.sha;
+    if (!gitData) print("Failed to reach github!");
+    else {
+      // Query GitHub for latest release commit
+      const gitBranches: { name: string; commit: { sha: string } }[] =
+        JSON.parse(gitData);
+      const releaseSHA = gitBranches.find(
+        (branchInfo) => branchInfo.name === "release",
+      )?.commit?.sha;
 
-    print(
-      `Local Version: ${localSHA} (built from ${process.env.GITHUB_REF_NAME}@${process.env.GITHUB_SHA})`,
-    );
-    if (releaseSHA === localSHA) {
-      print("Garbo is up to date!", HIGHLIGHT);
-    } else if (releaseSHA === undefined) {
       print(
-        "Garbo may be out of date, unable to query GitHub for latest version. Maybe run 'git update'?",
-        HIGHLIGHT,
+        `Local Version: ${localSHA} (built from ${process.env.GITHUB_REF_NAME}@${process.env.GITHUB_SHA})`,
       );
-    } else {
-      print(`Release Version: ${releaseSHA}`);
-      print("Garbo is out of date. Please run 'git update'!", "red");
+      if (releaseSHA === localSHA) {
+        print("Garbo is up to date!", HIGHLIGHT);
+      } else if (releaseSHA === undefined) {
+        print(
+          "Garbo may be out of date, unable to query GitHub for latest version. Maybe run 'git update'?",
+          HIGHLIGHT,
+        );
+      } else {
+        print(`Release Version: ${releaseSHA}`);
+        print("Garbo is out of date. Please run 'git update'!", "red");
+      }
     }
   } else {
     print(
@@ -864,26 +868,26 @@ export function freeRest(): boolean {
 }
 
 export function printEventLog(): void {
-  if (resetDailyPreference("garboEmbezzlerDate")) {
-    property.set("garboEmbezzlerCount", 0);
-    property.set("garboEmbezzlerSources", "");
+  if (resetDailyPreference("garboTargetDate")) {
+    property.set("garboTargetCount", 0);
+    property.set("garboTargetSources", "");
     property.set("garboYachtzeeCount", 0);
   }
-  const totalEmbezzlers =
-    property.getNumber("garboEmbezzlerCount", 0) +
+  const totalTargetCopies =
+    property.getNumber("garboTargetCount", 0) +
     eventLog.initialCopyTargetsFought +
     eventLog.digitizedCopyTargetsFought;
 
-  const allEmbezzlerSources = property
-    .getString("garboEmbezzlerSources")
+  const allTargetSources = property
+    .getString("garboTargetSources")
     .split(",")
     .filter((source) => source);
-  allEmbezzlerSources.push(...eventLog.copyTargetSources);
+  allTargetSources.push(...eventLog.copyTargetSources);
 
   const yacthzeeCount = get("garboYachtzeeCount", 0) + eventLog.yachtzees;
 
-  property.set("garboEmbezzlerCount", totalEmbezzlers);
-  property.set("garboEmbezzlerSources", allEmbezzlerSources.join(","));
+  property.set("garboTargetCount", totalTargetCopies);
+  property.set("garboTargetSources", allTargetSources.join(","));
   property.set("garboYachtzeeCount", yacthzeeCount);
 
   print(
@@ -891,7 +895,7 @@ export function printEventLog(): void {
     HIGHLIGHT,
   );
   print(
-    `Including this, you have fought ${totalEmbezzlers} across all ascensions today`,
+    `Including this, you have fought ${totalTargetCopies} across all ascensions today`,
     HIGHLIGHT,
   );
   if (yacthzeeCount > 0) {
@@ -1073,7 +1077,7 @@ export function aprilFoolsRufus() {
 
 type LuckyAdventure = {
   location: Location;
-  phase: "embezzler" | "yachtzee" | "barf";
+  phase: "target" | "yachtzee" | "barf";
   value: () => number;
   outfit?: () => Outfit;
   choices?: () => {
@@ -1101,3 +1105,34 @@ let bestLuckyAdventure: LuckyAdventure;
 export function getBestLuckyAdventure(): LuckyAdventure {
   return (bestLuckyAdventure ??= determineBestLuckyAdventure());
 }
+
+const SCALE_PATTERN = /Scale: /;
+const CAP_PATTERN = /Cap: (\d*)/;
+function calculateScalerCap({ attributes }: Monster): number {
+  const scaleMatch = SCALE_PATTERN.test(attributes);
+  if (!scaleMatch) return 0;
+  const capMatch = CAP_PATTERN.exec(attributes);
+  if (!capMatch?.[1]) return Infinity;
+  return Number(capMatch[1]);
+}
+
+const MONSTER_SCALER_CAPS = new Map<Monster, number>();
+export function scalerCap(monster: Monster): number {
+  const cached = MONSTER_SCALER_CAPS.get(monster);
+  if (cached) return cached;
+  const cap = calculateScalerCap(monster);
+  MONSTER_SCALER_CAPS.set(monster, cap);
+  return cap;
+}
+
+const STRONG_SCALER_THRESHOLD = 1_000;
+export const isStrongScaler = (m: Monster) =>
+  scalerCap(m) > STRONG_SCALER_THRESHOLD;
+
+export const isFreeAndCopyable = (monster: Monster) =>
+  monster.copyable && monster.attributes.includes("FREE");
+export const valueDrops = (monster: Monster) =>
+  sum(itemDropsArray(monster), ({ drop, rate, type }) =>
+    !["c", "0", "p", "a"].includes(type) ? (garboValue(drop) * rate) / 100 : 0,
+  );
+export const isFree = (monster: Monster) => monster.attributes.includes("FREE");

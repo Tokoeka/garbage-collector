@@ -1,5 +1,5 @@
 import { Args } from "grimoire-kolmafia";
-import { Item, itemDropsArray, Monster, print } from "kolmafia";
+import { Item, print } from "kolmafia";
 import {
   $item,
   $items,
@@ -11,16 +11,8 @@ import {
   get,
   have,
   maxBy,
-  sum,
 } from "libram";
-import { garboValue } from "./garboValue";
-
-export const isFreeAndCopyable = (monster: Monster) =>
-  monster.copyable && monster.attributes.includes("FREE");
-export const valueDrops = (monster: Monster) =>
-  sum(itemDropsArray(monster), ({ drop, rate, type }) =>
-    !["c", "0", "p"].includes(type) ? (garboValue(drop) * rate) / 100 : 0,
-  );
+import { isFreeAndCopyable, valueDrops } from "./lib";
 
 const workshedAliases = [
   { item: $item`model train set`, aliases: ["trainrealm"] },
@@ -87,19 +79,16 @@ function defaultTarget() {
   if ($skills`Curse of Weaksauce, Saucegeyser`.every((s) => have(s))) {
     if (
       ChestMimic.have() ||
-      have($item`Clan VIP Lounge key`) ||
-      (CombatLoversLocket.have() &&
-        CombatLoversLocket.unlockedLocketMonsters().includes(
-          $monster`cheerless mime executive`,
-        ))
+      (have($item`Clan VIP Lounge key`) && !get("_photocopyUsed")) ||
+      CombatLoversLocket.availableLocketMonsters().includes(
+        $monster`cheerless mime executive`,
+      )
     ) {
       return $monster`cheerless mime executive`;
     } else {
-      return (
-        maxBy(
-          $monsters.all().filter((m) => m.wishable && isFreeAndCopyable(m)),
-          valueDrops,
-        ) || $monster`Witchess Knight`
+      return maxBy(
+        $monsters.all().filter((m) => m.wishable && isFreeAndCopyable(m)),
+        valueDrops,
       );
     }
   }
@@ -126,7 +115,7 @@ You can use multiple options in conjunction, e.g. "garbo nobarf ascend"',
     }),
     nobarf: Args.flag({
       setting: "",
-      help: "do beginning of the day setup, embezzlers, and various daily flags, but will terminate before normal Barf Mountain turns. May close NEP for the day.",
+      help: "do beginning of the day setup, copy target monster, and various daily flags, but will terminate before normal Barf Mountain turns. May close NEP for the day.",
       default: false,
     }),
     nodiet: Args.flag({
@@ -219,10 +208,10 @@ You can use multiple options in conjunction, e.g. "garbo nobarf ascend"',
           default: false,
           hidden: true,
         }),
-        embezzlerValue: Args.number({
-          setting: "garbo_embezzlerValue",
-          help: "Average Value of a marginal embezzler to be used when estimating marginal Embezzler profit. (Default 10500)",
-          default: 10500,
+        meatTargetValue: Args.number({
+          setting: "garbo_meatTargetValue",
+          help: "Average Value of a marginal meat-target to be used when estimating marginal meat target profit. (Default 5500)",
+          default: 5500,
         }),
         stashClan: Args.string({
           setting: "garbo_stashClan",
@@ -250,9 +239,9 @@ You can use multiple options in conjunction, e.g. "garbo nobarf ascend"',
           setting: "garbo_autoUserConfirm",
           help: "**WARNING: Experimental** Don't show user confirm dialogs, instead automatically select yes/no in a way that will allow garbo to continue executing. Useful for scripting/headless. Risky and potentially destructive.",
         }),
-        autoUserConfirm_embezzlerInvocationsThreshold: Args.number({
-          setting: "garbo_autoUserConfirm_embezzlerInvocationsThreshold",
-          help: "This is used only when autoUserConfirm is true, will automatically use resources (such as pocket wishes, 11-leaf clovers, etc) up to this threshold to source an embezzler for chaining before requesting user interference.",
+        autoUserConfirm_targetInvocationsThreshold: Args.number({
+          setting: "garbo_autoUserConfirm_targetInvocationsThreshold",
+          help: "This is used only when autoUserConfirm is true, will automatically use resources (such as pocket wishes, 11-leaf clovers, etc) up to this threshold to source a target monster for chaining before requesting user interference.",
           default: 1,
         }),
         restoreHpTarget: Args.number({

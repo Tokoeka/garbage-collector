@@ -70,14 +70,14 @@ import {
 import { acquire, priceCaps } from "./acquire";
 import { withVIPClan } from "./clan";
 import { globalOptions, targettingMeat } from "./config";
-import { copyTargetCount } from "./embezzler";
+import { copyTargetCount } from "./target";
 import { expectedGregs, shouldAugustCast, synthesize } from "./resources";
 import {
   arrayEquals,
   HIGHLIGHT,
+  MEAT_TARGET_VALUE,
   targetMeat,
   userConfirmDialog,
-  VPE,
 } from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
@@ -338,6 +338,8 @@ const stomachLiverCleaners = new Map([
   [$item`cuppa Sobrie tea`, [0, -1]],
   [$item`designer sweatpants`, [0, -1]],
   [$item`august scepter`, [-1, 0]],
+  [$item`Mr. Burnsger`, [4, -1]],
+  [$item`Doc Clock's thyme cocktail`, [-1, 4]],
 ]);
 
 function legendaryPizzaToMenu(
@@ -347,6 +349,7 @@ function legendaryPizzaToMenu(
     price: number;
   }) => MenuItem<Note> | MenuItem<Note>[],
 ) {
+  if (!globalOptions.ascend) return [];
   const canCookLegendaryPizza = (pizza: Item): boolean => {
     const recipes = [
       pizza,
@@ -439,6 +442,7 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`deviled egg`),
     new MenuItem($item`spaghetti breakfast`, { maximum: spaghettiBreakfast }),
     new MenuItem($item`extra-greasy slider`),
+    new MenuItem($item`Mr. Burnsger`),
     new MenuItem(mallMin(lasagnas)),
     new MenuItem(mallMin(smallEpics)),
     new MenuItem($item`green hamhock`),
@@ -460,6 +464,7 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`yam martini`),
     new MenuItem($item`Eye and a Twist`),
     new MenuItem($item`jar of fermented pickle juice`),
+    new MenuItem($item`Doc Clock's thyme cocktail`),
     new MenuItem(mallMin(complexMushroomWines)),
     new MenuItem(mallMin(perfectDrinks)),
     new MenuItem($item`green eggnog`),
@@ -591,9 +596,7 @@ function gregariousCount(): {
 }
 
 function copiers(): MenuItem<Note>[] {
-  const embezzlerDifferential = targettingMeat()
-    ? VPE() - MPA
-    : 0;
+  const targetDifferential = targettingMeat() ? MEAT_TARGET_VALUE() - MPA : 0;
   const { expectedGregariousFights, marginalGregariousFights } =
     gregariousCount();
   const extros =
@@ -601,14 +604,14 @@ function copiers(): MenuItem<Note>[] {
       ? []
       : [
           ...expectedGregariousFights.map(
-            (embezzlers) =>
+            (targets) =>
               new MenuItem<Note>($item`Extrovermectin™`, {
-                additionalValue: embezzlers * embezzlerDifferential,
+                additionalValue: targets * targetDifferential,
                 maximum: 1,
               }),
           ),
           new MenuItem<Note>($item`Extrovermectin™`, {
-            additionalValue: marginalGregariousFights * embezzlerDifferential,
+            additionalValue: marginalGregariousFights * targetDifferential,
           }),
         ];
   return [...extros];
@@ -653,12 +656,12 @@ function ingredientCost(item: Item): number {
 
 /**
  * Generate a potion diet that has entries
- * @param embezzlers number of embezzlers expected to be encountered on this day
+ * @param targets number of target monsters expected to be encountered on this day
  * @param turns number of turns total expecte
  */
 export function potionMenu(
   baseMenu: MenuItem<Note>[],
-  embezzlers: number,
+  targets: number,
   turns: number,
 ): MenuItem<Note>[] {
   function limitedPotion(
@@ -680,7 +683,7 @@ export function potionMenu(
       potion = potion.doubleDuration();
       mayo = Mayo.zapine;
     }
-    return potion.value(embezzlers, turns, limit).map(
+    return potion.value(targets, turns, limit).map(
       (tier) =>
         new MenuItem(potion.potion, {
           maximum: tier.quantity,
@@ -832,16 +835,16 @@ function balanceMenu(
   baseMenu: MenuItem<Note>[],
   dietPlanner: DietPlanner,
 ): MenuItem<Note>[] {
-  const baseEmbezzlers = targettingMeat() ? copyTargetCount() : 0;
+  const baseTargets = targettingMeat() ? copyTargetCount() : 0;
   function rebalance(
     menu: MenuItem<Note>[],
     iterations: number,
-    embezzlers: number,
+    targets: number,
     adventures: number,
   ): MenuItem<Note>[] {
     const fullMenu = potionMenu(
       menu,
-      baseEmbezzlers + embezzlers,
+      baseTargets + targets,
       estimatedGarboTurns() + adventures,
     );
     if (iterations <= 0) {
@@ -947,14 +950,14 @@ function printDiet(diet: Diet<Note>, name: DietName) {
     (a, b) => itemPriority(b.menuItems) - itemPriority(a.menuItems),
   );
 
-  const embezzlers = Math.floor(
+  const targets = Math.floor(
     (targettingMeat() ? copyTargetCount() : 0) + countCopies(diet),
   );
   const adventures = Math.floor(
     estimatedGarboTurns() + diet.expectedAdventures(),
   );
   print(
-    `Planning to fight ${embezzlers} embezzlers and run ${adventures} adventures`,
+    `Planning to fight ${targets} ${globalOptions.target} and run ${adventures} adventures`,
   );
 
   for (const dietEntry of diet.entries) {

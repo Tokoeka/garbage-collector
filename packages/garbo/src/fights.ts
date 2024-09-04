@@ -22,7 +22,6 @@ import {
   isBanished,
   Item,
   itemAmount,
-  itemDropsArray,
   Location,
   mallPrice,
   maximize,
@@ -120,7 +119,7 @@ import {
   copyTargetCount,
   copyTargetSources,
   getNextCopyTargetFight,
-} from "./embezzler";
+} from "./target";
 import {
   bestMidnightAvailable,
   crateStrategy,
@@ -150,6 +149,8 @@ import {
   freeRest,
   freeRunConstraints,
   getUsingFreeBunnyBanish,
+  isFree,
+  isStrongScaler,
   kramcoGuaranteed,
   lastAdventureWasWeird,
   ltbRun,
@@ -164,12 +165,13 @@ import {
   targetMeat,
   tryFindFreeRunOrBanish,
   userConfirmDialog,
+  valueDrops,
 } from "./lib";
 import { freeFightMood, meatMood, useBuffExtenders } from "./mood";
 import {
-  embezzlerOutfit,
   freeFightOutfit,
   magnifyingGlass,
+  meatTargetOutfit,
   toSpec,
   waterBreathingEquipment,
 } from "./outfit";
@@ -177,8 +179,8 @@ import postCombatActions from "./post";
 import { bathroomFinance, potionSetup } from "./potions";
 import { garboValue } from "./garboValue";
 import { wanderer } from "./garboWanderer";
-import { runEmbezzlerFight } from "./embezzler/execution";
-import { EmbezzlerFightRunOptions } from "./embezzler/staging";
+import { runTargetFight } from "./target/execution";
+import { TargetFightRunOptions } from "./target/staging";
 import { FreeFightQuest, runGarboQuests } from "./tasks";
 import { expectedFreeFights, possibleTentacleFights } from "./tasks/freeFight";
 import { PostQuest } from "./tasks/post";
@@ -186,32 +188,34 @@ import { PostQuest } from "./tasks/post";
 const firstChainMacro = () =>
   Macro.if_(
     globalOptions.target,
-    Macro.if_(
-      `!${Macro.makeBALLSPredicate($skill`lecture on relativity`)}`,
-      Macro.externalIf(
-        SourceTerminal.getDigitizeMonster() !== globalOptions.target,
-        Macro.tryCopier($skill`Digitize`),
+    Macro.externalIf(isStrongScaler(globalOptions.target), Macro.delevel())
+      .if_(
+        `!${Macro.makeBALLSPredicate($skill`lecture on relativity`)}`,
+        Macro.externalIf(
+          SourceTerminal.getDigitizeMonster() !== globalOptions.target,
+          Macro.tryCopier($skill`Digitize`),
+        )
+          .tryCopier($item`Spooky Putty sheet`)
+          .tryCopier($item`Rain-Doh black box`)
+          .tryCopier($item`4-d camera`)
+          .tryCopier($item`unfinished ice sculpture`)
+          .externalIf(
+            get("_enamorangs") === 0,
+            Macro.tryCopier($item`LOV Enamorang`),
+          ),
       )
-        .tryCopier($item`Spooky Putty sheet`)
-        .tryCopier($item`Rain-Doh black box`)
-        .tryCopier($item`4-d camera`)
-        .tryCopier($item`unfinished ice sculpture`)
-        .externalIf(
-          get("_enamorangs") === 0,
-          Macro.tryCopier($item`LOV Enamorang`),
-        ),
-    )
       .trySkill($skill`lecture on relativity`)
-      .meatKill(),
+      .meatKill(false),
   ).abort();
 
 const secondChainMacro = () =>
   Macro.if_(
     globalOptions.target,
-    Macro.if_(
-      `!${Macro.makeBALLSPredicate($skill`lecture on relativity`)}`,
-      Macro.trySkill($skill`Meteor Shower`),
-    )
+    Macro.externalIf(isStrongScaler(globalOptions.target), Macro.delevel())
+      .if_(
+        `!${Macro.makeBALLSPredicate($skill`lecture on relativity`)}`,
+        Macro.trySkill($skill`Meteor Shower`),
+      )
       .if_(
         `!${Macro.makeBALLSPredicate($skill`lecture on relativity`)}`,
         Macro.externalIf(
@@ -228,10 +232,10 @@ const secondChainMacro = () =>
           ),
       )
       .trySkill($skill`lecture on relativity`)
-      .meatKill(),
+      .meatKill(false),
   ).abort();
 
-function embezzlerSetup() {
+function meatTargetSetup() {
   setLocation($location`Friar Ceremony Location`);
   potionSetup(false);
   maximize("MP", false);
@@ -375,7 +379,7 @@ function startWandererCounter() {
         );
         run = ltbRun();
         run.constraints.preparation?.();
-        embezzlerOutfit().dress();
+        meatTargetOutfit().dress();
       } else {
         print("You do not have gregs active, so this is a regular free run.");
         run = tryFindFreeRunOrBanish(freeRunConstraints()) ?? ltbRun();
@@ -384,7 +388,7 @@ function startWandererCounter() {
       }
       garboAdventure(
         $location`The Haunted Kitchen`,
-        Macro.if_(globalOptions.target, Macro.embezzler("wanderer")).step(
+        Macro.if_(globalOptions.target, Macro.target("wanderer")).step(
           run.macro,
         ),
       );
@@ -412,7 +416,7 @@ function familiarSpec(underwater: boolean, fight: string): OutfitSpec {
       ChestMimic.have() &&
       $familiar`Chest Mimic`.experience >= 50 &&
       get("_mimicEggsObtained") < 11 &&
-      // switchmonster doesn't apply ML, meaning the embezzlers die too quickly to get multiple eggs in
+      // switchmonster doesn't apply ML, meaning the target monsters die too quickly to get multiple eggs in
       !["Macrometeorite", "Powerful Glove", "Backup"].includes(fight)
     ) {
       return { familiar: $familiar`Chest Mimic` };
@@ -451,7 +455,7 @@ export function dailyFights(): void {
     withStash($items`Spooky Putty sheet`, () => {
       // check if user wants to wish for the copy target before doing setup
       if (!getNextCopyTargetFight()) return;
-      embezzlerSetup();
+      meatTargetSetup();
 
       // PROFESSOR COPIES
       if (have($familiar`Pocket Professor`)) {
@@ -460,7 +464,7 @@ export function dailyFights(): void {
             shouldDo: targettingMeat(),
             property: "_garbo_meatChain",
             macro: firstChainMacro,
-            goalMaximize: (spec: OutfitSpec) => embezzlerOutfit(spec).dress(),
+            goalMaximize: (spec: OutfitSpec) => meatTargetOutfit(spec).dress(),
           },
           {
             shouldDo: true,
@@ -514,7 +518,7 @@ export function dailyFights(): void {
 
           if (get("_pocketProfessorLectures") < pocketProfessorLectures()) {
             const startLectures = get("_pocketProfessorLectures");
-            runEmbezzlerFight(fightSource, {
+            runTargetFight(fightSource, {
               macro: macro(),
               useAuto: false,
               action: "Pocket Professor",
@@ -539,7 +543,7 @@ export function dailyFights(): void {
 
       useFamiliar(meatFamiliar());
 
-      // REMAINING EMBEZZLER FIGHTS
+      // REMAINING TARGET MONSTER FIGHTS
       let nextFight = getNextCopyTargetFight();
       while (nextFight !== null && myAdventures()) {
         print(`Running fight ${nextFight.name}`);
@@ -560,15 +564,15 @@ export function dailyFights(): void {
           if (weWantToSaberCrates) saberCrateIfSafe();
         }
 
-        const location = new EmbezzlerFightRunOptions(nextFight).location;
+        const location = new TargetFightRunOptions(nextFight).location;
         const underwater = location.environment === "underwater";
 
         const famSpec = familiarSpec(underwater, nextFight.name);
 
         setLocation(location);
-        embezzlerOutfit({ ...nextFight.spec, ...famSpec }, location).dress();
+        meatTargetOutfit({ ...nextFight.spec, ...famSpec }, location).dress();
 
-        runEmbezzlerFight(nextFight, { action: nextFight.name });
+        runTargetFight(nextFight, { action: nextFight.name });
         postCombatActions();
 
         print(`Finished ${nextFight.name}`);
@@ -1083,9 +1087,7 @@ const freeFightSources = [
       visitUrl(`inv_use.php?whichitem=${toInt($item`Time-Spinner`)}`);
       runChoice(1);
       visitUrl(
-        `choice.php?whichchoice=1196&monid=${
-          $monster`drunk pygmy`.id
-        }&option=1`,
+        `choice.php?whichchoice=1196&monid=${$monster`drunk pygmy`.id}&option=1`,
       );
     },
     true,
@@ -2083,7 +2085,7 @@ const freeKillSources = [
   ),
 ];
 
-function embezzlersInProgress(): boolean {
+function targetCopiesInProgress(): boolean {
   return (
     get("beGregariousFightsLeft") > 0 ||
     get("_monsterHabitatsFightsLeft") > 0 ||
@@ -2094,7 +2096,7 @@ function embezzlersInProgress(): boolean {
 
 export function freeRunFights(): void {
   if (myInebriety() > inebrietyLimit()) return;
-  if (embezzlersInProgress()) return;
+  if (targetCopiesInProgress()) return;
 
   propertyManager.setChoices({
     1387: 2, // "You will go find two friends and meet me here."
@@ -2125,7 +2127,7 @@ export function freeRunFights(): void {
 
 export function freeFights(): void {
   if (myInebriety() > inebrietyLimit()) return;
-  if (embezzlersInProgress()) return;
+  if (targetCopiesInProgress()) return;
 
   propertyManager.setChoices({
     1387: 2, // "You will go find two friends and meet me here."
@@ -2654,12 +2656,6 @@ function killRobortCreaturesForFree() {
     setBestLeprechaunAsMeatFamiliar();
   }
 }
-
-const isFree = (monster: Monster) => monster.attributes.includes("FREE");
-const valueDrops = (monster: Monster) =>
-  sum(itemDropsArray(monster), ({ drop, rate, type }) =>
-    !["c", "0", "p"].includes(type) ? (garboValue(drop) * rate) / 100 : 0,
-  );
 
 export function estimatedFreeFights(): number {
   return (

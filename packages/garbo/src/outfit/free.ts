@@ -4,7 +4,7 @@ import { $familiar, $item, $items, get, Guzzlr, SourceTerminal } from "libram";
 import { WanderDetails } from "garbo-lib";
 
 import { freeFightFamiliar } from "../familiar";
-import { BonusEquipMode, VPE } from "../lib";
+import { BonusEquipMode, MEAT_TARGET_VALUE } from "../lib";
 import { wanderer } from "../garboWanderer";
 
 import { chooseBjorn } from "./bjorn";
@@ -47,7 +47,7 @@ export function freeFightOutfit(
       [
         [
           $familiar`Chest Mimic`,
-          (VPE() - get("valueOfAdventure")) / 50,
+          (MEAT_TARGET_VALUE() - get("valueOfAdventure")) / 50,
         ],
         [$familiar`Pocket Professor`, (11 * get("valueOfAdventure")) / 200],
         [$familiar`Grey Goose`, 15 ** 4 / 400],

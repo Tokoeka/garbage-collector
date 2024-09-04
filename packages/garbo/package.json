@@ -26,11 +26,10 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "core-js": "^3.38.1",
     "garbo-lib": "*",
     "grimoire-kolmafia": "^0.3.26",
     "kolmafia": "^5.28021.0",
-    "libram": "^0.9.4"
+    "libram": "^0.9.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.8",
