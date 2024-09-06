@@ -69,7 +69,7 @@ import {
 } from "libram";
 import { acquire, priceCaps } from "./acquire";
 import { withVIPClan } from "./clan";
-import { globalOptions, targettingMeat } from "./config";
+import { globalOptions } from "./config";
 import { copyTargetCount } from "./target";
 import { expectedGregs, shouldAugustCast, synthesize } from "./resources";
 import {
@@ -77,6 +77,7 @@ import {
   HIGHLIGHT,
   MEAT_TARGET_VALUE,
   targetMeat,
+  targettingMeat,
   userConfirmDialog,
 } from "./lib";
 import { shrugBadEffects } from "./mood";
@@ -338,8 +339,10 @@ const stomachLiverCleaners = new Map([
   [$item`cuppa Sobrie tea`, [0, -1]],
   [$item`designer sweatpants`, [0, -1]],
   [$item`august scepter`, [-1, 0]],
-  [$item`Mr. Burnsger`, [4, -1]],
-  [$item`Doc Clock's thyme cocktail`, [-1, 4]],
+  [$item`Mr. Burnsger`, [4, -2]],
+  [$item`Doc Clock's thyme cocktail`, [-2, 4]],
+  [$item`The Plumber's mushroom stew`, [3, -1]],
+  [$item`The Mad Liquor`, [-1, 3]],
 ]);
 
 function legendaryPizzaToMenu(
@@ -442,7 +445,6 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`deviled egg`),
     new MenuItem($item`spaghetti breakfast`, { maximum: spaghettiBreakfast }),
     new MenuItem($item`extra-greasy slider`),
-    new MenuItem($item`Mr. Burnsger`),
     new MenuItem(mallMin(lasagnas)),
     new MenuItem(mallMin(smallEpics)),
     new MenuItem($item`green hamhock`),
@@ -464,7 +466,6 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`yam martini`),
     new MenuItem($item`Eye and a Twist`),
     new MenuItem($item`jar of fermented pickle juice`),
-    new MenuItem($item`Doc Clock's thyme cocktail`),
     new MenuItem(mallMin(complexMushroomWines)),
     new MenuItem(mallMin(perfectDrinks)),
     new MenuItem($item`green eggnog`),
@@ -950,9 +951,7 @@ function printDiet(diet: Diet<Note>, name: DietName) {
     (a, b) => itemPriority(b.menuItems) - itemPriority(a.menuItems),
   );
 
-  const targets = Math.floor(
-    (targettingMeat() ? copyTargetCount() : 0) + countCopies(diet),
-  );
+  const targets = Math.floor(copyTargetCount() + countCopies(diet));
   const adventures = Math.floor(
     estimatedGarboTurns() + diet.expectedAdventures(),
   );

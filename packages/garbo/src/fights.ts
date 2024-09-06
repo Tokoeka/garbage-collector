@@ -5,6 +5,7 @@ import {
   buy,
   canAdventure,
   canEquip,
+  ceil,
   cliExecute,
   closetAmount,
   create,
@@ -13,6 +14,7 @@ import {
   equippedItem,
   Familiar,
   familiarEquippedEquipment,
+  familiarWeight,
   getAutoAttack,
   getCampground,
   getWorkshed,
@@ -48,6 +50,7 @@ import {
   setAutoAttack,
   setLocation,
   Skill,
+  squareRoot,
   stashAmount,
   takeCloset,
   toInt,
@@ -57,6 +60,7 @@ import {
   useFamiliar,
   useSkill,
   visitUrl,
+  weightAdjustment,
 } from "kolmafia";
 import {
   $class,
@@ -113,7 +117,7 @@ import { WanderDetails } from "garbo-lib";
 import { acquire } from "./acquire";
 import { withStash } from "./clan";
 import { garboAdventure, garboAdventureAuto, Macro, withMacro } from "./combat";
-import { globalOptions, targettingMeat } from "./config";
+import { globalOptions } from "./config";
 import { postFreeFightDailySetup } from "./dailiespost";
 import {
   copyTargetCount,
@@ -149,7 +153,9 @@ import {
   freeRest,
   freeRunConstraints,
   getUsingFreeBunnyBanish,
+  gooseDroneEligible,
   isFree,
+  isFreeAndCopyable,
   isStrongScaler,
   kramcoGuaranteed,
   lastAdventureWasWeird,
@@ -163,6 +169,7 @@ import {
   safeRestore,
   setChoice,
   targetMeat,
+  targettingMeat,
   tryFindFreeRunOrBanish,
   userConfirmDialog,
   valueDrops,
@@ -189,6 +196,7 @@ const firstChainMacro = () =>
   Macro.if_(
     globalOptions.target,
     Macro.externalIf(isStrongScaler(globalOptions.target), Macro.delevel())
+      .if_("hppercentbelow 30", Macro.tryItem($item`New Age healing crystal`))
       .if_(
         `!${Macro.makeBALLSPredicate($skill`lecture on relativity`)}`,
         Macro.externalIf(
@@ -212,6 +220,7 @@ const secondChainMacro = () =>
   Macro.if_(
     globalOptions.target,
     Macro.externalIf(isStrongScaler(globalOptions.target), Macro.delevel())
+      .if_("hppercentbelow 30", Macro.tryItem($item`New Age healing crystal`))
       .if_(
         `!${Macro.makeBALLSPredicate($skill`lecture on relativity`)}`,
         Macro.trySkill($skill`Meteor Shower`),
@@ -436,6 +445,15 @@ function familiarSpec(underwater: boolean, fight: string): OutfitSpec {
       if (have($familiar`Reanimated Reanimator`)) {
         return { familiar: $familiar`Reanimated Reanimator` };
       }
+      if (
+        gooseDroneEligible() &&
+        get("gooseDronesRemaining") < copyTargetCount()
+      ) {
+        return { familiar: $familiar`Grey Goose` };
+      }
+      if (isFreeAndCopyable(globalOptions.target)) {
+        return { familiar: freeFightFamiliar() };
+      }
     }
   }
   return { familiar: meatFamiliar() };
@@ -504,6 +522,27 @@ export function dailyFights(): void {
             } else {
               retrieveItem(chip);
             }
+          }
+
+          if (
+            mallPrice($item`New Age healing crystal`) < expectedTargetProfit()
+          ) {
+            // Better to live and continue the chain than lose and not pprof fight at all
+            // You don't need more than 50 crystals, what are you a hippie?
+            retrieveItem(
+              $item`New Age healing crystal`,
+              clamp(
+                ceil(
+                  squareRoot(
+                    familiarWeight(myFamiliar()) +
+                      weightAdjustment() +
+                      myFamiliar().soupWeight,
+                  ) + 2,
+                ),
+                0,
+                50,
+              ),
+            );
           }
 
           const profSpec: OutfitSpec = {
