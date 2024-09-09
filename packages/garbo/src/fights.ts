@@ -92,7 +92,6 @@ import {
   FloristFriar,
   gameDay,
   get,
-  getFoldGroup,
   GingerBread,
   have,
   Latte,
@@ -124,7 +123,6 @@ import {
   bestMidnightAvailable,
   crateStrategy,
   doingGregFight,
-  faxMonster,
   gregReady,
   initializeExtrovermectinZones,
   saberCrateIfSafe,
@@ -302,52 +300,6 @@ function meatTargetSetup() {
     retrieveItem($item`LOV Enamorang`);
   }
 
-  // Fix invalid copiers (caused by ascending or combat text-effects)
-  if (have($item`Spooky Putty monster`) && !get("spookyPuttyMonster")) {
-    // Visit the description to update the monster as it may be valid but not tracked correctly
-    visitUrl(
-      `desc_item.php?whichitem=${$item`Spooky Putty monster`.descid}`,
-      false,
-      false,
-    );
-    if (!get("spookyPuttyMonster")) {
-      // Still invalid, use it to turn back into the spooky putty sheet
-      use($item`Spooky Putty monster`);
-    }
-  }
-
-  if (have($item`Rain-Doh box full of monster`) && !get("rainDohMonster")) {
-    visitUrl(
-      `desc_item.php?whichitem=${$item`Rain-Doh box full of monster`.descid}`,
-      false,
-      false,
-    );
-  }
-
-  if (have($item`shaking 4-d camera`) && !get("cameraMonster")) {
-    visitUrl(
-      `desc_item.php?whichitem=${$item`shaking 4-d camera`.descid}`,
-      false,
-      false,
-    );
-  }
-
-  if (have($item`envyfish egg`) && !get("envyfishMonster")) {
-    visitUrl(
-      `desc_item.php?whichitem=${$item`envyfish egg`.descid}`,
-      false,
-      false,
-    );
-  }
-
-  if (have($item`ice sculpture`) && !get("iceSculptureMonster")) {
-    visitUrl(
-      `desc_item.php?whichitem=${$item`ice sculpture`.descid}`,
-      false,
-      false,
-    );
-  }
-
   if (doingGregFight()) {
     initializeExtrovermectinZones();
   }
@@ -416,54 +368,47 @@ function pygmyOptions(equip: Item[] = []): FreeFightOptions {
 }
 
 function familiarSpec(underwater: boolean, fight: string): OutfitSpec {
-  if (!underwater) {
+  if (
+    ChestMimic.have() &&
+    $familiar`Chest Mimic`.experience >= 50 &&
+    get("_mimicEggsObtained") < 11 &&
+    // switchmonster doesn't apply ML, meaning the target monsters die too quickly to get multiple eggs in
+    !["Macrometeorite", "Powerful Glove", "Backup"].includes(fight)
+  ) {
+    return { familiar: $familiar`Chest Mimic` };
+  }
+
+  if (get("_badlyRomanticArrows") === 0) {
     if (
-      ChestMimic.have() &&
-      $familiar`Chest Mimic`.experience >= 50 &&
-      get("_mimicEggsObtained") < 11 &&
-      // switchmonster doesn't apply ML, meaning the target monsters die too quickly to get multiple eggs in
-      !["Macrometeorite", "Powerful Glove", "Backup"].includes(fight)
+      !underwater &&
+      have($familiar`Obtuse Angel`) &&
+      (familiarEquippedEquipment($familiar`Obtuse Angel`) ===
+        $item`quake of arrows` ||
+        retrieveItem($item`quake of arrows`))
     ) {
-      return { familiar: $familiar`Chest Mimic` };
+      return {
+        familiar: $familiar`Obtuse Angel`,
+        famequip: $item`quake of arrows`,
+      };
     }
-    if (get("_badlyRomanticArrows") === 0) {
-      if (
-        have($familiar`Obtuse Angel`) &&
-        (familiarEquippedEquipment($familiar`Obtuse Angel`) ===
-          $item`quake of arrows` ||
-          retrieveItem($item`quake of arrows`))
-      ) {
-        return {
-          familiar: $familiar`Obtuse Angel`,
-          famequip: $item`quake of arrows`,
-        };
-      }
-      if (have($familiar`Reanimated Reanimator`)) {
-        return { familiar: $familiar`Reanimated Reanimator` };
-      }
-      if (
-        gooseDroneEligible() &&
-        get("gooseDronesRemaining") < copyTargetCount()
-      ) {
-        return { familiar: $familiar`Grey Goose` };
-      }
-      if (isFreeAndCopyable(globalOptions.target)) {
-        return { familiar: freeFightFamiliar() };
-      }
+    if (have($familiar`Reanimated Reanimator`)) {
+      return { familiar: $familiar`Reanimated Reanimator` };
     }
   }
+
+  if (gooseDroneEligible() && get("gooseDronesRemaining") < copyTargetCount()) {
+    return { familiar: $familiar`Grey Goose` };
+  }
+
+  if (isFreeAndCopyable(globalOptions.target)) {
+    return { familiar: freeFightFamiliar() };
+  }
+
   return { familiar: meatFamiliar() };
 }
 
 export function dailyFights(): void {
   if (myInebriety() > inebrietyLimit()) return;
-
-  if (getFoldGroup($item`Spooky Putty sheet`).some((item) => have(item))) {
-    cliExecute("fold spooky putty sheet");
-  }
-
-  // Fax the copy target before starting, to prevent an abort in case the faxbot networks are down
-  faxMonster(globalOptions.target);
 
   if (copyTargetSources.some((source) => source.potential())) {
     withStash($items`Spooky Putty sheet`, () => {
