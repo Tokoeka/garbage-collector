@@ -3,6 +3,8 @@ import {
   availableAmount,
   canAdventure,
   canEquip,
+  equippedAmount,
+  getCampground,
   guildStoreAvailable,
   handlingChoice,
   inebrietyLimit,
@@ -38,12 +40,15 @@ import {
   ChateauMantegna,
   clamp,
   CombatLoversLocket,
+  Counter,
   ensureEffect,
   get,
   have,
   maxBy,
   set,
+  SourceTerminal,
   sum,
+  TearawayPants,
   TunnelOfLove,
   uneffect,
   Witchess,
@@ -54,7 +59,7 @@ import { globalOptions } from "../config";
 import { garboValue } from "../garboValue";
 import { freeFightOutfit } from "../outfit";
 import { GarboTask } from "./engine";
-import { doCandyTrick, shouldAugustCast } from "../resources";
+import { doCandyTrick, doingGregFight, shouldAugustCast } from "../resources";
 import { isFreeAndCopyable, kramcoGuaranteed, valueDrops } from "../lib";
 import { wanderer } from "../garboWanderer";
 
@@ -483,8 +488,109 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     ),
     tentacle: true,
   },
-  // mushroom garden
-  // portscan
+  {
+    name: "Mushroom garden",
+    ready: () =>
+      have($item`packet of mushroom spores`) ||
+      getCampground()["packet of mushroom spores"] !== undefined,
+    completed: () => get("_mushroomGardenFights") > 0,
+    prepare: () => {
+      if (have($item`packet of mushroom spores`)) {
+        use($item`packet of mushroom spores`);
+      }
+      if (SourceTerminal.have()) {
+        SourceTerminal.educate([$skill`Extract`, $skill`Portscan`]);
+      }
+    },
+    do: () => $location`Your Mushroom Garden`,
+    post: () => {
+      if (have($item`packet of tall grass seeds`)) {
+        use($item`packet of tall grass seeds`);
+      }
+    },
+    outfit: () =>
+      freeFightOutfit(
+        {
+          familiar: have($familiar`Robortender`)
+            ? $familiar`Robortender`
+            : undefined,
+          bonuses: new Map<Item, number>([
+            [
+              $item`tearaway pants`,
+              get("valueOfAdventure") * TearawayPants.plantsAdventureChance(),
+            ],
+          ]),
+        },
+        { canChooseMacro: false, allowAttackFamiliars: false },
+      ),
+    combat: new GarboStrategy(() =>
+      Macro.externalIf(
+        !doingGregFight(),
+        Macro.if_($skill`Macrometeorite`, Macro.trySkill($skill`Portscan`)),
+      )
+        .externalIf(
+          equippedAmount($item`tearaway pants`) > 0,
+          Macro.trySkill($skill`Tear Away your Pants!`),
+        )
+        .basicCombat(),
+    ),
+    combatCount: () => clamp(1 - get("_mushroomGardenFights"), 0, 1),
+    tentacle: true,
+  },
+  {
+    name: "Portscan + Macrometeorite + Mushroom garden",
+    ready: () =>
+      (have($item`packet of mushroom spores`) ||
+        getCampground()["packet of mushroom spores"] !== undefined) &&
+      !doingGregFight() &&
+      Counter.get("portscan.edu") === 0 &&
+      have($skill`Macrometeorite`) &&
+      get("_macrometeoriteUses") < 10,
+    completed: () => get("_mushroomGardenFights") > 0,
+    prepare: () => {
+      if (have($item`packet of mushroom spores`)) {
+        use($item`packet of mushroom spores`);
+      }
+      if (SourceTerminal.have()) {
+        SourceTerminal.educate([$skill`Extract`, $skill`Portscan`]);
+      }
+    },
+    do: () => $location`Your Mushroom Garden`,
+    post: () => {
+      if (have($item`packet of tall grass seeds`)) {
+        use($item`packet of tall grass seeds`);
+      }
+    },
+    outfit: () =>
+      freeFightOutfit(
+        {
+          familiar: have($familiar`Robortender`)
+            ? $familiar`Robortender`
+            : undefined,
+          bonuses: new Map<Item, number>([
+            [
+              $item`tearaway pants`,
+              get("valueOfAdventure") * TearawayPants.plantsAdventureChance(),
+            ],
+          ]),
+        },
+        { canChooseMacro: false, allowAttackFamiliars: false },
+      ),
+    combat: new GarboStrategy(() =>
+      Macro.if_($monster`Government agent`, Macro.skill($skill`Macrometeorite`))
+        .if_(
+          $monster`piranha plant`,
+          Macro.if_($skill`Macrometeorite`, Macro.trySkill($skill`Portscan`)),
+        )
+        .externalIf(
+          equippedAmount($item`tearaway pants`) > 0,
+          Macro.trySkill($skill`Tear Away your Pants!`),
+        )
+        .basicCombat(),
+    ),
+    combatCount: () => clamp(10 - get("_macrometeoriteUses"), 0, 10),
+    tentacle: true,
+  },
   {
     name: "God Lobster",
     ready: () => have($familiar`God Lobster`),
