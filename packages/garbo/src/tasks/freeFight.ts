@@ -511,9 +511,6 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     outfit: () =>
       freeFightOutfit(
         {
-          familiar: have($familiar`Robortender`)
-            ? $familiar`Robortender`
-            : undefined,
           bonuses: new Map<Item, number>([
             [
               $item`tearaway pants`,
@@ -564,9 +561,6 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     outfit: () =>
       freeFightOutfit(
         {
-          familiar: have($familiar`Robortender`)
-            ? $familiar`Robortender`
-            : undefined,
           bonuses: new Map<Item, number>([
             [
               $item`tearaway pants`,
