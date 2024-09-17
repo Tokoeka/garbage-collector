@@ -66,7 +66,11 @@ const SPECIAL_FAMILIARS_FOR_CACHING = new Map<
     $familiar`Mini Kiwi`,
     {
       extraValue: ({ weight }) =>
-        clamp(weight * 0.005, 0, 1) * garboValue($item`mini kiwi`),
+        clamp(
+          (weight + totalFamiliarWeight($familiar`Mini Kiwi`, false)) * 0.005,
+          0,
+          1,
+        ) * garboValue($item`mini kiwi`),
     },
   ],
 ]);

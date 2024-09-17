@@ -3,10 +3,10 @@ import {
   availableAmount,
   canAdventure,
   canEquip,
-  equippedAmount,
   getCampground,
   guildStoreAvailable,
   handlingChoice,
+  haveEquipped,
   inebrietyLimit,
   Item,
   itemAmount,
@@ -110,6 +110,19 @@ function sealsAvailable(): number {
   return Math.min(max, available);
 }
 
+const tearawayPantsFreeFightOutfit = () =>
+  freeFightOutfit(
+    {
+      bonuses: new Map<Item, number>([
+        [
+          $item`tearaway pants`,
+          get("valueOfAdventure") * TearawayPants.plantsAdventureChance(),
+        ],
+      ]),
+    },
+    { canChooseMacro: false, allowAttackFamiliars: false },
+  );
+
 function litLeafMacro(monster: Monster): Macro {
   const tiedUpItem = new Map<Monster, Item>([
     [$monster`flaming leaflet`, $item`tied-up flaming leaflet`],
@@ -119,16 +132,21 @@ function litLeafMacro(monster: Monster): Macro {
 
   // Only convert lassos if we can funksling as the combat counts as a free loss
   return Macro.externalIf(
-    tiedUpItem !== undefined &&
-      itemAmount($item`lit leaf lasso`) >= 2 &&
-      have($skill`Ambidextrous Funkslinging`) &&
-      (garboValue(tiedUpItem) - mallPrice($item`lit leaf lasso`)) * 2 >=
-        globalOptions.prefs.valueOfFreeFight,
-    Macro.if_(
-      monster,
-      Macro.tryItem([$item`lit leaf lasso`, $item`lit leaf lasso`]),
-    ),
-  ).basicCombat();
+    haveEquipped($item`tearaway pants`),
+    Macro.if_(monster, Macro.trySkill($skill`Tear Away your Pants!`)),
+  )
+    .externalIf(
+      tiedUpItem !== undefined &&
+        itemAmount($item`lit leaf lasso`) >= 2 &&
+        have($skill`Ambidextrous Funkslinging`) &&
+        (garboValue(tiedUpItem) - mallPrice($item`lit leaf lasso`)) * 2 >=
+          globalOptions.prefs.valueOfFreeFight,
+      Macro.if_(
+        monster,
+        Macro.tryItem([$item`lit leaf lasso`, $item`lit leaf lasso`]),
+      ),
+    )
+    .basicCombat();
 }
 
 /* const stunDurations = new Map<Skill | Item, Delayed<number>>([
@@ -508,25 +526,14 @@ const FreeFightTasks: GarboFreeFightTask[] = [
         use($item`packet of tall grass seeds`);
       }
     },
-    outfit: () =>
-      freeFightOutfit(
-        {
-          bonuses: new Map<Item, number>([
-            [
-              $item`tearaway pants`,
-              get("valueOfAdventure") * TearawayPants.plantsAdventureChance(),
-            ],
-          ]),
-        },
-        { canChooseMacro: false, allowAttackFamiliars: false },
-      ),
+    outfit: tearawayPantsFreeFightOutfit,
     combat: new GarboStrategy(() =>
       Macro.externalIf(
         !doingGregFight(),
         Macro.if_($skill`Macrometeorite`, Macro.trySkill($skill`Portscan`)),
       )
         .externalIf(
-          equippedAmount($item`tearaway pants`) > 0,
+          haveEquipped($item`tearaway pants`),
           Macro.trySkill($skill`Tear Away your Pants!`),
         )
         .basicCombat(),
@@ -558,18 +565,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
         use($item`packet of tall grass seeds`);
       }
     },
-    outfit: () =>
-      freeFightOutfit(
-        {
-          bonuses: new Map<Item, number>([
-            [
-              $item`tearaway pants`,
-              get("valueOfAdventure") * TearawayPants.plantsAdventureChance(),
-            ],
-          ]),
-        },
-        { canChooseMacro: false, allowAttackFamiliars: false },
-      ),
+    outfit: tearawayPantsFreeFightOutfit,
     combat: new GarboStrategy(() =>
       Macro.if_($monster`Government agent`, Macro.skill($skill`Macrometeorite`))
         .if_(
@@ -577,7 +573,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
           Macro.if_($skill`Macrometeorite`, Macro.trySkill($skill`Portscan`)),
         )
         .externalIf(
-          equippedAmount($item`tearaway pants`) > 0,
+          haveEquipped($item`tearaway pants`),
           Macro.trySkill($skill`Tear Away your Pants!`),
         )
         .basicCombat(),
@@ -749,6 +745,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     },
     tentacle: true,
     combatCount: () => clamp(5 - get("_leafMonstersFought"), 0, 5),
+    outfit: tearawayPantsFreeFightOutfit,
     combat: new GarboStrategy(() => litLeafMacro($monster`flaming leaflet`)),
   },
   {
@@ -768,6 +765,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     },
     tentacle: true,
     combatCount: () => (get("_tiedUpFlamingLeafletFought") ? 0 : 1),
+    outfit: tearawayPantsFreeFightOutfit,
     combat: new GarboStrategy(() => litLeafMacro($monster`flaming leaflet`)),
   },
   {
@@ -787,6 +785,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     },
     tentacle: true,
     combatCount: () => (get("_tiedUpFlamingMonsteraFought") ? 0 : 1),
+    outfit: tearawayPantsFreeFightOutfit,
     combat: new GarboStrategy(() => litLeafMacro($monster`flaming monstera`)),
   },
   // tied-up leaviathan (scaling, has 100 damage source cap and 2500 hp)
