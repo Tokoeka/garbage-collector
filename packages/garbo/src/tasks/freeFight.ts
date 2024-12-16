@@ -373,6 +373,12 @@ const FreeFightTasks: GarboFreeFightTask[] = [
         .externalIf(
           get("glitchItemImplementationCount") *
             itemAmount($item`[glitch season reward name]`) >=
+            1000,
+          Macro.item([$item`jam band bootleg`, $item`jam band bootleg`]),
+        )
+        .externalIf(
+          get("glitchItemImplementationCount") *
+            itemAmount($item`[glitch season reward name]`) >=
             400,
           Macro.item([$item`gas can`, $item`gas can`]),
         )
@@ -416,6 +422,13 @@ const FreeFightTasks: GarboFreeFightTask[] = [
         400
       ) {
         retrieveItem($item`gas can`, 2);
+      }
+      if (
+        get("glitchItemImplementationCount") *
+          itemAmount($item`[glitch season reward name]`) >=
+        1000
+      ) {
+        retrieveItem($item`jam band bootleg`, 2);
       }
     },
     tentacle: false,
