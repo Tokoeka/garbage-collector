@@ -94,7 +94,7 @@ const PostFreeFightTasks: GarboTask[] = [
       }
       setChoice(
         1410,
-        globalOptions.ascend || get("mushroomGardenCropLevel") >= 11 ? 2 : 1,
+        (globalOptions.ascend || get("mushroomGardenCropLevel") >= 11) ? 2 : 1,
       );
       garboAdventure($location`Your Mushroom Garden`, Macro.basicCombat());
       if (have($item`packet of tall grass seeds`)) {
