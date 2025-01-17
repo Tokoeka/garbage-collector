@@ -706,7 +706,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
   },
   {
     name: "The X-32-F Combat Training Snowman",
-    ready: () => get("snojoAvailable"),
+    ready: () => (get("snojoAvailable") && !get("relayCounters").includes("portscan")),
     completed: () => get("_snojoFreeFights") >= 10,
     do: $location`The X-32-F Combat Training Snowman`,
     tentacle: false,
