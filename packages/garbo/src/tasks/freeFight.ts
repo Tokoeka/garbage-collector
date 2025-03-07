@@ -565,7 +565,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       !doingGregFight() &&
       have($skill`Macrometeorite`) &&
       get("_macrometeoriteUses") < 10,
-    completed: () => Counter.exists("portscan.edu"),
+    completed: () => !Counter.exists("portscan.edu"),
     prepare: () => {
       if (have($item`packet of mushroom spores`)) {
         use($item`packet of mushroom spores`);
@@ -715,7 +715,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
   // Neverending party
   {
     name: "An Unusually Quiet Barroom Brawl",
-    ready: () => get("ownsSpeakeasy"),
+    ready: () => get("ownsSpeakeasy") && !get("relayCounters").includes("portscan"),
     completed: () => get("_speakeasyFreeFights") >= 3,
     do: $location`An Unusually Quiet Barroom Brawl`,
     tentacle: true,
