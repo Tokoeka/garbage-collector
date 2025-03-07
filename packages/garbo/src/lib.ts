@@ -22,7 +22,6 @@ import {
   itemDropsArray,
   lastMonster,
   Location,
-  mallPrices,
   meatDropModifier,
   Monster,
   mpCost,
@@ -48,7 +47,6 @@ import {
   rollover,
   runChoice,
   runCombat,
-  sessionStorage,
   setLocation,
   Skill,
   soulsauceCost,
@@ -67,6 +65,7 @@ import {
   $effect,
   $familiar,
   $item,
+  $items,
   $location,
   $monster,
   $skill,
@@ -715,23 +714,16 @@ type LastAdventureOptions = {
   includeJuneCleaver: boolean;
   includeVioletFog: boolean;
 };
-const DEFAULT_LAST_ADVENTURE_OPTIONS = {
-  extraEncounters: [],
-  includeGhostDog: true,
-  includeHolidayWanderers: true,
-  includeJuneCleaver: true,
-  includeVioletFog: true,
-} as const;
+
 export function lastAdventureWasWeird(
-  options: Partial<LastAdventureOptions> = {},
+  {
+    extraEncounters = [],
+    includeGhostDog = true,
+    includeHolidayWanderers = true,
+    includeJuneCleaver = true,
+    includeVioletFog = true,
+  } = {} as Partial<LastAdventureOptions>,
 ): boolean {
-  const {
-    extraEncounters,
-    includeGhostDog,
-    includeHolidayWanderers,
-    includeJuneCleaver,
-    includeVioletFog,
-  } = { ...DEFAULT_LAST_ADVENTURE_OPTIONS, ...options };
   return [
     ...extraEncounters,
     ...(includeGhostDog ? GHOST_DOG_ADVENTURES : []),
@@ -1059,14 +1051,6 @@ export function candyFactoryValue(): number {
   return garboAverageValue(...getDropsList("trainset"));
 }
 
-export function allMallPrices() {
-  const today = todayToString();
-  if (sessionStorage.getItem("allpricedate") !== today) {
-    mallPrices("allitems");
-    sessionStorage.setItem("allpricedate", today);
-  }
-}
-
 export function aprilFoolsRufus() {
   if (holiday().includes("April Fool's Day")) {
     visitUrl("questlog.php?which=7");
@@ -1134,3 +1118,5 @@ export const valueDrops = (monster: Monster) =>
     !["c", "0", "p", "a"].includes(type) ? (garboValue(drop) * rate) / 100 : 0,
   );
 export const isFree = (monster: Monster) => monster.attributes.includes("FREE");
+
+export const unlimitedFreeRunList = $items`handful of split pea soup, tennis ball, Louder Than Bomb, divine champagne popper`;

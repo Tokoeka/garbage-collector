@@ -142,11 +142,6 @@ export type WanderOptions = {
 
 export type WanderDetails = DraggableFight | WanderOptions;
 
-const defaultWanderOptions = {
-  drunkSafe: true,
-  allowEquipment: true,
-};
-
 export class WandererManager {
   private unsupportedChoices = new Map<
     Location,
@@ -231,6 +226,9 @@ export class WandererManager {
     [$location`The Penultimate Fantasy Airship`, { 178: 2, 182: 1 }], // Skip, and Fight random enemy
     [$location`The Haiku Dungeon`, { 297: 3 }], // skip
     [$location`Frat House`, { 1425: 4 }], // fight eXtreme Sports Orcs
+    [$location`Madness Bakery`, { 1061: 6 }],
+    [$location`The Skeleton Store`, { 1060: 6 }],
+    [$location`The Overgrown Lot`, { 1062: 6 }],
   ]);
   equipment = new Map<Location, Item[]>([
     ...Location.all()
@@ -254,10 +252,7 @@ export class WandererManager {
     const { draggableFight, options } = isDraggableFight(wanderer)
       ? { draggableFight: wanderer, options: {} }
       : { draggableFight: wanderer.wanderer, options: wanderer };
-    const { drunkSafe, allowEquipment } = {
-      ...defaultWanderOptions,
-      ...options,
-    };
+    const { drunkSafe = true, allowEquipment = false } = options;
     const newKey = `${myTotalTurnsSpent()};${totalTurnsPlayed()};${get(
       "familiarSweat",
     )}`;

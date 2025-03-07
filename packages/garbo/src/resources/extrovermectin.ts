@@ -31,6 +31,7 @@ import {
   clamp,
   CrystalBall,
   get,
+  getAcquirePrice,
   getBanishedMonsters,
   have,
   Latte,
@@ -379,9 +380,9 @@ type Banish = {
 
 const combatItem = (item: Item, maxPrice?: number): Banish => ({
   name: `${item}`,
-  available: () => mallPrice(item) < (maxPrice ?? MAX_BANISH_PRICE),
+  available: () => getAcquirePrice(item) < (maxPrice ?? MAX_BANISH_PRICE),
   macro: () => Macro.item(item),
-  price: () => mallPrice(item),
+  price: () => getAcquirePrice(item),
   prepare: () => acquire(1, item, maxPrice ?? MAX_BANISH_PRICE), // put a sanity ceiling of 50k on the banish
 });
 
@@ -470,6 +471,7 @@ const iceHouseBanish: Banish = {
 const shortBanishes = [
   combatItem($item`Louder Than Bomb`, 10000),
   combatItem($item`tennis ball`, 10000),
+  combatItem($item`handful of split pea soup`, 10000),
 ];
 
 function iceHouseAllowed(): boolean {

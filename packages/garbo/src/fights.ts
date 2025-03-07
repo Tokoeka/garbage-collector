@@ -692,7 +692,9 @@ class FreeRunFight extends FreeFight {
         new Error(`Failed to build outfit from ${JSON.stringify(initialSpec)}`),
       );
       mergingOutfit.equip(toSpec(runSource));
-      freeFightOutfit(mergingOutfit.spec()).dress();
+      freeFightOutfit(mergingOutfit.spec(), {
+        familiarOptions: { mode: "run" },
+      }).dress();
       freeFightMood(...(this.options.effects?.() ?? []));
       safeRestore();
       const curTurncount = myTurncount();
@@ -815,7 +817,7 @@ const freeFightSources = [
       } else {
         if (numericModifier($item`Grimacite guayabera`, "Monster Level") < 40) {
           retrieveItem(1, $item`tennis ball`);
-          retrieveItem(1, $item`Louder Than Bomb`);
+          retrieveItem(1, $item`handful of split pea soup`);
           retrieveItem(1, $item`divine champagne popper`);
         }
         const snokeLimit = getUsingFreeBunnyBanish() ? 1 : 3;
@@ -825,7 +827,7 @@ const freeFightSources = [
             $monster`alielf`,
             Macro.trySkill(
               $skill`Asdon Martin: Spring-Loaded Front Bumper`,
-            ).tryItem($item`Louder Than Bomb`),
+            ).tryItem($item`handful of split pea soup`),
           )
             .if_(
               $monster`cat-alien`,
@@ -1064,9 +1066,13 @@ const freeFightSources = [
             : get("_questPartyFairQuest") === "dj"
               ? ["100 Meat Drop"]
               : [],
-        equip: have($item`January's Garbage Tote`)
-          ? $items`makeshift garbage shirt`
-          : [],
+        equip:
+          have($item`January's Garbage Tote`) &&
+          (!have($item`broken champagne bottle`) ||
+            get("garbageChampagneCharge") === 0) &&
+          (!have($item`deceased crimbo tree`) || get("garbageTreeCharge") === 0)
+            ? $items`makeshift garbage shirt`
+            : [],
       }),
     },
   ),
@@ -1679,7 +1685,10 @@ const freeRunFightSources = [
         const spec: OutfitSpec = {
           equip: $items`mayfly bait necklace`,
           bonuses: new Map([[$item`carnivorous potted plant`, 100]]),
-          familiar: freeFightFamiliar({ allowAttackFamiliars: false }),
+          familiar: freeFightFamiliar({
+            allowAttackFamiliars: false,
+            mode: "run",
+          }),
         };
         if (!canPickPocket && bestPickpocketItem) {
           spec.equip?.push(bestPickpocketItem);

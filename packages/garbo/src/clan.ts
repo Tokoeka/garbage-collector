@@ -4,8 +4,6 @@ import {
   cliExecute,
   enthroneFamiliar,
   equip,
-  equippedAmount,
-  equippedItem,
   familiarEquippedEquipment,
   getClanId,
   getClanName,
@@ -16,7 +14,6 @@ import {
   putStash,
   refreshStash,
   retrieveItem,
-  Slot,
   stashAmount,
   takeStash,
   toItem,
@@ -27,17 +24,18 @@ import {
   $familiar,
   $familiars,
   $item,
-  $items,
   $slot,
   Clan,
   get,
+  getAcquirePrice,
   getFoldGroup,
   have,
   set,
+  unequip,
 } from "libram";
 import { Macro } from "./combat";
 import { globalOptions } from "./config";
-import { HIGHLIGHT, userConfirmDialog } from "./lib";
+import { HIGHLIGHT, unlimitedFreeRunList, userConfirmDialog } from "./lib";
 
 export const stashItems = get("garboStashItems", "")
   .split(",")
@@ -170,7 +168,11 @@ export class StashManager {
         HIGHLIGHT,
       );
       Macro.if_(globalOptions.target, Macro.attack().repeat())
-        .tryItem(...$items`Louder Than Bomb, divine champagne popper`)
+        .tryItem(
+          ...unlimitedFreeRunList
+            .filter((i) => getAcquirePrice(i) < get("valueOfAdventure"))
+            .sort((a, b) => getAcquirePrice(a) - getAcquirePrice(b)),
+        )
         .step("runaway")
         .submit();
     } else {
@@ -200,10 +202,8 @@ export class StashManager {
             enthroneFamiliar($familiar.none);
           }
 
-          if (equippedAmount(item) > 0) {
-            const slots = Slot.all().filter((s) => equippedItem(s) === item);
-            slots.forEach((s) => equip(s, $item.none));
-          }
+          const foldedForms = [item, ...getFoldGroup(item)];
+          for (const fold of foldedForms) unequip(fold);
 
           if (toSlot(item) === $slot`familiar` && !have(item, count)) {
             for (const familiar of $familiars.all().filter(have)) {
