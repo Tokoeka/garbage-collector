@@ -18,7 +18,6 @@ import {
   Monster,
   myBuffedstat,
   myClass,
-  myFamiliar,
   myInebriety,
   myMaxhp,
   restoreHp,
@@ -47,7 +46,6 @@ import {
   ChateauMantegna,
   clamp,
   CombatLoversLocket,
-  CommaChameleon,
   Counter,
   ensureEffect,
   get,
@@ -160,16 +158,6 @@ function litLeafMacro(monster: Monster): Macro {
     .basicCombat();
 }
 
-function dmtCommaValuable(): boolean {
-  if (!CommaChameleon.have()) return false;
-  const cost =
-    mallPrice($item`Deep Machine Tunnels snowglobe`) +
-    (CommaChameleon.currentFamiliar() === $familiar`Machine Elf`
-      ? 0
-      : mallPrice($item`self-dribbling basketball`));
-  return globalOptions.prefs.valueOfFreeFight * 5 > cost;
-}
-
 /* const stunDurations = new Map<Skill | Item, Delayed<number>>([
   [$skill`Blood Bubble`, 1],
   [
@@ -208,8 +196,6 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       get("questPAGhost") !== "unstarted" &&
       get("ghostLocation") !== null,
     completed: () => get("questPAGhost") === "unstarted",
-    choices: () =>
-      wanderer().getChoices(get("ghostLocation") ?? $location.none),
     do: () => get("ghostLocation"),
     combat: new GarboStrategy(() => Macro.ghostBustin()),
     outfit: () => freeFightOutfit({ back: $item`protonic accelerator pack` }),
@@ -667,22 +653,10 @@ const FreeFightTasks: GarboFreeFightTask[] = [
   },
   {
     name: "Machine Elf",
-    ready: () => have($familiar`Machine Elf`) || dmtCommaValuable(),
+    ready: () => have($familiar`Machine Elf`),
     completed: () => get("_machineTunnelsAdv") >= 5,
     do: $location`The Deep Machine Tunnels`,
     prepare: () => {
-      if (myFamiliar() === $familiar`Comma Chameleon`) {
-        if (CommaChameleon.currentFamiliar() !== $familiar`Machine Elf`) {
-          acquire(1, $item`self-dribbling basketball`);
-          CommaChameleon.transform($familiar`Machine Elf`);
-        }
-
-        if (!canAdventure($location`The Deep Machine Tunnels`)) {
-          acquire(1, $item`Deep Machine Tunnels snowglobe`);
-          use($item`Deep Machine Tunnels snowglobe`);
-        }
-      }
-      // We need an else here because if we're using Comma we don't get to convert items.
       if (
         garboValue($item`abstraction: certainty`) >=
         garboValue($item`abstraction: thought`)
@@ -748,9 +722,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     outfit: () =>
       freeFightOutfit(
         {
-          familiar: have($familiar`Machine Elf`)
-            ? $familiar`Machine Elf`
-            : $familiar`Comma Chameleon`,
+          familiar: $familiar`Machine Elf`,
         },
         {
           location: $location`The Deep Machine Tunnels`,

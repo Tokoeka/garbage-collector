@@ -12,7 +12,8 @@ import {
   Tuple,
 } from "libram";
 import { garboValue } from "../garboValue";
-import { effectValue } from "../potions";
+import { copyTargetCount } from "../target";
+import { Potion } from "../potions";
 import getExperienceFamiliars from "../familiar/experienceFamiliars";
 import { felizValue } from "../lib";
 import { GarboTask } from "../tasks/engine";
@@ -22,7 +23,10 @@ const MAYAM_RING_VALUES = {
   yam1: () => garboValue($item`yam`),
   sword: () => 1,
   vessel: () => 2,
-  eye: () => effectValue($effect`Big Eyes`, 100),
+  eye: () =>
+    new Potion($item.none, { effect: $effect`Big Eyes`, duration: 100 }).gross(
+      copyTargetCount(),
+    ),
   fur: () =>
     Math.max(
       0,
@@ -56,7 +60,9 @@ function valueResonance(combination: MayamCalendar.CombinationString): number {
     if (result === $item`yamtility belt`) return 0; // yamtilityValue();
     return garboValue(result);
   }
-  return effectValue(result, 30);
+  return new Potion($item.none, { effect: result, duration: 30 }).gross(
+    copyTargetCount(),
+  );
 }
 
 function valueCombination(

@@ -22,7 +22,7 @@ import {
 import { baseMeat, felizValue, newarkValue } from "../lib";
 import { garboAverageValue, garboValue } from "../garboValue";
 import { FamiliarMode, GeneralFamiliar } from "./lib";
-import { effectValue } from "../potions";
+import { Potion } from "../potions";
 import { globalOptions } from "../config";
 
 type ConstantValueFamiliar = {
@@ -98,9 +98,7 @@ const standardFamiliars: ConstantValueFamiliar[] = [
     familiar: $familiar`Unspeakachu`,
     value: () =>
       sum(getActiveEffects(), (effect) =>
-        effectValue(
-          effect,
-          5,
+        new Potion($item.none, { effect, duration: 5 }).gross(
           clamp(5, 0, globalOptions.ascend ? myAdventures() : 5),
         ),
       ) *
@@ -124,7 +122,7 @@ const standardFamiliars: ConstantValueFamiliar[] = [
           garboValue($item`mini kiwi`), // faster with aviator goggles
   },
   {
-    familiar: $familiar`Quantum Entangler`,
+    familiar: $familiar`quantum entangler`,
     value: () => garboValue($item`quantized familiar experience`) / 11,
   },
   {

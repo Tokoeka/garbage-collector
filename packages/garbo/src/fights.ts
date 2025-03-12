@@ -1983,7 +1983,6 @@ function doGhost() {
   }
   const ghostLocation = get("ghostLocation");
   if (!ghostLocation) return;
-  propertyManager.setChoices(wanderer().getChoices(ghostLocation));
   freeFightOutfit({ equip: $items`protonic accelerator pack` }).dress();
   let currentTurncount;
   do {

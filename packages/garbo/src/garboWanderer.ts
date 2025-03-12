@@ -1,4 +1,4 @@
-import { getMonsters, Location } from "kolmafia";
+import { Effect, getMonsters, Location } from "kolmafia";
 import { WandererManager } from "garbo-lib";
 
 import { globalOptions } from "./config";
@@ -6,7 +6,8 @@ import { freeFightFamiliarData } from "./familiar/freeFightFamiliar";
 import { estimatedGarboTurns } from "./turns";
 import { $item, $location, $monsters, get, have } from "libram";
 import { garboValue } from "./garboValue";
-import { effectValue } from "./potions";
+import { Potion } from "./potions";
+import { copyTargetCount } from "./target/fights";
 import { digitizedMonstersRemainingForTurns } from "./lib";
 
 let _wanderer: WandererManager | undefined;
@@ -16,7 +17,8 @@ export function wanderer(): WandererManager {
       ascend: globalOptions.ascend,
       estimatedTurns: estimatedGarboTurns,
       itemValue: garboValue,
-      effectValue,
+      effectValue: (effect: Effect, duration: number) =>
+        new Potion($item.none, { effect, duration }).gross(copyTargetCount()),
       prioritizeCappingGuzzlr: get("garbo_prioritizeCappingGuzzlr", false),
       freeFightExtraValue: (location: Location) =>
         freeFightFamiliarData({ location }).expectedValue,
