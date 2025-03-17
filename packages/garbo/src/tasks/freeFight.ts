@@ -104,9 +104,7 @@ function bestWitchessPiece() {
 const locketMonster = () =>
   CombatLoversLocket.findMonster(isFreeAndCopyable, valueDrops);
 const locketsToSave = () =>
-  CombatLoversLocket.availableLocketMonsters().includes(globalOptions.target)
-    ? 1
-    : 0;
+  CombatLoversLocket.canReminisce(globalOptions.target) ? 1 : 0;
 
 const maxSealsAvailable = () =>
   retrieveItem(1, $item`Claw of the Infernal Seal`) ? 10 : 5;
@@ -657,6 +655,18 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     completed: () => get("_machineTunnelsAdv") >= 5,
     do: $location`The Deep Machine Tunnels`,
     prepare: () => {
+      if (myFamiliar() === $familiar`Comma Chameleon`) {
+        if (CommaChameleon.currentFamiliar() !== $familiar`Machine Elf`) {
+          acquire(1, $item`self-dribbling basketball`, 10000);
+          CommaChameleon.transform($familiar`Machine Elf`);
+        }
+
+        if (!canAdventure($location`The Deep Machine Tunnels`)) {
+          acquire(1, $item`Deep Machine Tunnels snowglobe`, 2000);
+          use($item`Deep Machine Tunnels snowglobe`);
+        }
+      }
+      // We need an else here because if we're using Comma we don't get to convert items.
       if (
         garboValue($item`abstraction: certainty`) >=
         garboValue($item`abstraction: thought`)
