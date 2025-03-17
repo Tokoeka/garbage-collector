@@ -18,6 +18,7 @@ import {
   Monster,
   myBuffedstat,
   myClass,
+  myFamiliar,
   myInebriety,
   myMaxhp,
   restoreHp,
@@ -46,6 +47,7 @@ import {
   ChateauMantegna,
   clamp,
   CombatLoversLocket,
+  CommaChameleon,
   Counter,
   ensureEffect,
   get,
@@ -156,6 +158,16 @@ function litLeafMacro(monster: Monster): Macro {
     .basicCombat();
 }
 
+function dmtCommaValuable(): boolean {
+  if (!CommaChameleon.have()) return false;
+  const cost =
+    mallPrice($item`Deep Machine Tunnels snowglobe`) +
+    (CommaChameleon.currentFamiliar() === $familiar`Machine Elf`
+      ? 0
+      : mallPrice($item`self-dribbling basketball`));
+  return globalOptions.prefs.valueOfFreeFight * 5 > cost;
+}
+
 /* const stunDurations = new Map<Skill | Item, Delayed<number>>([
   [$skill`Blood Bubble`, 1],
   [
@@ -194,6 +206,8 @@ const FreeFightTasks: GarboFreeFightTask[] = [
       get("questPAGhost") !== "unstarted" &&
       get("ghostLocation") !== null,
     completed: () => get("questPAGhost") === "unstarted",
+    choices: () =>
+      wanderer().getChoices(get("ghostLocation") ?? $location.none),
     do: () => get("ghostLocation"),
     combat: new GarboStrategy(() => Macro.ghostBustin()),
     outfit: () => freeFightOutfit({ back: $item`protonic accelerator pack` }),
@@ -651,7 +665,7 @@ const FreeFightTasks: GarboFreeFightTask[] = [
   },
   {
     name: "Machine Elf",
-    ready: () => have($familiar`Machine Elf`),
+    ready: () => have($familiar`Machine Elf`) || dmtCommaValuable(),
     completed: () => get("_machineTunnelsAdv") >= 5,
     do: $location`The Deep Machine Tunnels`,
     prepare: () => {
@@ -732,7 +746,9 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     outfit: () =>
       freeFightOutfit(
         {
-          familiar: $familiar`Machine Elf`,
+          familiar: have($familiar`Machine Elf`)
+            ? $familiar`Machine Elf`
+            : $familiar`Comma Chameleon`,
         },
         {
           location: $location`The Deep Machine Tunnels`,
