@@ -1,10 +1,4 @@
-import {
-  Familiar,
-  familiarWeight,
-  holiday,
-  myAdventures,
-  squareRoot,
-} from "kolmafia";
+import { Familiar, holiday, squareRoot } from "kolmafia";
 import {
   $effect,
   $familiar,
@@ -12,18 +6,15 @@ import {
   $items,
   clamp,
   findLeprechaunMultiplier,
-  getActiveEffects,
   getModifier,
   have,
   Robortender,
-  sum,
   totalFamiliarWeight,
 } from "libram";
 import { baseMeat, felizValue, newarkValue } from "../lib";
 import { garboAverageValue, garboValue } from "../garboValue";
 import { FamiliarMode, GeneralFamiliar } from "./lib";
-import { effectValue } from "../potions";
-import { globalOptions } from "../config";
+import { effectExtenderValue } from "../potions";
 
 type ConstantValueFamiliar = {
   familiar: Familiar;
@@ -96,16 +87,9 @@ const standardFamiliars: ConstantValueFamiliar[] = [
   },
   {
     familiar: $familiar`Unspeakachu`,
-    value: () =>
-      sum(getActiveEffects(), (effect) =>
-        effectValue(
-          effect,
-          5,
-          clamp(5, 0, globalOptions.ascend ? myAdventures() : 5),
-        ),
-      ) *
-      0.5 *
-      0.05,
+    value: () => {
+      return effectExtenderValue(5) * 0.5 * 0.05;
+    },
   },
   {
     familiar: $familiar`Patriotic Eagle`,
@@ -141,7 +125,7 @@ const standardFamiliars: ConstantValueFamiliar[] = [
 ];
 
 function peaceTurkeyDropChance(): number {
-  return 0.24 + squareRoot(familiarWeight($familiar`Peace Turkey`)) / 100;
+  return 0.24 + squareRoot(totalFamiliarWeight($familiar`Peace Turkey`)) / 100;
 }
 
 export default function getConstantValueFamiliars(

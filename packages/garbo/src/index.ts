@@ -56,6 +56,7 @@ import {
   setDefaultMaximizeOptions,
   sinceKolmafiaRevision,
   unequip,
+  withProperty,
 } from "libram";
 import { stashItems, withStash, withVIPClan } from "./clan";
 import { globalOptions, isQuickGear } from "./config";
@@ -75,7 +76,7 @@ import {
   userConfirmDialog,
   valueDrops,
 } from "./lib";
-import { meatMood, useBuffExtenders } from "./mood";
+import { meatMood } from "./mood";
 import { potionSetup } from "./potions";
 import { endSession, startSession, trackMarginalMpa } from "./session";
 import { estimatedGarboTurns } from "./turns";
@@ -83,10 +84,17 @@ import { yachtzeeChain } from "./yachtzee";
 import { garboAverageValue } from "./garboValue";
 import {
   BarfTurnQuests,
+  CockroachSetup,
+  DailyFamiliarsQuest,
   PostQuest,
   runGarboQuests,
+  runSafeGarboQuests,
   SetupTargetCopyQuest,
 } from "./tasks";
+import {
+  BuffExtensionQuest,
+  PostBuffExtensionQuest,
+} from "./tasks/buffExtension";
 
 // Max price for tickets. You should rethink whether Barf is the best place if they're this expensive.
 const TICKET_MAX_PRICE = 500000;
@@ -276,7 +284,7 @@ export function main(argString = ""): void {
     !globalOptions.nobarf &&
     globalOptions.prefs.valueOfAdventure &&
     globalOptions.prefs.valueOfAdventure >= 8500 &&
-    globalOptions.prefs.valueOfAdventure < 17500
+    globalOptions.prefs.valueOfAdventure < 20_000
   ) {
     userConfirmDialog(
       `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, are you sure you want to continue?`,
@@ -285,7 +293,8 @@ export function main(argString = ""): void {
   }
   if (
     globalOptions.prefs.valueOfAdventure &&
-    globalOptions.prefs.valueOfAdventure >= 17500
+    globalOptions.prefs.valueOfAdventure >=
+    (globalOptions.nobarf ? 20_000 : 10_000)
   ) {
     throw `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, which is definitely incorrect. Please set it to your reliable marginal turn value.`;
   }
@@ -449,6 +458,7 @@ export function main(argString = ""): void {
       maximizerCombinationLimit: maximizerCombinationLimit,
       allowNegativeTally: true,
       spadingScript: "excavator.js",
+      lastChanceBurn: "",
     });
     let bestHalloweiner = 0;
     if (haveInCampground($item`haunted doghouse`)) {
@@ -530,6 +540,18 @@ export function main(argString = ""): void {
     // FIXME: Dynamically figure out pointer ring approach.
     withStash(stashItems, () => {
       withVIPClan(() => {
+        // Prepare pirate realm if our copy target is cockroach
+        // How do we handle if garbo was started without enough turns left without dieting to prep?
+        if (
+          globalOptions.target === $monster`cockroach` &&
+          !globalOptions.simdiet
+        ) {
+          if (!globalOptions.nodiet) nonOrganAdventures();
+          runSafeGarboQuests([DailyFamiliarsQuest]); // Prep robortender ahead of time in case it's a giant crab
+          withProperty("removeMalignantEffects", false, () =>
+            runGarboQuests([CockroachSetup]),
+          );
+        }
         // 0. diet stuff.
         if (
           globalOptions.nodiet ||
@@ -579,7 +601,7 @@ export function main(argString = ""): void {
           potionSetup(false);
           maximize("MP", false);
           meatMood().execute(estimatedGarboTurns());
-          useBuffExtenders();
+          runGarboQuests([BuffExtensionQuest, PostBuffExtensionQuest]);
           try {
             runGarboQuests([PostQuest(), ...BarfTurnQuests]);
 

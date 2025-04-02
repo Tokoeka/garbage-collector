@@ -51,6 +51,7 @@ import {
   $items,
   $skill,
   clamp,
+  DesignerSweatpants,
   Diet,
   get,
   getAverageAdventures,
@@ -76,8 +77,8 @@ import {
   arrayEquals,
   HIGHLIGHT,
   MEAT_TARGET_VALUE,
+  targetingMeat,
   targetMeat,
-  targettingMeat,
   userConfirmDialog,
 } from "./lib";
 import { shrugBadEffects } from "./mood";
@@ -514,10 +515,7 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`designer sweatpants`, {
       size: -1,
       organ: "booze",
-      maximum: Math.min(
-        3 - get("_sweatOutSomeBoozeUsed"),
-        Math.floor(get("sweat") / 25),
-      ),
+      maximum: DesignerSweatpants.availableCasts($skill`Sweat Out Some Booze`),
     }),
     new MenuItem($item`august scepter`, {
       size: -1,
@@ -602,7 +600,7 @@ function gregariousCount(): {
 }
 
 function copiers(): MenuItem<Note>[] {
-  const targetDifferential = targettingMeat() ? MEAT_TARGET_VALUE() - MPA : 0;
+  const targetDifferential = targetingMeat() ? MEAT_TARGET_VALUE() - MPA : 0;
   const { expectedGregariousFights, marginalGregariousFights } =
     gregariousCount();
   const extros =
@@ -841,7 +839,7 @@ function balanceMenu(
   baseMenu: MenuItem<Note>[],
   dietPlanner: DietPlanner,
 ): MenuItem<Note>[] {
-  const baseTargets = targettingMeat() ? copyTargetCount() : 0;
+  const baseTargets = targetingMeat() ? copyTargetCount() : 0;
   function rebalance(
     menu: MenuItem<Note>[],
     iterations: number,
@@ -1247,10 +1245,6 @@ export function consumeDiet(diet: Diet<Note>, name: DietName): void {
   }
 }
 
-let completedDiet = globalOptions.nodiet;
-export function dietCompleted(): boolean {
-  return completedDiet;
-}
 export function runDiet(): void {
   withVIPClan(() => {
     if (myFamiliar() === $familiar`Stooper`) {
@@ -1302,5 +1296,5 @@ export function runDiet(): void {
       shrugBadEffects();
     }
   });
-  completedDiet = true;
+  globalOptions.dietCompleted = true;
 }
