@@ -6,6 +6,7 @@ import {
   canEquip,
   cliExecute,
   currentRound,
+  equip,
   getCampground,
   getClanName,
   guildStoreAvailable,
@@ -35,6 +36,7 @@ import {
   $class,
   $classes,
   $coinmaster,
+  $familiars,
   $item,
   $items,
   $monster,
@@ -95,6 +97,8 @@ import {
   BuffExtensionQuest,
   PostBuffExtensionQuest,
 } from "./tasks/buffExtension";
+import { shouldAffirmationHate } from "./combat";
+import { acquire } from "./acquire";
 
 // Max price for tickets. You should rethink whether Barf is the best place if they're this expensive.
 const TICKET_MAX_PRICE = 500000;
@@ -499,6 +503,11 @@ export function main(argString = ""): void {
     }
     propertyManager.set({ shadowLabyrinthGoal: "effects" }); // Automate Shadow Labyrinth Quest
 
+    const equipmentFamiliars = $familiars`Left-Hand Man, Disembodied Hand, Mad Hatrack, Fancypants Scarecrow`;
+    for (const familiar of equipmentFamiliars.filter(have)) {
+      equip(familiar, $item.none);
+    }
+
     safeRestore();
 
     if (questStep("questM23Meatsmith") === -1) {
@@ -535,6 +544,15 @@ export function main(argString = ""): void {
     }
     if (!have($item`Jurassic Parka`) && have($skill`Torso Awareness`)) {
       stashItems.push($item`origami pasties`);
+    }
+
+    // Prepare Daily Affirmation for PvP fights if desired
+    if (shouldAffirmationHate()) {
+      acquire(
+        1,
+        $item`Daily Affirmation: Keep Free Hate in your Heart`,
+        globalOptions.prefs.valueOfPvPFight * 3 * 1.1,
+      );
     }
 
     // FIXME: Dynamically figure out pointer ring approach.
