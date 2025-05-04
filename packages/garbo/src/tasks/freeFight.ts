@@ -201,16 +201,22 @@ function dmtCommaValuable(): boolean {
 const FreeFightTasks: GarboFreeFightTask[] = [
   {
     name: $item`protonic accelerator pack`.name,
-    ready: () =>
-      have($item`protonic accelerator pack`) &&
-      get("questPAGhost") !== "unstarted" &&
-      get("ghostLocation") !== null,
+    ready: () => get("ghostLocation") !== null,
     completed: () => get("questPAGhost") === "unstarted",
     choices: () =>
       wanderer().getChoices(get("ghostLocation") ?? $location.none),
     do: () => get("ghostLocation") ?? $location.none,
-    combat: new GarboStrategy(() => Macro.ghostBustin()),
-    outfit: () => freeFightOutfit({ back: $item`protonic accelerator pack` }),
+    combat: new GarboStrategy(() =>
+      have($item`protonic accelerator pack`)
+        ? Macro.ghostBustin()
+        : Macro.basicCombat(),
+    ),
+    outfit: () =>
+      freeFightOutfit({
+        back: have($item`protonic accelerator pack`)
+          ? $item`protonic accelerator pack`
+          : [],
+      }),
     tentacle: true,
   },
   {
@@ -272,7 +278,9 @@ const FreeFightTasks: GarboFreeFightTask[] = [
   {
     name: "Eldritch Tentacle",
     ready: () => get("questL02Larva") !== "unstarted",
-    completed: () => get("_eldritchTentacleFought"),
+    completed: () =>
+      get("_eldritchTentacleFought") ||
+      get("_eldritchTentaclesFoughtToday") >= 11,
     do: () => {
       const haveEldritchEssence = itemAmount($item`eldritch essence`) !== 0;
       visitUrl("place.php?whichplace=forestvillage&action=fv_scientist", false);
@@ -284,7 +292,9 @@ const FreeFightTasks: GarboFreeFightTask[] = [
   {
     name: $skill`Evoke Eldritch Horror`.name,
     ready: () => have($skill`Evoke Eldritch Horror`),
-    completed: () => get("_eldritchHorrorEvoked"),
+    completed: () =>
+      get("_eldritchHorrorEvoked") ||
+      get("_eldritchTentaclesFoughtToday") >= 11,
     do: () => {
       useSkill($skill`Evoke Eldritch Horror`);
       if (have($effect`Beaten Up`)) uneffect($effect`Beaten Up`);
@@ -369,7 +379,9 @@ const FreeFightTasks: GarboFreeFightTask[] = [
           modes: { retrocape: ["robot", "kiss"] },
           avoid: $items`mutant crown, mutant arm, mutant legs, shield of the Skeleton Lord`,
           modifier:
-            numericModifier("Monster Level") >= 50 ? "-Monster Level" : [], // Above 50 ML, monsters resist stuns.
+            numericModifier("Monster Level") >= 50
+              ? "-7 Monster Level"
+              : "-Monster Level", // Above 50 ML, monsters resist stuns.
         },
         { familiarOptions: { canChooseMacro: false } },
       ),

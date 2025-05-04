@@ -222,12 +222,13 @@ export class WandererManager {
       },
     ],
     [$location`The Hidden Office Building`, { 786: 6 }],
+    [$location`The Hidden Temple`, { 581: 3 }], // Fight clan of cave bars
     [$location`Cobb's Knob Barracks`, { 522: 2 }], // skip
     [$location`The Penultimate Fantasy Airship`, { 178: 2, 182: 1 }], // Skip, and Fight random enemy
     [$location`The Haiku Dungeon`, { 297: 3 }], // skip
     [$location`Frat House`, { 1425: 4 }], // fight eXtreme Sports Orcs
     [$location`Madness Bakery`, { 1061: 6 }],
-    [$location`The Skeleton Store`, { 1060: 6 }],
+    [$location`The Skeleton Store`, { 1060: 5 }],
     [$location`The Overgrown Lot`, { 1062: 7 }],
   ]);
   equipment = new Map<Location, Item[]>([

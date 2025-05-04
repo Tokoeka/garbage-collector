@@ -1266,10 +1266,10 @@ const freeRunFightSources = [
       const mappingMonster =
         Cartography.availableMaps() > 0 && best.location.wanderers;
       const monsters = asArray(best.monster);
-      try {
-        if (best.preReq) best.preReq();
-        const hasXO = myFamiliar() === $familiar`XO Skeleton`;
-        if (myThrall() !== $thrall.none) useSkill($skill`Dismiss Pasta Thrall`);
+      if (best.preReq) best.preReq();
+      const hasXO = myFamiliar() === $familiar`XO Skeleton`;
+      if (myThrall() !== $thrall.none) useSkill($skill`Dismiss Pasta Thrall`);
+      withMacro(
         Macro.if_(
           monsters.map((m) => `!monsterid ${m.id}`).join(" && "),
           runSource.macro,
@@ -1287,16 +1287,16 @@ const freeRunFightSources = [
             $skill`Perpetrate Mild Evil`,
             $skill`Swoop like a Bat`,
           )
-          .step(runSource.macro)
-          .setAutoAttack();
-        if (mappingMonster) {
-          mapMonster(best.location, monsters[0]);
-        } else {
-          adv1(best.location, -1, "");
-        }
-      } finally {
-        setAutoAttack(0);
-      }
+          .step(runSource.macro),
+        () => {
+          if (mappingMonster) {
+            mapMonster(best.location, monsters[0]);
+          } else {
+            adv1(best.location, -1, "");
+          }
+        },
+        true,
+      );
     },
     {
       spec: () => {
@@ -1815,6 +1815,7 @@ export function freeFights(): void {
   killRobortCreaturesForFree();
 
   // TODO: Run unconverted free fights
+  // TODO: Once all is grimoirized, move Eldritch Horror free fight to the start and update the uneffect task, so that we can optimize Generic Summer Holiday tentacles.
   for (const freeFightSource of freeFightSources) {
     freeFightSource.runAll();
   }
@@ -2132,19 +2133,24 @@ function setupItemStealZones() {
 }
 
 function itemStealOlfact(best: ItemStealZone) {
-  return Macro.externalIf(
-    have($skill`Transcendent Olfaction`) &&
-      get("_olfactionsUsed") < 1 &&
-      itemStealZones.every(
-        (zone) =>
-          !asArray(zone.monster).includes(get("olfactedMonster") as Monster),
-      ),
-    Macro.skill($skill`Transcendent Olfaction`),
-  ).externalIf(
-    have($skill`Gallapagosian Mating Call`) &&
-      get("_gallapagosMonster") !== best.monster,
-    Macro.skill($skill`Gallapagosian Mating Call`),
-  );
+  // banishes and sniffs do not work in the shadow rifts
+  return best.location.zone === "Shadow Rift"
+    ? new Macro()
+    : Macro.externalIf(
+        have($skill`Transcendent Olfaction`) &&
+          get("_olfactionsUsed") < 1 &&
+          itemStealZones.every(
+            (zone) =>
+              !asArray(zone.monster).includes(
+                get("olfactedMonster") as Monster,
+              ),
+          ),
+        Macro.skill($skill`Transcendent Olfaction`),
+      ).externalIf(
+        have($skill`Gallapagosian Mating Call`) &&
+          get("_gallapagosMonster") !== best.monster,
+        Macro.skill($skill`Gallapagosian Mating Call`),
+      );
 }
 
 const haveEnoughPills =
@@ -2313,15 +2319,27 @@ export function estimatedFreeFights(): number {
   );
 }
 
-// Possible additional free fights from tentacles
-export function estimatedTentacles(): number {
-  return (
+// Possible additional free fights from Eldritch Attunement
+export function estimatedAttunementTentacles(): number {
+  const totalFreeFights =
     sum(freeFightSources, (source: FreeFight) => {
       const avail = source.tentacle ? source.available() : 0;
       return typeof avail === "number" ? avail : toInt(avail);
     }) +
     possibleFreeFightQuestTentacleFights() +
-    possibleFreeGiantSandwormQuestTentacleFights()
+    possibleFreeGiantSandwormQuestTentacleFights();
+  return clamp(
+    totalFreeFights,
+    0,
+    Math.max(
+      0,
+      11 - // Capped at 11,
+        get("_eldritchTentaclesFoughtToday") - // minus what we've already fought,
+        (get("questL02Larva") !== "unstarted" ? 1 : 0) - // minus one if we have access to Science Tent
+        (have($skill`Evoke Eldritch Horror`) && !get("_eldritchHorrorEvoked") // minus one if we have Evoke Eldritch Horror
+          ? 1
+          : 0),
+    ),
   );
 }
 

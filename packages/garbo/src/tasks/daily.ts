@@ -31,6 +31,7 @@ import {
   retrieveItem,
   runChoice,
   toSlot,
+  totalTurnsPlayed,
   toUrl,
   use,
   visitUrl,
@@ -66,7 +67,7 @@ import { withStash } from "../clan";
 import { globalOptions } from "../config";
 import { copyTargetCount } from "../target";
 import { meatFamiliar } from "../familiar";
-import { estimatedTentacles } from "../fights";
+import { estimatedAttunementTentacles } from "../fights";
 import { baseMeat, HIGHLIGHT, targetMeat } from "../lib";
 import { garboValue } from "../garboValue";
 import { digitizedMonstersRemaining, estimatedGarboTurns } from "../turns";
@@ -698,7 +699,7 @@ const DailyTasks: GarboTask[] = [
     ready: () =>
       holiday().includes("Generic Summer Holiday") &&
       !have($effect`Eldritch Attunement`) &&
-      estimatedTentacles() * globalOptions.prefs.valueOfFreeFight >
+      estimatedAttunementTentacles() * globalOptions.prefs.valueOfFreeFight >
         get("valueOfAdventure"),
     completed: () => have($effect`Eldritch Attunement`),
     do: () => adv1($location`Generic Summer Holiday Swimming!`),
@@ -824,6 +825,29 @@ const DailyTasks: GarboTask[] = [
         (x) => <AcquireItem>{ item: x },
       ),
     outfit: { modifier: "disco style" },
+    spendsTurn: false,
+  },
+  {
+    name: "Use Walkie Talkie for Ghost",
+    ready: () =>
+      mallPrice($item`almost-dead walkie-talkie`) <
+        globalOptions.prefs.valueOfFreeFight &&
+      get("nextParanormalActivity") <= totalTurnsPlayed(),
+    completed: () =>
+      have($item`protonic accelerator pack`) ||
+      get("questPAGhost") === "started",
+    do: () => {
+      if (
+        acquire(
+          1,
+          $item`almost-dead walkie-talkie`,
+          globalOptions.prefs.valueOfFreeFight,
+          false,
+        )
+      ) {
+        use($item`almost-dead walkie-talkie`);
+      }
+    },
     spendsTurn: false,
   },
 ];

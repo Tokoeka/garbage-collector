@@ -38,9 +38,17 @@ export const SetupTargetCopyQuest: Quest<GarboTask> = {
       // Need the daily dungeon to either be totally finished or to be on a NC we can walk away from
       name: "Setup Daily Dungeon",
       outfit: () =>
-        freeFightOutfit({ equip: $items`ring of Detect Boring Doors` }),
+        freeFightOutfit({
+          equip: $items`ring of Detect Boring Doors`,
+        }),
       // walk away from any nc we can walk away from, skip boring doors, open the final chest
-      choices: () => ({ 689: 1, 690: 2, 691: 2, 692: 8, 693: 3 }),
+      choices: () => ({
+        689: 1,
+        690: 2,
+        691: 2,
+        692: 8,
+        693: 3,
+      }),
       acquire: [{ item: $item`ring of Detect Boring Doors` }],
       ready: () =>
         getChangeLastAdvLocationMethod() === "dailydungeon" &&
@@ -152,6 +160,7 @@ export const SetupTargetCopyQuest: Quest<GarboTask> = {
           wait(10 + i * 2);
           if (!have($item`photocopied monster`)) {
             cliExecute("fax receive");
+            examine($item`photocopied monster`);
             if (get("photocopyMonster") === globalOptions.target) {
               break;
             }
