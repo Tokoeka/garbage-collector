@@ -27,7 +27,7 @@ import { estimatedGarboTurns } from "../turns";
 const famExpValue = new Map<Familiar, Delayed<number>>([
   [
     $familiar`Chest Mimic`,
-    () => (MEAT_TARGET_MULTIPLIER() * get("valueOfAdventure")) / 50,
+    () => (MEAT_TARGET_VALUE() - get("valueOfAdventure")) / 50,
   ],
   [$familiar`Pocket Professor`, (11 * get("valueOfAdventure")) / 200],
   [$familiar`Grey Goose`, 15 ** 4 / 400],
