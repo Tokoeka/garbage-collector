@@ -86,7 +86,6 @@ import {
 import { acquire, priceCaps } from "./acquire";
 import { withVIPClan } from "./clan";
 import { globalOptions } from "./config";
-import { copyTargetCount } from "./target";
 import { expectedGregs, shouldAugustCast, synthesize } from "./resources";
 import {
   arrayEquals,
@@ -98,7 +97,7 @@ import {
 } from "./lib";
 import { shrugBadEffects } from "./mood";
 import { Potion, PotionTier } from "./potions";
-import { estimatedGarboTurns } from "./turns";
+import { estimatedGarboTurns, highMeatMonsterCount } from "./turns";
 import { garboValue } from "./garboValue";
 
 const MPA = get("valueOfAdventure");
@@ -160,11 +159,11 @@ function shrugForOde() {
   const inexpensiveSongs = getActiveSongs().filter(
     (e) => !EXPENSIVE_SONGS.includes(e),
   );
-  if (inexpensiveSongs.length === 1) return uneffect(inexpensiveSongs[1]);
   const uselessSongs = inexpensiveSongs.filter(
     (e) => !USEFUL_SONGS.includes(e),
   );
   if (uselessSongs.length >= 1) return uneffect(uselessSongs[0]);
+  if (inexpensiveSongs.length === 1) return uneffect(inexpensiveSongs[0]);
   return uneffect(
     maxBy(inexpensiveSongs, (e) => haveEffect(e) * mpCost(toSkill(e)), true),
   );
@@ -454,8 +453,8 @@ function legendaryPizzaToMenu(
     );
 }
 
-export const mallMin: (items: Item[]) => Item = (items: Item[]) =>
-  maxBy(items, mallPrice, true);
+export const cheapestItem: (items: Item[]) => Item = (items: Item[]) =>
+  maxBy(items, MenuItem.defaultPriceFunction, true);
 
 /**
  * Generate a basic menu of high-yield items to consider
@@ -505,7 +504,7 @@ function menu(): MenuItem<Note>[] {
   const instantKarma = globalOptions.usekarma
     ? $items`Instant Karma`.filter((item) => have(item))
     : [];
-  const crimboKeyItem = mallMin(
+  const crimboKeyItem = cheapestItem(
     $items`corned beet, pickled bread, salted mutton`,
   );
   const limitedItems = [
@@ -545,8 +544,8 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`deviled egg`),
     new MenuItem($item`spaghetti breakfast`, { maximum: spaghettiBreakfast }),
     new MenuItem($item`extra-greasy slider`),
-    new MenuItem(mallMin(lasagnas)),
-    new MenuItem(mallMin(smallEpics)),
+    new MenuItem(cheapestItem(lasagnas)),
+    new MenuItem(cheapestItem(smallEpics)),
     new MenuItem($item`green hamhock`),
     ...legendaryPizzas.flat(),
 
@@ -566,8 +565,8 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`yam martini`),
     new MenuItem($item`Eye and a Twist`),
     new MenuItem($item`jar of fermented pickle juice`),
-    new MenuItem(mallMin(complexMushroomWines)),
-    new MenuItem(mallMin(perfectDrinks)),
+    new MenuItem(cheapestItem(complexMushroomWines)),
+    new MenuItem(cheapestItem(perfectDrinks)),
     new MenuItem($item`green eggnog`),
 
     // SPLEEN
@@ -577,8 +576,8 @@ function menu(): MenuItem<Note>[] {
     new MenuItem($item`antimatter wad`),
     new MenuItem($item`voodoo snuff`),
     new MenuItem($item`blood-drive sticker`),
-    new MenuItem(mallMin(standardSpleenItems)),
-    new MenuItem(mallMin($items`not-a-pipe, glimmering roc feather`)),
+    new MenuItem(cheapestItem(standardSpleenItems)),
+    new MenuItem(cheapestItem($items`not-a-pipe, glimmering roc feather`)),
 
     // MISC
     ...limitedItems,
@@ -951,7 +950,7 @@ function balanceMenu(
   baseMenu: MenuItem<Note>[],
   dietPlanner: DietPlanner,
 ): MenuItem<Note>[] {
-  const baseTargets = targetingMeat() ? copyTargetCount() : 0;
+  const baseTargets = highMeatMonsterCount();
   function rebalance(
     menu: MenuItem<Note>[],
     iterations: number,
@@ -1067,7 +1066,7 @@ function printDiet(diet: Diet<Note>, name: DietName) {
     (a, b) => itemPriority(b.menuItems) - itemPriority(a.menuItems),
   );
 
-  const targets = Math.floor(copyTargetCount() + countCopies(diet));
+  const targets = Math.floor(highMeatMonsterCount() + countCopies(diet));
   const adventures = Math.floor(
     estimatedGarboTurns(false) + diet.expectedAdventures(),
   );
@@ -1362,24 +1361,24 @@ function dailySpecialPrice(item: Item) {
   return get("_dailySpecialPrice");
 }
 
+MenuItem.defaultPriceFunction = (item: Item) => {
+  const prices = [
+    retrievePrice(item),
+    mallPrice(item),
+    npcPrice(item),
+    dailySpecialPrice(item),
+  ].filter((p) => p > 0 && p < Number.MAX_SAFE_INTEGER);
+  if (prices.length > 0) {
+    return Math.min(...prices);
+  }
+  return !item.tradeable && have(item) ? 0 : Infinity;
+};
+
 export function runDiet(): void {
   withVIPClan(() => {
     if (myFamiliar() === $familiar`Stooper`) {
       useFamiliar($familiar.none);
     }
-
-    MenuItem.defaultPriceFunction = (item: Item) => {
-      const prices = [
-        retrievePrice(item),
-        mallPrice(item),
-        npcPrice(item),
-        dailySpecialPrice(item),
-      ].filter((p) => p > 0 && p < Number.MAX_SAFE_INTEGER);
-      if (prices.length > 0) {
-        return Math.min(...prices);
-      }
-      return !item.tradeable && have(item) ? 0 : Infinity;
-    };
 
     const dietBuilder = computeDiet();
 

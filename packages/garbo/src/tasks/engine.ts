@@ -6,7 +6,7 @@ import {
   Quest,
   StrictCombatTask,
 } from "grimoire-kolmafia";
-import { eventLog, safeInterrupt, safeRestore, sober } from "../lib";
+import { eventLog, HIGHLIGHT, safeInterrupt, safeRestore, sober } from "../lib";
 import { wanderer } from "../garboWanderer";
 import {
   $familiar,
@@ -25,7 +25,7 @@ import {
   print,
   totalTurnsPlayed,
 } from "kolmafia";
-import { GarboStrategy } from "../combat";
+import { GarboStrategy } from "../combatStrategy";
 import { globalOptions } from "../config";
 import { sessionSinceStart } from "../session";
 import { garboValue } from "../garboValue";
@@ -35,6 +35,8 @@ export type GarboTask = StrictCombatTask<never, GarboStrategy> & {
   spendsTurn: Delayed<boolean>;
   duplicate?: Delayed<boolean>;
 };
+
+export type AlternateTask = GarboTask & { turns: Delayed<number> };
 
 function logTargetFight(encounterType: string) {
   const isDigitize = encounterType.includes("Digitize Wanderer");
@@ -50,6 +52,11 @@ function logTargetFight(encounterType: string) {
  * Runs extra logic before executing all tasks.
  */
 export class BaseGarboEngine extends Engine<never, GarboTask> {
+  printExecutingMessage(task: GarboTask) {
+    print(``);
+    print(`Executing ${task.name}`, HIGHLIGHT);
+  }
+
   available(task: GarboTask): boolean {
     safeInterrupt();
     const taskSober = undelay(task.sobriety);

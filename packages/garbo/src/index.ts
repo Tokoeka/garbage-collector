@@ -75,6 +75,7 @@ import {
   propertyManager,
   questStep,
   safeRestore,
+  targetingMeat,
   userConfirmDialog,
   valueDrops,
 } from "./lib";
@@ -87,6 +88,7 @@ import {
   BarfTurnQuests,
   CockroachSetup,
   DailyFamiliarsQuest,
+  EmbezzlerFightsQuest,
   PostQuest,
   runGarboQuests,
   runSafeGarboQuests,
@@ -122,7 +124,7 @@ function defaultTarget() {
 }
 
 export function main(argString = ""): void {
-  sinceKolmafiaRevision(28520); // feat: update `cast` for replacing / additional buff effects
+  sinceKolmafiaRevision(28562); // fix: names for base hippy camp, frat house, video game dungeons
   checkGithubVersion();
 
   Args.fill(globalOptions, argString);
@@ -618,6 +620,7 @@ export function main(argString = ""): void {
           maximize("MP", false);
           meatMood().execute(estimatedGarboTurns());
           runGarboQuests([BuffExtensionQuest, PostBuffExtensionQuest]);
+          if (!targetingMeat()) runGarboQuests([EmbezzlerFightsQuest]);
           try {
             runGarboQuests([PostQuest(), ...BarfTurnQuests]);
 

@@ -62,7 +62,8 @@ import {
   Witchess,
 } from "libram";
 import { acquire } from "../acquire";
-import { GarboStrategy, Macro } from "../combat";
+import { Macro } from "../combat";
+import { GarboStrategy } from "../combatStrategy";
 import { globalOptions } from "../config";
 import { garboValue } from "../garboValue";
 import { freeFightOutfit } from "../outfit";
@@ -538,7 +539,8 @@ const FreeFightTasks: GarboFreeFightTask[] = [
     ready: () => have($item`Kramco Sausage-o-Matic™`),
     completed: () => !kramcoGuaranteed(),
     do: () =>
-      wanderer().getTarget({ wanderer: "wanderer", allowEquipment: false }),
+      wanderer().getTarget({ wanderer: "wanderer", allowEquipment: false })
+        .location,
     outfit: () => freeFightOutfit({ offhand: $item`Kramco Sausage-o-Matic™` }),
     choices: () =>
       wanderer().getChoices({ wanderer: "wanderer", allowEquipment: false }),

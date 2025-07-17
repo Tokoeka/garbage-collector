@@ -105,11 +105,7 @@ import { withStash } from "./clan";
 import { garboAdventure, garboAdventureAuto, Macro, withMacro } from "./combat";
 import { globalOptions } from "./config";
 import { postFreeFightDailySetup } from "./dailiespost";
-import {
-  copyTargetCount,
-  copyTargetSources,
-  getNextCopyTargetFight,
-} from "./target";
+import { copyTargetSources, getNextCopyTargetFight } from "./target";
 import {
   bestMidnightAvailable,
   crateStrategy,
@@ -171,7 +167,7 @@ import { garboValue } from "./garboValue";
 import { wanderer } from "./garboWanderer";
 import { runTargetFight } from "./target/execution";
 import { TargetFightRunOptions } from "./target/staging";
-import { FreeFightQuest, runGarboQuests } from "./tasks";
+import { EmbezzlerFightsQuest, FreeFightQuest, runGarboQuests } from "./tasks";
 import {
   expectedFreeFightQuestFights,
   possibleFreeFightQuestTentacleFights,
@@ -187,6 +183,7 @@ import {
   BuffExtensionQuest,
   PostBuffExtensionQuest,
 } from "./tasks/buffExtension";
+import { highMeatMonsterCount } from "./turns";
 
 const firstChainMacro = () =>
   Macro.if_(
@@ -244,13 +241,13 @@ function meatTargetSetup() {
   setLocation($location`Friar Ceremony Location`);
   potionSetup(false);
   maximize("MP", false);
-  meatMood(true, targetMeat()).execute(copyTargetCount());
+  meatMood(true, targetMeat()).execute(highMeatMonsterCount());
   safeRestore();
   freeFightMood().execute(50);
   runGarboQuests([BuffExtensionQuest, PostBuffExtensionQuest]);
   burnLibrams(400);
 
-  bathroomFinance(copyTargetCount());
+  bathroomFinance(highMeatMonsterCount());
 
   if (SourceTerminal.have()) {
     SourceTerminal.educate([$skill`Extract`, $skill`Digitize`]);
@@ -404,6 +401,7 @@ export function dailyFights(): void {
       // check if user wants to wish for the copy target before doing setup
       if (!getNextCopyTargetFight()) return;
       meatTargetSetup();
+      if (targetingMeat()) runGarboQuests([EmbezzlerFightsQuest]);
 
       // PROFESSOR COPIES
       if (have($familiar`Pocket Professor`)) {
@@ -725,21 +723,22 @@ const pygmySniffed = () =>
     pygmyBanishHandlers.some(({ pygmy }) => pygmy === get(source)),
   );
 
-const pygmyMacro = Macro.step(
-  ...pygmyBanishHandlers.map(({ pygmy, skill, item, check, limit }) =>
-    Macro.externalIf(
-      (check ? get(check) : Infinity) < limit,
-      Macro.if_(
-        pygmy,
-        skill ? Macro.trySkill(skill).item(item) : Macro.item(item),
+const pygmyMacro = () =>
+  Macro.step(
+    ...pygmyBanishHandlers.map(({ pygmy, skill, item, check, limit }) =>
+      Macro.externalIf(
+        (check ? get(check) : Infinity) < limit,
+        Macro.if_(
+          pygmy,
+          skill ? Macro.trySkill(skill).item(item) : Macro.item(item),
+        ),
+        Macro.if_(pygmy, Macro.item(item)),
       ),
-      Macro.if_(pygmy, Macro.item(item)),
     ),
-  ),
-)
-  .if_($monster`drunk pygmy`, Macro.trySkill($skill`Extract`).trySingAlong())
-  .ifInnateWanderer(Macro.basicCombat())
-  .abort();
+  )
+    .if_($monster`drunk pygmy`, Macro.trySkill($skill`Extract`).trySingAlong())
+    .ifInnateWanderer(Macro.basicCombat())
+    .abort();
 
 function getStenchLocation() {
   return (
@@ -871,7 +870,7 @@ const freeFightSources = [
       retrieveItem($item`Louder Than Bomb`);
       retrieveItem($item`tennis ball`);
       retrieveItem($item`divine champagne popper`);
-      garboAdventure($location`The Hidden Bowling Alley`, pygmyMacro);
+      garboAdventure($location`The Hidden Bowling Alley`, pygmyMacro());
     },
     true,
     {
@@ -899,7 +898,7 @@ const freeFightSources = [
     () => {
       putCloset(itemAmount($item`bowling ball`), $item`bowling ball`);
       retrieveItem($item`Bowl of Scorpions`);
-      garboAdventure($location`The Hidden Bowling Alley`, pygmyMacro);
+      garboAdventure($location`The Hidden Bowling Alley`, pygmyMacro());
     },
     true,
     pygmyOptions($items`miniature crystal ball`.filter((item) => have(item))),
@@ -915,7 +914,7 @@ const freeFightSources = [
     () => {
       putCloset(itemAmount($item`bowling ball`), $item`bowling ball`);
       retrieveItem($item`Bowl of Scorpions`);
-      garboAdventureAuto($location`The Hidden Bowling Alley`, pygmyMacro);
+      garboAdventureAuto($location`The Hidden Bowling Alley`, pygmyMacro());
     },
     true,
     pygmyOptions(),
@@ -968,7 +967,7 @@ const freeFightSources = [
             $item`Bowl of Scorpions`,
           );
         } else retrieveItem($item`Bowl of Scorpions`);
-        garboAdventure($location`The Hidden Bowling Alley`, pygmyMacro);
+        garboAdventure($location`The Hidden Bowling Alley`, pygmyMacro());
       }
     },
     false,
@@ -988,7 +987,7 @@ const freeFightSources = [
       retrieveItem(1, $item`Bowl of Scorpions`);
       garboAdventure(
         $location`The Hidden Bowling Alley`,
-        Macro.if_($monster`drunk pygmy`, pygmyMacro).abort(),
+        Macro.if_($monster`drunk pygmy`, pygmyMacro()).abort(),
       );
     },
     true,
@@ -1688,7 +1687,7 @@ const freeRunFightSources = [
       get("_hipsterAdv") < 7 &&
       (have($familiar`Mini-Hipster`) || have($familiar`Artistic Goth Kid`)),
     (runSource: ActionSource) => {
-      const targetLocation = wanderer().getTarget("backup");
+      const targetLocation = wanderer().getTarget("backup").location;
       propertyManager.setChoices(wanderer().getChoices(targetLocation));
       garboAdventure(
         targetLocation,
@@ -1936,7 +1935,7 @@ export function doSausage(): void {
   freeFightOutfit({ equip: $items`Kramco Sausage-o-Matic™` }).dress();
   const currentSausages = get("_sausageFights");
   do {
-    const targetLocation = wanderer().getTarget("wanderer");
+    const targetLocation = wanderer().getTarget("wanderer").location;
     propertyManager.setChoices(wanderer().getChoices(targetLocation));
     const goblin = $monster`sausage goblin`;
     freeFightOutfit(
@@ -2177,7 +2176,7 @@ function voidMonster(): void {
     },
     { wanderOptions: "wanderer" },
   ).dress();
-  const targetLocation = wanderer().getTarget("wanderer");
+  const targetLocation = wanderer().getTarget("wanderer").location;
   propertyManager.setChoices(wanderer().getChoices(targetLocation));
   garboAdventure(targetLocation, Macro.basicCombat());
   postCombatActions();

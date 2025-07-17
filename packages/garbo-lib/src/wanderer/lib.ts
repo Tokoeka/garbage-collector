@@ -1,8 +1,10 @@
 import {
+  appearanceRates,
   buy,
   canAdventure,
   Effect,
   effectFact,
+  getMonsters,
   Item,
   itemFact,
   Location,
@@ -19,6 +21,7 @@ import {
   $locations,
   $skill,
   clamp,
+  Delayed,
   get,
   GingerBread,
   have,
@@ -26,6 +29,7 @@ import {
   questStep,
   realmAvailable,
   sum,
+  undelay,
 } from "libram";
 import { NumericProperty } from "libram/dist/propertyTypes";
 
@@ -72,6 +76,7 @@ export type WandererLocation = {
   location: Location;
   targets: WandererTarget[];
   value: number;
+  peridotMonster: Monster;
 };
 
 export const UnlockableZones: UnlockableZone[] = [
@@ -127,17 +132,21 @@ const ILLEGAL_PARENTS = [
   "Psychoses",
   "PirateRealm",
   "A Monorail Station",
+  "Memories",
   "Holiday Islands",
 ];
 const ILLEGAL_ZONES = ["The Drip", "Suburbs"];
 const canAdventureOrUnlockSkipList = [
-  ...$locations`The Oasis, The Bubblin' Caldera, Barrrney's Barrr, The F'c'le, The Poop Deck, Belowdecks, The Secret Government Laboratory, The Dire Warren, Inside the Palindome, The Haiku Dungeon, An Incredibly Strange Place (Bad Trip), An Incredibly Strange Place (Mediocre Trip), An Incredibly Strange Place (Great Trip), El Vibrato Island, The Daily Dungeon, Trick-or-Treating, Seaside Megalopolis, Frat House, Through the Spacegate`,
+  ...$locations`The Oasis, The Bubblin' Caldera, Barrrney's Barrr, The F'c'le, The Poop Deck, Belowdecks, The Secret Government Laboratory, The Dire Warren, Inside the Palindome, The Haiku Dungeon, An Incredibly Strange Place (Bad Trip), An Incredibly Strange Place (Mediocre Trip), An Incredibly Strange Place (Great Trip), El Vibrato Island, The Daily Dungeon, Trick-or-Treating, Seaside Megalopolis, Frat House, Through the Spacegate, Mt. Molehill`,
   ...Location.all().filter(
     ({ parent, zone }) =>
       ILLEGAL_PARENTS.includes(parent) || ILLEGAL_ZONES.includes(zone),
   ),
 ];
-export function canAdventureOrUnlock(loc: Location): boolean {
+export function canAdventureOrUnlock(
+  loc: Location,
+  includeUnlockable = true,
+): boolean {
   const skiplist = [...canAdventureOrUnlockSkipList];
   if (
     !have($item`repaid diaper`) &&
@@ -153,9 +162,20 @@ export function canAdventureOrUnlock(loc: Location): boolean {
     skiplist.push(...GingerBread.LOCATIONS);
   }
 
-  const canUnlock = UnlockableZones.some(
-    (z) => loc.zone === z.zone && (z.available() || !z.noInv),
-  );
+  if (
+    !goingPostalSafe() ||
+    (!have($item`Hey Deze map`) &&
+      !have($item`Hey Deze nuts`) &&
+      !haveInCampground($item`pagoda plans`)) // Quest not tracked, but these three checks work
+  ) {
+    skiplist.push($location`Pandamonium Slums`);
+  }
+
+  const canUnlock =
+    includeUnlockable &&
+    UnlockableZones.some(
+      (z) => loc.zone === z.zone && (z.available() || !z.noInv),
+    );
   return (
     !underwater(loc) &&
     !skiplist.includes(loc) &&
@@ -197,7 +217,7 @@ function canWanderTypeFreeFight(location: Location): boolean {
   );
 }
 
-const wandererSkiplist = $locations`The Smut Orc Logging Camp, The Batrat and Ratbat Burrow, Guano Junction, The Beanbat Chamber, A-Boo Peak, The Mouldering Mansion, The Rogue Windmill, The Stately Pleasure Dome, Pandamonium Slums`;
+const wandererSkiplist = $locations`The Smut Orc Logging Camp, The Batrat and Ratbat Burrow, Guano Junction, The Beanbat Chamber, A-Boo Peak, The Mouldering Mansion, The Rogue Windmill, The Stately Pleasure Dome, Pandamonium Slums, Lair of the Ninja Snowmen`;
 function canWanderTypeWander(location: Location): boolean {
   return !wandererSkiplist.includes(location) && location.wanderers;
 }
@@ -218,7 +238,8 @@ export function canWander(location: Location, type: DraggableFight): boolean {
 
 export class WandererTarget {
   name: string;
-  value: number;
+  zoneValue: number;
+  monsterValues: Map<Monster, number>;
   location: Location;
   prepareTurn: () => boolean;
 
@@ -226,17 +247,20 @@ export class WandererTarget {
    * Process for determining where to put a wanderer to extract additional value from it
    * @param name name of this wanderer - for documentation/logging purposes
    * @param location returns the location to adventure to target this; null only if something goes wrong
-   * @param value the expected additional value of putting a single wanderer-fight into the zone for this
+   * @param zoneValue value of an encounter existing within a zone, regardless of which monster you fight
+   * @param monsterValues A map of monsters and their expected value from this wanderer for encountering it
    * @param prepareTurn attempt to set up, spending meat and or items as necessary
    */
   constructor(
     name: string,
     location: Location,
-    value: number,
+    zoneValue: number,
+    monsterValues: Map<Monster, number> = new Map<Monster, number>(),
     prepareTurn: () => boolean = () => true,
   ) {
     this.name = name;
-    this.value = value;
+    this.zoneValue = zoneValue;
+    this.monsterValues = monsterValues;
     this.location = location;
     this.prepareTurn = prepareTurn;
   }
@@ -367,11 +391,11 @@ function questBetween(
     : step > lower && step < upper;
 }
 
+const goingPostalSafe = () => !questBetween("questM11Postal", -1, 999, false); // Going Postal tracking is not especially granular
+
 const alwaysSafeUltraRares = $locations`Battlefield (No Uniform), The Icy Peak, Cobb's Knob Treasury, Cobb's Knob Menagerie\, Level 1, The Dungeons of Doom, A Mob of Zeppelin Protesters, Camp Logging Camp`;
 export function getAvailableUltraRareZones(): Location[] {
   const zones = [...alwaysSafeUltraRares];
-
-  const goingPostalSafe = !questBetween("questM11Postal", -1, 999, false); // Going Postal tracking is not especially granular
 
   if ($location`The Haunted Billiards Room`.turnsSpent > 0) {
     zones.push($location`The Haunted Billiards Room`); // no better check for pool cue adventure
@@ -380,18 +404,18 @@ export function getAvailableUltraRareZones(): Location[] {
     if (!questBetween("questG04Nemesis", 0, 2)) {
       zones.push($location`The Unquiet Garves`);
     }
-    if (goingPostalSafe) zones.push($location`The VERY Unquiet Garves`);
+    if (goingPostalSafe()) zones.push($location`The VERY Unquiet Garves`);
   }
   if (
     have($item`the Slug Lord's map`) && // Quest not tracked, but certainly if you currently own the map you aren't going to get it again
-    goingPostalSafe &&
+    goingPostalSafe() &&
     questStep("questG08Moxie") !== 0 &&
     questStep("questM02Artist") !== 0
   ) {
     zones.push($location`The Sleazy Back Alley`);
   }
   if (
-    goingPostalSafe &&
+    goingPostalSafe() &&
     (have($item`Hey Deze map`) ||
       have($item`Hey Deze nuts`) ||
       haveInCampground($item`pagoda plans`)) // Quest not tracked, but these three checks work
@@ -402,7 +426,7 @@ export function getAvailableUltraRareZones(): Location[] {
     zones.push($location`Inside the Palindome`); // Step 1 is having rearranged the photos, which means you got all the superlikelies already
   }
   if (
-    goingPostalSafe &&
+    goingPostalSafe() &&
     $location`The Spooky Forest`.turnsSpent -
       $location`The Spooky Forest`.lastNoncombatTurnsSpent >=
       7
@@ -411,4 +435,65 @@ export function getAvailableUltraRareZones(): Location[] {
   }
 
   return zones.filter((l) => canAdventure(l));
+}
+
+const nameCollisionCache = new Map<Monster, boolean>();
+export function hasNameCollision(monster: Monster): boolean {
+  const cached = nameCollisionCache.get(monster);
+  if (cached !== undefined) return cached;
+  for (const other of Monster.all()) {
+    if (other === monster) continue;
+    if (other.manuelName === monster.manuelName) {
+      nameCollisionCache.set(other, true);
+      nameCollisionCache.set(monster, true);
+      return true;
+    }
+  }
+  nameCollisionCache.set(monster, false);
+  return false;
+}
+
+// TODO These seem to be bugged peridot zones. Can remove if they get fixed.
+export const unperidotableZones = $locations`A Mob of Zeppelin Protesters, The Upper Chamber, The Haunted Billiards Room`;
+
+/**
+ * Retrieve an element from a map if it exists; setting a value for the given key if it doesn't.
+ * @param map The map in question.
+ * @param key The key to try to retrieve from the map.
+ * @param defaultValue A delayed value to assign to the key in the map if there isn't already an existing object.
+ * @returns The retrieved value, which, by the end of this function, will exist in the map.
+ */
+export function ensureMapElement<K, V>(
+  map: Map<K, V>,
+  key: K,
+  defaultValue: Delayed<V>,
+): V {
+  const current = map.get(key);
+  if (map.has(key)) return current as V;
+  const value = undelay(defaultValue);
+  map.set(key, value);
+  return value;
+}
+
+/**
+ * Add the values of a numeric-valued map to another with the same key type, mutating the first map.
+ * @param left The "left" addend map. This map will be mutated by this function.
+ * @param right The "right" addend map, to be added to the left.
+ */
+export function addMaps<K>(left: Map<K, number>, right: Map<K, number>): void {
+  for (const [key, value] of right) {
+    const current = left.get(key) ?? 0;
+    left.set(key, current + value);
+  }
+}
+
+const BAD_ATTRIBUTES = ["LUCKY", "ULTRARARE", "BOSS"];
+export function availableMonsters(location: Location): Monster[] {
+  appearanceRates(location, true); // Force a recalculation
+  const rates = appearanceRates(location);
+  return getMonsters(location).filter(
+    (m) =>
+      !BAD_ATTRIBUTES.some((attribute) => m.attributes.includes(attribute)) &&
+      rates[m.name] > 0,
+  );
 }
