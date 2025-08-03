@@ -937,5 +937,5 @@ export function possibleFreeFightQuestTentacleFights(): number {
 export const FreeFightQuest: Quest<GarboTask> = {
   name: "Free Fight",
   tasks: FreeFightTasks,
-  ready: () => sober(),
+  ready: () => sober() && !have($effect`Feeling Lost`),
 };
