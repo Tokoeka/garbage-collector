@@ -46,7 +46,6 @@ import {
   stashAmount,
   takeCloset,
   toInt,
-  toItem,
   totalTurnsPlayed,
   use,
   useFamiliar,
