@@ -18,7 +18,7 @@ import {
 } from "libram";
 import { baseMeat, felizValue, newarkValue } from "../lib";
 import { garboAverageValue, garboValue } from "../garboValue";
-import { FamiliarMode, GeneralFamiliar } from "./lib";
+import { FamiliarMode, GeneralFamiliar, knuckleboneValue } from "./lib";
 import { effectExtenderValue } from "../potions";
 import { globalOptions } from "../config";
 import { canAdventureOrUnlock, unperidotableZones } from "garbo-lib";
@@ -149,7 +149,14 @@ const standardFamiliars: ConstantValueFamiliar[] = [
   },
   {
     familiar: $familiar`Skeleton of Crimbo Past`,
-    value: () => (get("_knuckleboneDrops", 0) < 100 ? 50_000 : 0),
+    // Rate of drop for dudes appears to be ~49% without cane
+    value: (mode) =>
+      mode === "barf"
+        ? knuckleboneValue() * 0.5
+        : mode === "target" &&
+            globalOptions.target.attributes.includes("Skeleton")
+          ? knuckleboneValue() * 0.9
+          : 0,
   },
 ];
 
