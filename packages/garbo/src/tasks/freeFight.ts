@@ -49,6 +49,7 @@ import {
   CombatLoversLocket,
   CommaChameleon,
   Counter,
+  Delayed,
   ensureEffect,
   get,
   have,
@@ -58,6 +59,7 @@ import {
   sum,
   TearawayPants,
   TunnelOfLove,
+  undelay,
   uneffect,
   Witchess,
 } from "libram";
