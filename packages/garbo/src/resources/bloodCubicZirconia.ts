@@ -1,5 +1,6 @@
 import {
   myBasestat,
+  myClass,
   myDaycount,
   myLevel,
   myPrimestat,
@@ -7,6 +8,7 @@ import {
   Stat,
 } from "kolmafia";
 import {
+  $class,
   $item,
   $skill,
   $stat,
@@ -38,8 +40,9 @@ const BCT_LEVEL_THRESHOLDS = [26, 20, 13];
 export function getBCZStatFloor(skill: Skill): number {
   const userSelectedStatFloor = get("garbo_bczStatFloor", 0);
   const stat = parentStat(BloodCubicZirconia.substatUsed(skill));
+  const month = Date.prototype.getMonth()
   if (stat !== myPrimestat()) {
-    if (stat === $stat`Moxie` && have($item`crumpled felt fedora`)) {
+    if (stat === $stat`Moxie` && have($item`crumpled felt fedora`) && !(month === 11 && have($item`shining star cap`)) && !(myClass() === $class`Turtle Tamer` && (have($item`warbear foil hat`) || have($item`Zombo's skullcap`)))) {
       return clamp(200, userSelectedStatFloor, Infinity);
     }
     return clamp(100, userSelectedStatFloor, Infinity); // ? is this good?
