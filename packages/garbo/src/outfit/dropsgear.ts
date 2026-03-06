@@ -48,7 +48,6 @@ import { bonusAccessories } from "./dropsgearAccessories";
 import {
   familiarEquipmentValue,
   getUsedTcbFamiliars,
-  knuckleboneValue,
   tcbTurnsLeft,
 } from "../familiar/lib";
 

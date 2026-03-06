@@ -18,7 +18,7 @@ import {
 } from "libram";
 import { baseMeat, felizValue, newarkValue } from "../lib";
 import { garboAverageValue, garboValue } from "../garboValue";
-import { FamiliarMode, GeneralFamiliar, knuckleboneValue } from "./lib";
+import { FamiliarMode, GeneralFamiliar } from "./lib";
 import { effectExtenderValue } from "../potions";
 import { globalOptions } from "../config";
 import { canAdventureOrUnlock, unperidotableZones } from "garbo-lib";
