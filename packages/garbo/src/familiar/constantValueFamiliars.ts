@@ -148,15 +148,8 @@ const standardFamiliars: ConstantValueFamiliar[] = [
     worksOnFreeRun: true,
   },
   {
-    familiar: $familiar`Skeleton of Crimbo Past`,
-    // Rate of drop for dudes appears to be ~49% without cane
-    value: (mode) =>
-      mode === "barf"
-        ? knuckleboneValue() * 0.5
-        : mode === "target" &&
-            globalOptions.target.attributes.includes("Skeleton")
-          ? knuckleboneValue() * 0.9
-          : 0,
+    familiar: $familiar`XO Skeleton`,
+    value: () => garboAverageValue(...$items`X, O`) / 9, // counters for X & O are simultaneous but offset by 5
   },
 ];
 
