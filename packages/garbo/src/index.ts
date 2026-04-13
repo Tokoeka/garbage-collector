@@ -298,7 +298,7 @@ export function main(argString = ""): void {
   if (
     globalOptions.prefs.valueOfAdventure &&
     globalOptions.prefs.valueOfAdventure >=
-    (globalOptions.nobarf ? 20_000 : 10_000)
+      (globalOptions.nobarf ? 20_000 : 10_000)
   ) {
     throw `Your valueOfAdventure is set to ${globalOptions.prefs.valueOfAdventure}, which is definitely incorrect. Please set it to your reliable marginal turn value.`;
   }
