@@ -11,6 +11,7 @@ import {
   Effect,
   Element,
   elementalResistance,
+  equippedItem,
   fullnessLimit,
   getClanLounge,
   getProperty,
@@ -31,12 +32,14 @@ import {
   myMaxhp,
   mySpleenUse,
   npcPrice,
+  numericModifier,
   print,
   putCloset,
   retrieveItem,
   retrievePrice,
   sellsItem,
   setProperty,
+  Slot,
   spleenLimit,
   takeCloset,
   toEffect,
@@ -60,6 +63,7 @@ import {
   $item,
   $items,
   $locations,
+  $modifier,
   $skill,
   clamp,
   DesignerSweatpants,
@@ -83,6 +87,7 @@ import {
   sum,
   sumNumbers,
   uneffect,
+  unequip,
   withProperties,
 } from "libram";
 import { acquire, priceCaps } from "./acquire";
@@ -620,6 +625,15 @@ function menu(): MenuItem<Note>[] {
     new MenuItem(cheapestItem(complexMushroomWines)),
     new MenuItem(cheapestItem(perfectDrinks)),
     new MenuItem($item`green eggnog`),
+    new MenuItem($item`can of Brütalbräu`, {
+      additionalValue: garboValue($item`fancy tin beer can`),
+    }),
+    new MenuItem($item`can of Drooling Monk`, {
+      additionalValue: garboValue($item`fancy tin beer can`),
+    }),
+    new MenuItem($item`can of Impetuous Scofflaw`, {
+      additionalValue: garboValue($item`fancy tin beer can`),
+    }),
 
     // SPLEEN
     new MenuItem($item`octolus oculus`),
@@ -1428,10 +1442,23 @@ MenuItem.defaultPriceFunction = (item: Item) => {
 
 export function runDiet(): void {
   withVIPClan(() => {
+    // Strip organ capacity enhancers to avoid accidental overfilling.
     if (myFamiliar() === $familiar`Stooper`) {
       useFamiliar($familiar.none);
     }
 
+    for (const slot of Slot.all()) {
+      const item = equippedItem(slot);
+      if (
+        numericModifier(item, $modifier`stomach capacity`) ||
+        numericModifier(item, $modifier`liver capacity`) ||
+        numericModifier(item, $modifier`spleen capacity`)
+      ) {
+        unequip(slot);
+      }
+    }
+
+    // Compute diet
     const dietBuilder = computeDiet();
 
     if (globalOptions.simdiet) {
